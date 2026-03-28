@@ -156,7 +156,7 @@ pre{background:var(--bg);padding:10px;border-radius:var(--rs);font-size:11px;fon
     <div class="nlbl" style="margin-top:4px">Assistant</div>
     <div class="ni" onclick="show('chat',this)"><span class="nico">&#10022;</span> AI assistant</div>
     <div class="nlbl" style="margin-top:4px">Settings</div>
-    <div class="ni" onclick="show('apikey',this)"><span class="nico">&#128273;</span> API key</div>
+    <div class="ni" onclick="show('apikey',this)"><span class="nico">🔑</span> API key</div>
     <div class="ni" onclick="show('gcal',this)"><span class="nico">&#128197;</span> Google Calendar</div>
     <div class="ni" onclick="show('icloud',this)"><span class="nico">&#9729;</span> iCloud sync</div>
     <div class="ni" onclick="show('firebase',this)"><span class="nico">&#128293;</span> Firebase setup</div>
@@ -200,20 +200,14 @@ pre{background:var(--bg);padding:10px;border-radius:var(--rs);font-size:11px;fon
     </div>
 
     <div class="pn" id="pn-calendar">
-      <div style="display:flex;align-items:center;gap:7px;margin-bottom:12px;flex-wrap:wrap">
-        <span style="font-size:12px;color:var(--t3)">Show:</span>
-        <div class="chip on" id="cf-all" onclick="setCalF('all')">All</div>
-        <div class="chip" id="cf-bill" onclick="setCalF('bill')">Bill Hickner</div>
-        <div class="chip" id="cf-utbsc" onclick="setCalF('utbsc')">UTBSC Schedule</div>
-        <div class="chip" id="cf-anna" onclick="setCalF('anna')">Anna and Bill</div>
-        <button class="btn btns" onclick="refreshGC()" style="margin-left:auto">&#8635; Refresh</button>
-      </div>
-      <div id="cal-status" style="font-size:11px;color:var(--t3);margin-bottom:8px"></div>
-      <div style="padding:10px;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rs);font-size:11px;margin-bottom:10px;font-family:monospace">
-        <div id="dbg-gc">GC events: checking...</div>
-        <div id="dbg-cal">CAL events: checking...</div>
-        <div id="dbg-date">Date: checking...</div>
-        <button class="btn btns" onclick="forceCalRefresh()" style="margin-top:5px;background:#185FA5;color:#fff">Force refresh calendar</button>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+        <div id="gcal-filters" style="display:flex;gap:5px;flex-wrap:wrap">
+          <div class="chip on" id="cf-all" onclick="filterGCal('all')" style="background:#7F77DD;color:#fff;border-color:#7F77DD">All</div>
+          <div class="chip" id="cf-bill" onclick="filterGCal('bill')">Bill Hickner</div>
+          <div class="chip" id="cf-utbsc" onclick="filterGCal('utbsc')">UTBSC Schedule</div>
+          <div class="chip" id="cf-anna" onclick="filterGCal('anna')">Anna &amp; Bill</div>
+        </div>
+        <button class="btn btns" onclick="gcRefresh()" style="margin-left:auto">&#8635; Refresh</button>
       </div>
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
         <button class="btn btns" onclick="chMo(-1)">&#8249;</button>
@@ -225,9 +219,9 @@ pre{background:var(--bg);padding:10px;border-radius:var(--rs);font-size:11px;fon
         <div class="cdow">Wed</div><div class="cdow">Thu</div><div class="cdow">Fri</div><div class="cdow">Sat</div>
       </div>
       <div class="cgrid" id="cgrid"></div>
-      <div style="margin-top:14px">
-        <div style="font-size:13px;font-weight:700;margin-bottom:8px" id="cal-upcoming-title">Upcoming events</div>
-        <div id="cal-upcoming"></div>
+      <div style="margin-top:14px" id="gcal-list-wrap">
+        <div style="font-size:13px;font-weight:700;margin-bottom:8px">Upcoming events</div>
+        <div id="gcal-list"></div>
       </div>
     </div>
     <div class="pn" id="pn-tasks">
@@ -354,19 +348,22 @@ pre{background:var(--bg);padding:10px;border-radius:var(--rs);font-size:11px;fon
 
     <div class="pn" id="pn-gcal">
       <div class="card">
-        <h2>Google Calendar</h2>
-        <p>Connect Google Calendar to see all your events including UTBSC Schedule and Anna and Bill.</p>
-        <div class="al ali">Your calendar data stays between you and Google.</div>
+        <h2>Google Calendar sync</h2>
+        <p>Connect your Google Calendar to see all your real events directly in this app. Since your Apple Calendar syncs to Google Calendar, all your Apple events will appear here too.</p>
+        <div class="al ali">Your calendar data stays between you and Google. Nothing is stored on any server.</div>
         <div id="gc-alert"></div>
-        <div style="display:flex;gap:10px;margin-top:8px">
-          <button class="btn btnp" id="gc-signin-btn" onclick="gcSignIn()" style="background:#4285F4">Sign in with Google</button>
-          <button class="btn btns" id="gc-signout-btn" onclick="gcSignOut()" style="display:none">Disconnect</button>
+        <div style="display:flex;gap:10px;margin-top:4px">
+          <button class="btn btnp" id="gc-signin-btn" onclick="gcSignIn()" style="background:#4285F4;display:flex;align-items:center;gap:8px;padding:10px 18px">
+            <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#fff" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#fff" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#fff" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#fff" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+            Sign in with Google
+          </button>
+          <button class="btn" onclick="gcSignOut()" id="gc-signout-btn" style="display:none">Disconnect Google</button>
         </div>
       </div>
       <div class="card" id="gc-events-card" style="display:none">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-          <h2 style="margin:0">Events loaded</h2>
-          <button class="btn btns" onclick="fetchGCEvents()">Refresh</button>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+          <h2 style="margin:0">Your Google Calendar events</h2>
+          <button class="btn btns" onclick="fetchGCEvents()">Refresh</button><button class="btn btns" onclick="show('calendar',null)" style="margin-left:5px">View Calendar</button>
         </div>
         <div id="gc-events-list"></div>
       </div>
@@ -397,14 +394,25 @@ pre{background:var(--bg);padding:10px;border-radius:var(--rs);font-size:11px;fon
     <div class="pn" id="pn-apikey">
       <div class="card">
         <h2>AI Assistant API Key</h2>
-        <p>Enter your Anthropic API key to enable the AI assistant. Stored only in your browser.</p>
-        <div class="al ali">Your key never leaves your device.</div>
-        <div id="ak-al"></div>
-        <div class="fg"><label>Anthropic API Key</label><input type="password" id="ak-input" placeholder="sk-ant-..." style="font-family:monospace"/></div>
+        <p>Enter your Anthropic API key to enable the AI assistant. It is stored only in your browser and never shared with anyone.</p>
+        <div class="al ali">Your key is saved locally on this device only. Never share it with anyone.</div>
+        <div id="ak-alert"></div>
+        <div class="fg"><label>Anthropic API Key</label>
+          <input type="password" id="ak-input" placeholder="sk-ant-..." style="font-family:monospace"/>
+        </div>
         <div style="display:flex;gap:7px">
           <button class="btn btnp btns" style="background:#7F77DD" onclick="saveAK()">Save key</button>
           <button class="btn btns" onclick="clearAK()">Remove key</button>
         </div>
+      </div>
+      <div class="card">
+        <h2>How to get an API key</h2>
+        <ol class="sli">
+          <li>Go to <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> and sign in.</li>
+          <li>Click <strong>API Keys</strong> in the left sidebar.</li>
+          <li>Click <strong>+ Create Key</strong> and name it "MyLifeOrganizer".</li>
+          <li>Copy the key and paste it above. Click Save.</li>
+        </ol>
       </div>
     </div>
 
@@ -535,9 +543,9 @@ var TASKS = [
 ];
 
 var PEOPLE = {
-  uc:[{n:"Ron Snider",i:"RS",r:"CEO",on:true},{n:"Bill Snider",i:"BS",r:"Assembly",on:true},{n:"Keith Snider",i:"KS",r:"TAB Technician",on:false},{n:"Nate Essin",i:"NE",r:"Shop Supervisor",on:true},{n:"Casey Cormier",i:"CC",r:"Sr Technical Coordinator",on:false},{n:"Paul Smith",i:"PS",r:"Installation Tech",on:false}],
-  ut:[{n:"Ron Snider",i:"RS",r:"CEO",on:true},{n:"Bill Snider",i:"BS",r:"Assembly",on:true},{n:"Keith Snider",i:"KS",r:"TAB Technician",on:false},{n:"Nate Essin",i:"NE",r:"Shop Supervisor",on:true},{n:"Casey Cormier",i:"CC",r:"Sr Technical Coordinator",on:false},{n:"Paul Smith",i:"PS",r:"Installation Tech",on:false}],
-  pa:[{n:"Ron Snider",i:"RS",r:"CEO",on:true},{n:"Bill Snider",i:"BS",r:"Assembly",on:true},{n:"Keith Snider",i:"KS",r:"TAB Technician",on:false},{n:"Nate Essin",i:"NE",r:"Shop Supervisor",on:true},{n:"Casey Cormier",i:"CC",r:"Sr Technical Coordinator",on:false},{n:"Paul Smith",i:"PS",r:"Installation Tech",on:false}],
+  uc:[{n:"Ron Snider",i:"RS",r:"CEO",on:true},{n:"Bill Snider",i:"BS",r:"Assembly",on:true},{n:"Keith Snider",i:"KS",r:"TAB Technician",on:false},{n:"Nate Essin",i:"NE",r:"Shop Supervisor",on:true},{n:"Casey Cormier",i:"CC",r:"Senior Technical Coordinator",on:false},{n:"Paul Smith",i:"PS",r:"Installation Technician",on:false}],
+  ut:[{n:"Ron Snider",i:"RS",r:"CEO",on:true},{n:"Bill Snider",i:"BS",r:"Assembly",on:true},{n:"Keith Snider",i:"KS",r:"TAB Technician",on:false},{n:"Nate Essin",i:"NE",r:"Shop Supervisor",on:true},{n:"Casey Cormier",i:"CC",r:"Senior Technical Coordinator",on:false},{n:"Paul Smith",i:"PS",r:"Installation Technician",on:false}],
+  pa:[{n:"Ron Snider",i:"RS",r:"CEO",on:true},{n:"Bill Snider",i:"BS",r:"Assembly",on:true},{n:"Keith Snider",i:"KS",r:"TAB Technician",on:false},{n:"Nate Essin",i:"NE",r:"Shop Supervisor",on:true},{n:"Casey Cormier",i:"CC",r:"Senior Technical Coordinator",on:false},{n:"Paul Smith",i:"PS",r:"Installation Technician",on:false}],
   family:[{n:"Spouse",i:"SP",r:"Family",on:true},{n:"Taylor",i:"TX",r:"Sibling",on:false},{n:"Mom and Dad",i:"MD",r:"Parents",on:false}],
   ro:[{n:"Linda Bone",i:"LB",r:"Board Member",on:false},{n:"Linda Henry",i:"LH",r:"Board Member",on:false},{n:"Kettelene Hilaire",i:"KH",r:"Board Member",on:false},{n:"Anna Hickner",i:"AH",r:"Board Member",on:false}]
 };
@@ -604,7 +612,7 @@ var ROBGT = [
   {cat:"Education programs",amt:12000,type:"expense"}
 ];
 
-var ACO="all",CY=2026,CM=2,PO=0,TF="all";
+var today=new Date(),ACO="all",CY=today.getFullYear(),CM=today.getMonth(),PO=0,TF="all";
 var REC=null,LIS=false,LT="chat";
 var ICC=JSON.parse(localStorage.getItem("lo_ic")||"null");
 var FBC=JSON.parse(localStorage.getItem("lo_fb")||"null");
@@ -613,7 +621,7 @@ var CHIST=[],ATID=null;
 
 var PT={dashboard:"Dashboard",apikey:"API Key",gcal:"Google Calendar",calendar:"Calendar",tasks:"Tasks",planner:"Daily planner",people:"People",family:"Family",ro:"Restoring Oaks",chat:"AI assistant",icloud:"iCloud sync",firebase:"Firebase setup"};
 
-function g(id){return document.getElementById(id);}
+function g(id){var el=document.getElementById(id);if(!el){var dummy=document.createElement("div");dummy._dummy=true;return dummy;}return el;}
 function openMod(id){g(id).classList.add("on");}
 function closeMod(id){g(id).classList.remove("on");}
 function coC(){return ACO==="all"?"#7F77DD":(CO[ACO]?CO[ACO].c:"#7F77DD");}
@@ -629,16 +637,14 @@ function show(id,el){
 }
 
 function rPanel(id){
-  try{
   if(id==="dashboard")rDash();
-  else if(id==="calendar"){updateDebug();if(GC_ITEMS&&GC_ITEMS.length>0){renderGCtoCAL();}else{rCal();}updateDebug();}
+  else if(id==="calendar"){if(GC_ALL_ITEMS&&GC_ALL_ITEMS.length)applyCalFilter();else rCal();}
   else if(id==="tasks")rTasks();
   else if(id==="planner")rPlanner();
   else if(id==="people")rPeople();
   else if(id==="family")showFT("cal");
   else if(id==="ro")showRT("meet");
   else if(id==="chat")rChatChips();
-  }catch(rpErr){console.error("rPanel error:",rpErr);};
 }
 
 function setCo(co){
@@ -653,7 +659,8 @@ function setCo(co){
   g("atb").style.background=color;
   g("sndb").style.background=color;
   g("cmtb").style.background=color;
-  try{var ap=document.querySelector(".pn.on");if(ap)rPanel(ap.id.replace("pn-",""));}catch(e){}
+  var ap=document.querySelector(".pn.on");
+  if(ap)rPanel(ap.id.replace("pn-",""));
   var ind=g("oind");ind.innerHTML="";
   if(CU){
     var cl=co==="all"?["uc","ut","pa","ro"]:([co]);
@@ -663,7 +670,8 @@ function setCo(co){
 
 function rDash(){
   var cl=ACO==="all"?["uc","ut","pa"]:([ACO]);
-  g("dash-title").textContent=ACO==="all"?"All Companies":(CO[ACO]?CO[ACO].n:"");
+  var dt=g("dash-title");if(dt)dt.textContent=ACO==="all"?"All Companies":(CO[ACO]?CO[ACO].n:"");
+  document.querySelectorAll(".tbd-real").forEach(function(el){el.textContent=new Date().toLocaleDateString("en-US",{weekday:"long",year:"numeric",month:"long",day:"numeric"});});
   var mr=g("mrow");mr.innerHTML="";
   var pend=TASKS.filter(function(t){return !t.done&&(ACO==="all"||t.co===ACO);});
   var tev=(CAL["2026-3-26"]||[]).filter(function(e){return ACO==="all"||e.co===ACO;});
@@ -703,21 +711,16 @@ function rDash(){
 function qTog(id){var t=TASKS.find(function(x){return x.id===id;});if(t){t.done=true;rDash();}}
 
 function rCal(){
-  var td=new Date();
-  var mons=["January","February","March","April","May","June","July","August","September","October","November","December"];
-  var cmonEl=document.getElementById("cmon");
-  if(cmonEl)cmonEl.textContent=mons[CM]+" "+CY;
-  var gr=document.getElementById("cgrid");
-  if(!gr)return;
+  var cmon=g("cmon");if(cmon&&!cmon._dummy)cmon.textContent=["January","February","March","April","May","June","July","August","September","October","November","December"][CM]+" "+CY;
+  var gr=g("cgrid");if(!gr||gr._dummy)return;
   gr.innerHTML="";
   var first=new Date(CY,CM,1).getDay();
   var days=new Date(CY,CM+1,0).getDate();
   var prev=new Date(CY,CM,0).getDate();
-  var isToday=function(d){return CY===td.getFullYear()&&CM===td.getMonth()&&d===td.getDate();};
   for(var i=0;i<first;i++){var d2=document.createElement("div");d2.className="cday dim";d2.innerHTML="<div class='cnum'>"+(prev-first+1+i)+"</div>";gr.appendChild(d2);}
   for(var dd=1;dd<=days;dd++){
     var de=document.createElement("div");
-    de.className="cday"+(isToday(dd)?" tod":"");
+    de.className="cday"+(CY===today.getFullYear()&&CM===today.getMonth()&&dd===today.getDate()?" tod":"");
     var key=CY+"-"+(CM+1)+"-"+dd;
     var markup="<div class='cnum'>"+dd+"</div>";
     if(CAL[key]){CAL[key].forEach(function(ev){
@@ -731,11 +734,8 @@ function rCal(){
   }
   var rem=(first+days)%7===0?0:7-(first+days)%7;
   for(var j=1;j<=rem;j++){var dj=document.createElement("div");dj.className="cday dim";dj.innerHTML="<div class='cnum'>"+j+"</div>";gr.appendChild(dj);}
-  var noEvts=document.getElementById("cal-noevts");
-  var gcEventsInCAL=Object.keys(CAL).some(function(k){return CAL[k].some(function(e){return e.src==="google";});});
-  if(noEvts)noEvts.style.display=gcEventsInCAL?"none":"block";
 }
-function chMo(dir){CM+=dir;if(CM>11){CM=0;CY++;}if(CM<0){CM=11;CY--;}if(GC_ITEMS&&GC_ITEMS.length>0)renderGCtoCAL();else rCal();}
+function chMo(dir){CM+=dir;if(CM>11){CM=0;CY++;}if(CM<0){CM=11;CY--;}rCal();}
 function openAddEvt(){g("etitle").value="";g("enotes").value="";if(ACO!=="all"&&CO[ACO])g("eco").value=ACO;openMod("evt-mod");}
 function saveEvt(){
   var title=g("etitle").value.trim();if(!title)return;
@@ -1001,7 +1001,7 @@ async function sendChat(ov){
   var sum=["uc","ut","pa"].map(function(co){var t=TASKS.filter(function(x){return x.co===co&&!x.done;});return CO[co].n+": "+t.length+" pending";}).join(", ");
   var ros=TASKS.filter(function(t){return t.co==="ro"&&!t.done;}).length+" RO action items pending.";
   try{
-    var ak=getAK();if(!ak){var tr3=document.getElementById("typr");if(tr3)tr3.remove();addBub("No API key. Go to Settings > API Key and enter your Anthropic API key.","ai");return;}
+    var ak=getAK();if(!ak){var tr3=document.getElementById("typr");if(tr3)tr3.remove();addBub("No API key found. Please go to Settings > API Key in the sidebar and enter your Anthropic API key.","ai");return;}
 var res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json","x-api-key":ak,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
       body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,
         system:"You are a smart personal assistant for an entrepreneur. Be concise (1-3 sentences). No markdown. Spoken aloud. Today is Thursday March 26 2026. "+ctx+" Companies: Unity Controls (industrial controls/bids), UTBSC TAB (HVAC testing/balancing), PulsAIO (tech/SaaS). Also board member of Restoring Oaks nonprofit. "+sum+". "+ros+" Today: Unity standup 9am, TAB inspection 11am, PulsAIO demo 2pm, Dentist 4pm.",
@@ -1015,216 +1015,313 @@ var res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",heade
 addBub("Hi! I know all your workspaces: Unity Controls, UTBSC TAB, PulsAIO, Family, and Restoring Oaks. Ask me anything.","ai");
 
 
-var GC_CLIENT_ID="558830694197-00hvjl61s76tfv52l028omedp8gnb6uk.apps.googleusercontent.com";
-var GC_SCOPES="https://www.googleapis.com/auth/calendar.readonly";
-var gcToken=null,gcTokenClient=null;
-var GC_ITEMS=[],GC_FILTER="all";
-var GC_COLORS={bill:"#185FA5",utbsc:"#0F6E56",anna:"#BA7517",other:"#7F77DD"};
+function saveAK(){
+  var inp=g("ak-input");var val=inp.value.trim();
+  if(!val||!val.startsWith("sk-")){g("ak-alert").className="al ale";g("ak-alert").textContent="Please enter a valid API key starting with sk-";return;}
+  localStorage.setItem("lo_ak",val);
+  g("ak-alert").className="al alo";g("ak-alert").textContent="API key saved! The AI assistant is now active.";
+  inp.value="";
+}
+function clearAK(){localStorage.removeItem("lo_ak");g("ak-input").value="";g("ak-alert").className="al ali";g("ak-alert").textContent="API key removed.";}
+function getAK(){return localStorage.getItem("lo_ak")||"";}
 
-function gcCalType(ev){
+
+var GC_CLIENT_ID = "558830694197-00hvjl61s76tfv52l028omedp8gnb6uk.apps.googleusercontent.com";
+var GC_SCOPES = "https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/calendar.events.readonly";
+var gcTokenClient = null;
+var gcAccessToken = null;
+
+function loadGAPI(){
+  return new Promise(function(resolve){
+    if(window.gapi){resolve();return;}
+    var s=document.createElement("script");
+    s.src="https://apis.google.com/js/api.js";
+    s.onload=function(){gapi.load("client",function(){gapi.client.init({}).then(resolve);});};
+    document.head.appendChild(s);
+  });
+}
+function loadGIS(){
+  return new Promise(function(resolve){
+    if(window.google&&window.google.accounts){resolve();return;}
+    var s=document.createElement("script");
+    s.src="https://accounts.google.com/gsi/client";
+    s.onload=resolve;
+    document.head.appendChild(s);
+  });
+}
+
+async function gcSignIn(){
+  var al=g("gc-alert");
+  try{if(al){al.className="al ali";al.textContent="Loading Google sign-in...";}}catch(e){}
+  try{
+    await loadGAPI();
+    await loadGIS();
+    gcTokenClient=google.accounts.oauth2.initTokenClient({
+      client_id:GC_CLIENT_ID,
+      scope:GC_SCOPES,
+      callback:function(resp){
+        if(resp.error){al.className="al ale";al.textContent="Sign-in failed: "+resp.error;return;}
+        gcAccessToken=resp.access_token;
+        localStorage.setItem("gc_token",gcAccessToken);
+        try{if(al){al.className="al alo";al.textContent="Connected to Google Calendar!";}}catch(e){}
+        g("gc-signin-btn").style.display="none";
+        g("gc-signout-btn").style.display="inline-flex";
+        g("gc-events-card").style.display="block";
+        fetchGCEvents();
+      }
+    });
+    gcTokenClient.requestAccessToken();
+  }catch(e){try{if(al){al.className="al ale";al.textContent="Error: "+e.message;}}catch(e2){}}
+}
+
+function gcSignOut(){
+  gcAccessToken=null;localStorage.removeItem("gc_token");
+  try{var sb=g("gc-signin-btn");if(sb)sb.style.display="flex";}catch(e){}
+  try{var so=g("gc-signout-btn");if(so)so.style.display="none";}catch(e){}
+  try{var ec=g("gc-events-card");if(ec)ec.style.display="none";}catch(e){}
+  try{var al=g("gc-alert");if(al){al.className="al ali";al.textContent="Disconnected.";}}catch(e){}
+}
+
+var GC_ALL_ITEMS=[];
+var GC_FILTER="all";
+var GC_CAL_COLORS={"bill":"#185FA5","utbsc":"#0F6E56","anna":"#BA7517","other":"#7F77DD"};
+
+function getCalType(ev){
   var cal=(ev._cal||"").toLowerCase();
   if(cal.indexOf("utbsc")>-1)return "utbsc";
   if(cal.indexOf("anna")>-1)return "anna";
   return "bill";
 }
-function gcCalColor(ev){return GC_COLORS[gcCalType(ev)]||"#7F77DD";}
+function getCalColor(ev){return GC_CAL_COLORS[getCalType(ev)]||"#7F77DD";}
 
-function setCalF(f){
-  GC_FILTER=f;
-  ["all","bill","utbsc","anna"].forEach(function(k){
-    var chip=document.getElementById("cf-"+k);if(!chip)return;
-    var colors={all:"#7F77DD",bill:"#185FA5",utbsc:"#0F6E56",anna:"#BA7517"};
-    if(k===f){chip.style.background=colors[k];chip.style.color="#fff";chip.style.borderColor=colors[k];}
-    else{chip.style.background="";chip.style.color="";chip.style.borderColor="";}
+function setCalFilter(filter){
+  GC_FILTER=filter;
+  var colors={"all":"#7F77DD","bill":"#185FA5","utbsc":"#0F6E56","anna":"#BA7517"};
+  ["all","bill","utbsc","anna"].forEach(function(f){
+    var chip=g("cf-"+f);if(!chip||chip._dummy)return;
+    if(f===filter){chip.style.background=colors[f];chip.style.color="#fff";chip.style.borderColor=colors[f];chip.classList.add("on");}
+    else{chip.style.background="";chip.style.color="";chip.style.borderColor="";chip.classList.remove("on");}
   });
-  renderGCtoCAL();
+  applyCalFilter();
 }
 
-function renderGCtoCAL(){
-  Object.keys(CAL).forEach(function(k){CAL[k]=CAL[k].filter(function(e){return e.src!=="google";});});
-  var filtered=GC_ITEMS.filter(function(ev){
+function applyCalFilter(){
+  var filtered=GC_ALL_ITEMS.filter(function(ev){
     if(GC_FILTER==="all")return true;
-    return gcCalType(ev)===GC_FILTER;
+    return getCalType(ev)===GC_FILTER;
   });
+  Object.keys(CAL).forEach(function(k){CAL[k]=CAL[k].filter(function(ev){return ev.src!=="google";});});
   filtered.forEach(function(ev){
     try{
-      var d=new Date(ev.start.dateTime||ev.start.date);
+      var startStr=ev.start.dateTime||ev.start.date;
+      var d=new Date(startStr);
       var key=d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate();
       if(!CAL[key])CAL[key]=[];
-      var ts=ev.start.dateTime?d.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"}):"All day";
-      CAL[key].push({t:(ev.summary||"(No title)").replace(/</g,"&lt;").replace(/>/g,"&gt;"),co:"personal",time:ts,src:"google",gcol:gcCalColor(ev)});
-    }catch(ie){console.warn("Event inject error:",ie,ev);}
+      var timeStr=ev.start.dateTime?d.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"}):"All day";
+      CAL[key].push({t:ev.summary||"(No title)",co:"personal",time:timeStr,src:"google",gcol:getCalColor(ev)});
+    }catch(ie){}
   });
-  // Jump to today's month first, then find best month
-  var today2=new Date();CY=today2.getFullYear();CM=today2.getMonth();
-  // Count how many actually made it into CAL
-  var injected=Object.keys(CAL).reduce(function(sum,k){return sum+CAL[k].filter(function(e){return e.src==="google";}).length;},0);
-  var calSt=document.getElementById("cal-status");
-  if(calSt)calSt.textContent=filtered.length+" events from Google | "+injected+" on calendar";
-  rCal();
-  try{renderUpcoming(filtered);}catch(e){}
-  updateDebug();
+  var td=new Date();CY=td.getFullYear();CM=td.getMonth();
+  try{rCal();}catch(e){}
+  try{renderCalEvtsList(filtered);}catch(e){}
+  try{var st=g("cal-status");if(st&&!st._dummy)st.textContent=filtered.length+" events"+(GC_FILTER!=="all"?" (filtered)":"");}catch(e){}
 }
 
-function renderUpcoming(items){
-  var list=document.getElementById("cal-upcoming");if(!list)return;
-  list.innerHTML="";
+function renderCalEvtsList(items){
+  var list=g("cal-evts-list");if(!list||list._dummy)return;list.innerHTML="";
   var now=new Date();
-  var up=items.filter(function(ev){return new Date(ev.start.dateTime||ev.start.date)>=now;}).slice(0,20);
-  if(!up.length){list.innerHTML="<div style='color:var(--t3);font-size:12px'>No upcoming events</div>";return;}
-  up.forEach(function(ev){
+  var upcoming=items.filter(function(ev){return new Date(ev.start.dateTime||ev.start.date)>=now;}).slice(0,20);
+  if(!upcoming.length){list.innerHTML="<div style='color:var(--t3);font-size:12px;padding:8px 0'>No upcoming events</div>";return;}
+  upcoming.forEach(function(ev){
     var d=new Date(ev.start.dateTime||ev.start.date);
     var ds=d.toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"});
     var ts=ev.start.dateTime?d.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"}):"All day";
-    var color=gcCalColor(ev);
+    var color=getCalColor(ev);
+    var calName=ev._cal||"Bill Hickner";
     var row=document.createElement("div");
     row.style.cssText="display:flex;align-items:center;gap:9px;padding:8px 11px;background:var(--sf);border:1px solid var(--bd);border-left:3px solid "+color+";border-radius:var(--rs);margin-bottom:4px;font-size:13px";
-    row.innerHTML="<span style='font-size:11px;color:"+color+";font-weight:600;min-width:70px'>"+ds+"</span><span style='flex:1'>"+(ev.summary||"(No title)")+"</span><span style='font-size:10px;color:var(--t3)'>"+ts+"</span><span style='font-size:10px;background:var(--bg);padding:1px 6px;border-radius:20px'>"+(ev._cal||"")+"</span>";
+    row.innerHTML="<span style='font-size:11px;color:"+color+";font-weight:600;min-width:70px'>"+ds+"</span><span style='flex:1'>"+( ev.summary||"(No title)")+"</span><span style='font-size:10px;color:var(--t3)'>"+ts+"</span><span style='font-size:10px;background:var(--bg);padding:1px 6px;border-radius:20px;color:var(--t2)'>"+calName+"</span>";
     list.appendChild(row);
   });
 }
 
-function refreshGC(){
-  if(!gcToken){show("gcal",null);return;}
+function refreshGCal(){
+  if(!gcAccessToken){show("gcal",null);return;}
+  try{var st=g("cal-status");if(st&&!st._dummy)st.textContent="Refreshing...";}catch(e){}
   fetchGCEvents();
 }
 
-async function gcSignIn(){
-  var al=document.getElementById("gc-alert");
-  try{
-    if(!window.google||!window.google.accounts){
-      await new Promise(function(res){var sc=document.createElement("script");sc.src="https://accounts.google.com/gsi/client";sc.onload=res;document.head.appendChild(sc);});
-    }
-    if(!window.gapi){
-      await new Promise(function(res){var sc=document.createElement("script");sc.src="https://apis.google.com/js/api.js";sc.onload=function(){gapi.load("client",function(){gapi.client.init({}).then(res);});};document.head.appendChild(sc);});
-    }
-    if(al){al.className="al ali";al.textContent="Opening Google sign-in...";}
-    gcTokenClient=google.accounts.oauth2.initTokenClient({
-      client_id:GC_CLIENT_ID,scope:GC_SCOPES,
-      callback:function(resp){
-        if(resp.error){if(al){al.className="al ale";al.textContent="Sign-in failed: "+resp.error;}return;}
-        gcToken=resp.access_token;
-        localStorage.setItem("gc_tok",gcToken);
-        if(al){al.className="al alo";al.textContent="Connected!";}
-        var sb=document.getElementById("gc-signin-btn");var so=document.getElementById("gc-signout-btn");var ec=document.getElementById("gc-events-card");
-        if(sb)sb.style.display="none";if(so)so.style.display="inline-flex";if(ec)ec.style.display="block";
-        fetchGCEvents();
-      }
-    });
-    gcTokenClient.requestAccessToken();
-  }catch(e){if(al){al.className="al ale";al.textContent="Error: "+e.message;}}
-}
 
-function gcSignOut(){
-  gcToken=null;localStorage.removeItem("gc_tok");GC_ITEMS=[];
-  var sb=document.getElementById("gc-signin-btn");var so=document.getElementById("gc-signout-btn");var ec=document.getElementById("gc-events-card");
-  if(sb)sb.style.display="flex";if(so)so.style.display="none";if(ec)ec.style.display="none";
-}
 
 async function fetchGCEvents(){
-  if(!gcToken)return;
-  var list=document.getElementById("gc-events-list");
-  if(list)list.innerHTML="<div style='color:var(--t3);font-size:13px'>Loading...</div>";
+  if(!gcAccessToken){return;}
+  var list=g("gc-events-list");list.innerHTML="<div style='color:var(--t3);font-size:13px'>Loading events from all calendars...</div>";
   try{
-    var now=new Date(new Date().getFullYear(),0,1),end=new Date(new Date().getFullYear()+1,11,31);
+    var now=new Date();
+    var end=new Date();end.setDate(end.getDate()+60);
+    var calResp=await fetch("https://www.googleapis.com/calendar/v3/users/me/calendarList",{headers:{Authorization:"Bearer "+gcAccessToken}});
+    var calData=await calResp.json();
+    if(calData.error){try{if(calData.error.code===401){gcSignOut();}}catch(e){}return;}
     var allItems=[];
-
-    // Fetch from calendarList
-    var clr=await fetch("https://www.googleapis.com/calendar/v3/users/me/calendarList",{headers:{Authorization:"Bearer "+gcToken}});
-    var cld=await clr.json();
-    if(cld.error){gcSignOut();return;}
-
-    for(var ci=0;ci<(cld.items||[]).length;ci++){
-      var cal=cld.items[ci];
-      // fetch all calendars regardless of selected status
+    for(var ci=0;ci<calData.items.length;ci++){
+      var cal=calData.items[ci];
+      if(cal.selected===false)continue;
       try{
-        var url="https://www.googleapis.com/calendar/v3/calendars/"+encodeURIComponent(cal.id)+"/events?timeMin="+encodeURIComponent(now.toISOString())+"&timeMax="+encodeURIComponent(end.toISOString())+"&singleEvents=true&orderBy=startTime&maxResults=2500";
-        var cr=await fetch(url,{headers:{Authorization:"Bearer "+gcToken}});
+        var curl="https://www.googleapis.com/calendar/v3/calendars/"+encodeURIComponent(cal.id)+"/events"
+          +"?timeMin="+encodeURIComponent(now.toISOString())
+          +"&timeMax="+encodeURIComponent(end.toISOString())
+          +"&singleEvents=true&orderBy=startTime&maxResults=100";
+        var cr=await fetch(curl,{headers:{Authorization:"Bearer "+gcAccessToken}});
         var cd=await cr.json();
         if(cd.items)cd.items.forEach(function(ev){ev._cal=cal.summary;allItems.push(ev);});
       }catch(ce){}
     }
-
-    // Also try UTBSC and Anna directly by ID
-    var extraIds=["aakus6fs5ogpjk6e1c8emec078kkuhlf@import.calendar.google.com","n02u8fughr3104cla06esm5c3hteqack@import.calendar.google.com"];
-    var extraNames=["UTBSC Schedule","Anna and Bill"];
-    for(var ei=0;ei<extraIds.length;ei++){
-      // Always try to fetch these calendars directly
-        try{
-          var eu="https://www.googleapis.com/calendar/v3/calendars/"+encodeURIComponent(extraIds[ei])+"/events?timeMin="+encodeURIComponent(now.toISOString())+"&timeMax="+encodeURIComponent(end.toISOString())+"&singleEvents=true&orderBy=startTime&maxResults=2500";
-          var er=await fetch(eu,{headers:{Authorization:"Bearer "+gcToken}});
-          var ed=await er.json();
-          if(ed.items)ed.items.forEach(function(ev){ev._cal=extraNames[ei];allItems.push(ev);});
-        }catch(ee){}
-    }
-
     allItems.sort(function(a,b){return new Date(a.start.dateTime||a.start.date)-new Date(b.start.dateTime||b.start.date);});
-    GC_ITEMS=allItems;
-
-    if(list){
-      list.innerHTML="";
-      allItems.slice(0,50).forEach(function(ev){
-        var d=new Date(ev.start.dateTime||ev.start.date);
-        var ds=d.toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"});
-        var ts=ev.start.dateTime?d.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"}):"All day";
-        var color=gcCalColor(ev);
-        var row=document.createElement("div");
-        row.style.cssText="display:flex;align-items:center;gap:9px;padding:8px 11px;background:var(--sf);border:1px solid var(--bd);border-left:3px solid "+color+";border-radius:var(--rs);margin-bottom:4px;font-size:13px";
-        row.innerHTML="<span style='font-size:11px;color:"+color+";font-weight:600;min-width:70px'>"+ds+"</span><span style='flex:1'>"+(ev.summary||"(No title)")+"</span><span style='font-size:10px;color:var(--t3)'>"+ts+"</span><span style='font-size:10px;background:var(--bg);padding:1px 6px;border-radius:20px'>"+(ev._cal||"")+"</span>";
-        list.appendChild(row);
-      });
-      var al=document.getElementById("gc-alert");
-      if(al){al.className="al alo";al.textContent="Loaded "+allItems.length+" events from all calendars!";}
+    
+    // Also fetch UTBSC Schedule and Anna&Bill directly via Google Calendar API
+    // Fetch UTBSC and Anna&Bill by looking them up in calendarList
+    var extraCalsToFetch=[];
+    try{
+      var calListResp2=await fetch("https://www.googleapis.com/calendar/v3/users/me/calendarList",{headers:{Authorization:"Bearer "+gcAccessToken}});
+      var calListData2=await calListResp2.json();
+      if(calListData2&&calListData2.items){
+        calListData2.items.forEach(function(cal){
+          var calName=(cal.summary||"").toLowerCase();
+          if(calName.indexOf("utbsc")>-1||calName.indexOf("anna")>-1){
+            extraCalsToFetch.push({id:cal.id,name:cal.summary});
+          }
+        });
+      }
+    }catch(cle){}
+    for(var ei=0;ei<extraCalsToFetch.length;ei++){
+      try{
+        var ecurl="https://www.googleapis.com/calendar/v3/calendars/"+encodeURIComponent(extraCalsToFetch[ei].id)+"/events"
+          +"?timeMin="+encodeURIComponent(now.toISOString())
+          +"&timeMax="+encodeURIComponent(end.toISOString())
+          +"&singleEvents=true&orderBy=startTime&maxResults=100";
+        var ecr=await fetch(ecurl,{headers:{Authorization:"Bearer "+gcAccessToken}});
+        var ecd=await ecr.json();
+        if(ecd.items)ecd.items.forEach(function(ev){ev._cal=extraCalsToFetch[ei].name;allItems.push(ev);});
+      }catch(ece){}
     }
-    renderGCtoCAL();
-    updateDebug();
-  }catch(e){if(list)list.innerHTML="<div style='color:#e24b4a;font-size:13px'>Error: "+e.message+"</div>";}
+    var data={items:allItems};
+    if(data.error){
+      if(data.error.code===401){gcSignOut();g("gc-alert").className="al alw";g("gc-alert").textContent="Session expired. Please sign in again.";}
+      else{list.innerHTML="<div style='color:#e24b4a;font-size:13px'>Error: "+data.error.message+"</div>";}
+      return;
+    }
+    list.innerHTML="";
+    if(!data.items||!data.items.length){list.innerHTML="<div style='color:var(--t3);font-size:13px'>No upcoming events found.</div>";return;}
+    
+    // Store all items and trigger filter/render
+    GC_ALL_ITEMS=data.items||[];
+    applyCalFilter();
+    rDash();
+    try{var gal=g("gc-alert");if(gal){gal.className="al alo";gal.textContent="Loaded "+GC_ALL_ITEMS.length+" events from all calendars!";}}catch(e){}
+    
+    data.items.forEach(function(ev){
+      var start=ev.start.dateTime||ev.start.date;
+      var d=new Date(start);
+      var ds=d.toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"});
+      var ts=ev.start.dateTime?d.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"}):"All day";
+      var row=document.createElement("div");
+      row.style.cssText="display:flex;align-items:center;gap:10px;padding:9px 11px;background:var(--sf);border:1px solid var(--bd);border-left:3px solid #4285F4;border-radius:var(--rs);margin-bottom:5px;font-size:13px";
+      row.innerHTML="<span style='font-size:11px;color:#4285F4;font-weight:600;min-width:80px'>"+ds+"</span>"
+        +"<span style='flex:1'>"+( ev.summary||"(No title)")+"</span>"
+        +"<span style='font-size:11px;color:var(--t3)'>"+ts+"</span>";
+      list.appendChild(row);
+    });
+  }catch(e){try{var el=g("gc-events-list");if(el)el.innerHTML="<div style='color:#e24b4a;font-size:13px'>Error: "+e.message+"</div>";}catch(e2){}}
 }
 
+// Auto-restore token on load
 (function(){
-  var saved=localStorage.getItem("gc_tok");
+  var saved=localStorage.getItem("gc_token");
   if(saved){
-    gcToken=saved;
+    gcAccessToken=saved;
     setTimeout(function(){
-      var sb=document.getElementById("gc-signin-btn");var so=document.getElementById("gc-signout-btn");var ec=document.getElementById("gc-events-card");
-      if(sb)sb.style.display="none";if(so)so.style.display="inline-flex";if(ec)ec.style.display="block";
-      fetchGCEvents();
+      try{
+        var sb=g("gc-signin-btn");var so=g("gc-signout-btn");var ec=g("gc-events-card");
+        if(sb)sb.style.display="none";
+        if(so)so.style.display="inline-flex";
+        if(ec)ec.style.display="block";
+        fetchGCEvents().then(function(){try{applyCalFilter();}catch(e){}});
+      }catch(e){}
     },1500);
   }
 })();
 
-function saveAK(){
-  var inp=document.getElementById("ak-input");var val=inp?inp.value.trim():"";
-  var al=document.getElementById("ak-al");
-  if(!val||!val.startsWith("sk-")){if(al){al.className="al ale";al.textContent="Invalid key.";}return;}
-  localStorage.setItem("lo_ak",val);
-  if(al){al.className="al alo";al.textContent="API key saved! AI assistant is now active.";}
-  if(inp)inp.value="";
-}
-function clearAK(){localStorage.removeItem("lo_ak");var inp=document.getElementById("ak-input");if(inp)inp.value="";}
-function getAK(){return localStorage.getItem("lo_ak")||"";}
 
 
-function updateDebug(){
-  var dgc=document.getElementById("dbg-gc");
-  var dcal=document.getElementById("dbg-cal");
-  var ddate=document.getElementById("dbg-date");
-  if(dgc)dgc.textContent="GC_ITEMS: "+(GC_ITEMS?GC_ITEMS.length:0)+" events loaded";
-  var calCount=Object.keys(CAL).reduce(function(sum,k){return sum+CAL[k].filter(function(e){return e.src==="google";}).length;},0);
-  if(dcal)dcal.textContent="CAL google events: "+calCount+" | Total CAL keys: "+Object.keys(CAL).length;
-  if(ddate)ddate.textContent="Showing: "+["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][CM]+" "+CY+" (today: "+new Date().toLocaleDateString()+")";
+
+
+
+
+
+
+
+
+var GC_ACTIVE_FILTER="all";
+var GC_ALL_ITEMS=[];
+
+function filterGCal(f){
+  GC_ACTIVE_FILTER=f;
+  var colors={"all":"#7F77DD","bill":"#185FA5","utbsc":"#0F6E56","anna":"#BA7517"};
+  ["all","bill","utbsc","anna"].forEach(function(k){
+    var ch=document.getElementById("cf-"+k);
+    if(!ch)return;
+    if(k===f){ch.style.background=colors[k];ch.style.color="#fff";ch.style.borderColor=colors[k];}
+    else{ch.style.background="";ch.style.color="";ch.style.borderColor="";}
+  });
+  // Re-inject filtered events
+  Object.keys(CAL).forEach(function(k){CAL[k]=CAL[k].filter(function(ev){return ev.src!=="google";});});
+  var gcCalColors2={"utbsc":"#0F6E56","anna":"#BA7517","bill":"#185FA5"};
+  GC_ALL_ITEMS.forEach(function(ev){
+    var ct2=(ev._cal||"").toLowerCase().indexOf("utbsc")>-1?"utbsc":(ev._cal||"").toLowerCase().indexOf("anna")>-1?"anna":"bill";
+    if(f!=="all"&&ct2!==f)return;
+    try{
+      var ds2=ev.start.dateTime||ev.start.date;
+      var d2=new Date(ds2);
+      var key2=d2.getFullYear()+"-"+(d2.getMonth()+1)+"-"+d2.getDate();
+      if(!CAL[key2])CAL[key2]=[];
+      var ts2=ev.start.dateTime?d2.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"}):"All day";
+      CAL[key2].push({t:ev.summary||"(No title)",co:"personal",time:ts2,src:"google",gcol:gcCalColors2[ct2],gcal:ev._cal||"Bill Hickner"});
+    }catch(e2){}
+  });
+  rCal();
+  try{renderCalEvtsList(GC_ALL_ITEMS);}catch(e){};
 }
 
-function forceCalRefresh(){
-  updateDebug();
-  if(GC_ITEMS&&GC_ITEMS.length>0){
-    renderGCtoCAL();
-  } else {
-    var al=document.getElementById("gc-alert");
-    alert("No Google events loaded yet. Go to Settings > Google Calendar and sign in first.");
-  }
-  updateDebug();
+try{renderCalEvtsList(GC_ALL_ITEMS);}catch(e){}{
+  var list=document.getElementById("gcal-list");
+  if(!list)return;
+  list.innerHTML="";
+  var now=new Date();
+  var gcCalColors3={"utbsc":"#0F6E56","anna":"#BA7517","bill":"#185FA5"};
+  var upcoming=GC_ALL_ITEMS.filter(function(ev){
+    var ct=(ev._cal||"").toLowerCase().indexOf("utbsc")>-1?"utbsc":(ev._cal||"").toLowerCase().indexOf("anna")>-1?"anna":"bill";
+    if(GC_ACTIVE_FILTER!=="all"&&ct!==GC_ACTIVE_FILTER)return false;
+    return new Date(ev.start.dateTime||ev.start.date)>=now;
+  }).slice(0,20);
+  if(!upcoming.length){list.innerHTML="<div style='color:var(--t3);font-size:12px;padding:8px 0'>No upcoming events. Sign in via Google Calendar in Settings to load your events.</div>";return;}
+  upcoming.forEach(function(ev){
+    var d=new Date(ev.start.dateTime||ev.start.date);
+    var ds=d.toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"});
+    var ts=ev.start.dateTime?d.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"}):"All day";
+    var ct=(ev._cal||"").toLowerCase().indexOf("utbsc")>-1?"utbsc":(ev._cal||"").toLowerCase().indexOf("anna")>-1?"anna":"bill";
+    var color=gcCalColors3[ct]||"#7F77DD";
+    var row=document.createElement("div");
+    row.style.cssText="display:flex;align-items:center;gap:9px;padding:8px 11px;background:var(--sf);border:1px solid var(--bd);border-left:3px solid "+color+";border-radius:var(--rs);margin-bottom:4px;font-size:13px";
+    row.innerHTML="<span style='font-size:11px;color:"+color+";font-weight:600;min-width:70px'>"+ds+"</span><span style='flex:1'>"+(ev.summary||"(No title)")+"</span><span style='font-size:10px;color:var(--t3)'>"+ts+"</span><span style='font-size:10px;background:var(--bg);padding:1px 6px;border-radius:20px;color:var(--t2)'>"+(ev._cal||"Bill Hickner")+"</span>";
+    list.appendChild(row);
+  });
 }
+
+function gcRefresh(){
+  if(!gcAccessToken){show("gcal",null);return;}
+  fetchGCEvents();
+}
+
 
 function updateAuthUI(){
   var btn=g("authb");
@@ -1302,7 +1399,7 @@ function setL(val){
   g("smb").classList.toggle("on",val);
   g("cmic").classList.toggle("on",val);
   g("mlbl").textContent=val?"Listening...":"Voice command";
-  g("mico").textContent=val?"⏹":"🎙";
+  g("mico").textContent=val?"⏹":"🎤";
   if(!val)setTimeout(function(){g("vt").textContent="";},2000);
 }
 function handleVoice(cmd){
@@ -1325,6 +1422,7 @@ if(window.speechSynthesis)window.speechSynthesis.getVoices();
 
 g("tbdate").textContent=new Date().toLocaleDateString("en-US",{weekday:"long",year:"numeric",month:"long",day:"numeric"});
 if(ICC)g("ic-em").value=ICC.em;
+if(getAK()){var akEl=g("ak-input");if(akEl)akEl.placeholder="Key saved (hidden for security)";}
 if(FBC)g("fb-cfg").value=JSON.stringify(FBC,null,2);
 setCo("all");
 rDash();rCal();rTasks();rPlanner();rChatChips();updateAuthUI();
