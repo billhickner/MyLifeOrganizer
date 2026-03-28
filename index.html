@@ -1156,20 +1156,20 @@ async function fetchGCEvents(){
   if(!gcAccessToken){return;}
   var list=g("gc-events-list");list.innerHTML="<div style='color:var(--t3);font-size:13px'>Loading events from all calendars...</div>";
   try{
-    var now=new Date();
-    var end=new Date();end.setDate(end.getDate()+60);
+    var now=new Date(new Date().getFullYear(),0,1);
+    var end=new Date(new Date().getFullYear()+1,11,31);
     var calResp=await fetch("https://www.googleapis.com/calendar/v3/users/me/calendarList",{headers:{Authorization:"Bearer "+gcAccessToken}});
     var calData=await calResp.json();
     if(calData.error){try{if(calData.error.code===401){gcSignOut();}}catch(e){}return;}
     var allItems=[];
     for(var ci=0;ci<calData.items.length;ci++){
       var cal=calData.items[ci];
-      if(cal.selected===false)continue;
+      // include all calendars
       try{
         var curl="https://www.googleapis.com/calendar/v3/calendars/"+encodeURIComponent(cal.id)+"/events"
           +"?timeMin="+encodeURIComponent(now.toISOString())
           +"&timeMax="+encodeURIComponent(end.toISOString())
-          +"&singleEvents=true&orderBy=startTime&maxResults=100";
+          +"&singleEvents=true&orderBy=startTime&maxResults=2500";
         var cr=await fetch(curl,{headers:{Authorization:"Bearer "+gcAccessToken}});
         var cd=await cr.json();
         if(cd.items)cd.items.forEach(function(ev){ev._cal=cal.summary;allItems.push(ev);});
@@ -1197,7 +1197,7 @@ async function fetchGCEvents(){
         var ecurl="https://www.googleapis.com/calendar/v3/calendars/"+encodeURIComponent(extraCalsToFetch[ei].id)+"/events"
           +"?timeMin="+encodeURIComponent(now.toISOString())
           +"&timeMax="+encodeURIComponent(end.toISOString())
-          +"&singleEvents=true&orderBy=startTime&maxResults=100";
+          +"&singleEvents=true&orderBy=startTime&maxResults=2500";
         var ecr=await fetch(ecurl,{headers:{Authorization:"Bearer "+gcAccessToken}});
         var ecd=await ecr.json();
         if(ecd.items)ecd.items.forEach(function(ev){ev._cal=extraCalsToFetch[ei].name;allItems.push(ev);});
