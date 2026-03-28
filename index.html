@@ -735,7 +735,7 @@ function rCal(){
   var rem=(first+days)%7===0?0:7-(first+days)%7;
   for(var j=1;j<=rem;j++){var dj=document.createElement("div");dj.className="cday dim";dj.innerHTML="<div class='cnum'>"+j+"</div>";gr.appendChild(dj);}
 }
-function chMo(dir){CM+=dir;if(CM>11){CM=0;CY++;}if(CM<0){CM=11;CY--;}if(typeof GC_ALL_ITEMS!=="undefined"&&GC_ALL_ITEMS.length>0)applyCalFilter();else rCal();}
+function chMo(dir){CM+=dir;if(CM>11){CM=0;CY++;}if(CM<0){CM=11;CY--;}if(typeof GC_ALL_ITEMS!="undefined"&&GC_ALL_ITEMS.length)applyCalFilter();else rCal();}
 function openAddEvt(){g("etitle").value="";g("enotes").value="";if(ACO!=="all"&&CO[ACO])g("eco").value=ACO;openMod("evt-mod");}
 function saveEvt(){
   var title=g("etitle").value.trim();if(!title)return;
@@ -1288,21 +1288,21 @@ function filterGCal(f){
     }catch(e2){}
   });
   rCal();
-  try{renderCalEvtsList(GC_ALL_ITEMS);}catch(e){};
+  try{renderGcalList(GC_ALL_ITEMS);}catch(e){}
 }
 
-try{renderCalEvtsList(GC_ALL_ITEMS);}catch(e){}{
+function renderGcalList(items){
   var list=document.getElementById("gcal-list");
   if(!list)return;
   list.innerHTML="";
   var now=new Date();
   var gcCalColors3={"utbsc":"#0F6E56","anna":"#BA7517","bill":"#185FA5"};
-  var upcoming=GC_ALL_ITEMS.filter(function(ev){
+  var upcoming=(items||GC_ALL_ITEMS).filter(function(ev){
     var ct=(ev._cal||"").toLowerCase().indexOf("utbsc")>-1?"utbsc":(ev._cal||"").toLowerCase().indexOf("anna")>-1?"anna":"bill";
     if(GC_ACTIVE_FILTER!=="all"&&ct!==GC_ACTIVE_FILTER)return false;
     return new Date(ev.start.dateTime||ev.start.date)>=now;
   }).slice(0,20);
-  if(!upcoming.length){list.innerHTML="<div style='color:var(--t3);font-size:12px;padding:8px 0'>No upcoming events. Sign in via Google Calendar in Settings to load your events.</div>";return;}
+  if(!upcoming.length){list.innerHTML="<div style='color:var(--t3);font-size:12px;padding:8px 0'>No upcoming events.</div>";return;}
   upcoming.forEach(function(ev){
     var d=new Date(ev.start.dateTime||ev.start.date);
     var ds=d.toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"});
