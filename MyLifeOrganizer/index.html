@@ -1047,6 +1047,13 @@ function renderGCtoCAL(){
     }catch(ie){}
   });
   var today2=new Date();CY=today2.getFullYear();CM=today2.getMonth();
+  // Debug: count events injected into current month
+  var curMonKey=CY+"-"+(CM+1);
+  var curMonEvts=Object.keys(CAL).filter(function(k){return k.startsWith(curMonKey);}).reduce(function(sum,k){return sum+CAL[k].filter(function(e){return e.src==="google";}).length;},0);
+  var nextMonKey=CY+"-"+(CM+2);
+  var nextMonEvts=Object.keys(CAL).filter(function(k){return k.startsWith(nextMonKey);}).reduce(function(sum,k){return sum+CAL[k].filter(function(e){return e.src==="google";}).length;},0);
+  var st=document.getElementById("cal-status");
+  if(st)st.textContent=filtered.length+" events total | "+curMonEvts+" in "+["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][CM]+" | "+nextMonEvts+" in next month";
   rCal();
   try{renderUpcoming(filtered);}catch(e){}
   var st=document.getElementById("cal-status");
