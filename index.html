@@ -209,9 +209,11 @@ pre{background:var(--bg);padding:10px;border-radius:var(--rs);font-size:11px;fon
         <button class="btn btns" onclick="refreshGC()" style="margin-left:auto">&#8635; Refresh</button>
       </div>
       <div id="cal-status" style="font-size:11px;color:var(--t3);margin-bottom:8px"></div>
-      <div id="cal-noevts" style="display:none;padding:10px;background:#FAEEDA;border-radius:var(--rs);font-size:12px;margin-bottom:8px;color:#633806">
-        No events on grid yet. <strong>Sign into Google Calendar</strong> under Settings, then come back here.
-        <button class="btn btns" onclick="renderGCtoCAL()" style="margin-left:8px">Refresh grid</button>
+      <div style="padding:10px;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rs);font-size:11px;margin-bottom:10px;font-family:monospace">
+        <div id="dbg-gc">GC events: checking...</div>
+        <div id="dbg-cal">CAL events: checking...</div>
+        <div id="dbg-date">Date: checking...</div>
+        <button class="btn btns" onclick="forceCalRefresh()" style="margin-top:5px;background:#185FA5;color:#fff">Force refresh calendar</button>
       </div>
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
         <button class="btn btns" onclick="chMo(-1)">&#8249;</button>
@@ -629,7 +631,7 @@ function show(id,el){
 function rPanel(id){
   try{
   if(id==="dashboard")rDash();
-  else if(id==="calendar"){if(GC_ITEMS&&GC_ITEMS.length>0){renderGCtoCAL();}else{rCal();}}
+  else if(id==="calendar"){updateDebug();if(GC_ITEMS&&GC_ITEMS.length>0){renderGCtoCAL();}else{rCal();}updateDebug();}
   else if(id==="tasks")rTasks();
   else if(id==="planner")rPlanner();
   else if(id==="people")rPeople();
@@ -1178,6 +1180,7 @@ async function fetchGCEvents(){
       if(al){al.className="al alo";al.textContent="Loaded "+allItems.length+" events from all calendars!";}
     }
     renderGCtoCAL();
+    updateDebug();
   }catch(e){if(list)list.innerHTML="<div style='color:#e24b4a;font-size:13px'>Error: "+e.message+"</div>";}
 }
 
@@ -1203,6 +1206,28 @@ function saveAK(){
 }
 function clearAK(){localStorage.removeItem("lo_ak");var inp=document.getElementById("ak-input");if(inp)inp.value="";}
 function getAK(){return localStorage.getItem("lo_ak")||"";}
+
+
+function updateDebug(){
+  var dgc=document.getElementById("dbg-gc");
+  var dcal=document.getElementById("dbg-cal");
+  var ddate=document.getElementById("dbg-date");
+  if(dgc)dgc.textContent="GC_ITEMS: "+(GC_ITEMS?GC_ITEMS.length:0)+" events loaded";
+  var calCount=Object.keys(CAL).reduce(function(sum,k){return sum+CAL[k].filter(function(e){return e.src==="google";}).length;},0);
+  if(dcal)dcal.textContent="CAL google events: "+calCount+" | Total CAL keys: "+Object.keys(CAL).length;
+  if(ddate)ddate.textContent="Showing: "+["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][CM]+" "+CY+" (today: "+new Date().toLocaleDateString()+")";
+}
+
+function forceCalRefresh(){
+  updateDebug();
+  if(GC_ITEMS&&GC_ITEMS.length>0){
+    renderGCtoCAL();
+  } else {
+    var al=document.getElementById("gc-alert");
+    alert("No Google events loaded yet. Go to Settings > Google Calendar and sign in first.");
+  }
+  updateDebug();
+}
 
 function updateAuthUI(){
   var btn=g("authb");
