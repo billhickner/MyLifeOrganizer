@@ -735,7 +735,7 @@ function rCal(){
   var gcEventsInCAL=Object.keys(CAL).some(function(k){return CAL[k].some(function(e){return e.src==="google";});});
   if(noEvts)noEvts.style.display=gcEventsInCAL?"none":"block";
 }
-function chMo(dir){CM+=dir;if(CM>11){CM=0;CY++;}if(CM<0){CM=11;CY--;}rCal();}
+function chMo(dir){CM+=dir;if(CM>11){CM=0;CY++;}if(CM<0){CM=11;CY--;}if(GC_ITEMS&&GC_ITEMS.length>0)renderGCtoCAL();else rCal();}
 function openAddEvt(){g("etitle").value="";g("enotes").value="";if(ACO!=="all"&&CO[ACO])g("eco").value=ACO;openMod("evt-mod");}
 function saveEvt(){
   var title=g("etitle").value.trim();if(!title)return;
@@ -1055,6 +1055,7 @@ function renderGCtoCAL(){
       CAL[key].push({t:(ev.summary||"(No title)").replace(/</g,"&lt;").replace(/>/g,"&gt;"),co:"personal",time:ts,src:"google",gcol:gcCalColor(ev)});
     }catch(ie){console.warn("Event inject error:",ie,ev);}
   });
+  // Jump to today's month first, then find best month
   var today2=new Date();CY=today2.getFullYear();CM=today2.getMonth();
   // Count how many actually made it into CAL
   var injected=Object.keys(CAL).reduce(function(sum,k){return sum+CAL[k].filter(function(e){return e.src==="google";}).length;},0);
@@ -1125,7 +1126,7 @@ async function fetchGCEvents(){
   var list=document.getElementById("gc-events-list");
   if(list)list.innerHTML="<div style='color:var(--t3);font-size:13px'>Loading...</div>";
   try{
-    var now=new Date(),end=new Date();end.setDate(end.getDate()+90);
+    var now=new Date(new Date().getFullYear(),0,1),end=new Date(new Date().getFullYear()+1,11,31);
     var allItems=[];
 
     // Fetch from calendarList
@@ -1137,7 +1138,7 @@ async function fetchGCEvents(){
       var cal=cld.items[ci];
       // fetch all calendars regardless of selected status
       try{
-        var url="https://www.googleapis.com/calendar/v3/calendars/"+encodeURIComponent(cal.id)+"/events?timeMin="+encodeURIComponent(now.toISOString())+"&timeMax="+encodeURIComponent(end.toISOString())+"&singleEvents=true&orderBy=startTime&maxResults=100";
+        var url="https://www.googleapis.com/calendar/v3/calendars/"+encodeURIComponent(cal.id)+"/events?timeMin="+encodeURIComponent(now.toISOString())+"&timeMax="+encodeURIComponent(end.toISOString())+"&singleEvents=true&orderBy=startTime&maxResults=2500";
         var cr=await fetch(url,{headers:{Authorization:"Bearer "+gcToken}});
         var cd=await cr.json();
         if(cd.items)cd.items.forEach(function(ev){ev._cal=cal.summary;allItems.push(ev);});
@@ -1150,7 +1151,7 @@ async function fetchGCEvents(){
     for(var ei=0;ei<extraIds.length;ei++){
       // Always try to fetch these calendars directly
         try{
-          var eu="https://www.googleapis.com/calendar/v3/calendars/"+encodeURIComponent(extraIds[ei])+"/events?timeMin="+encodeURIComponent(now.toISOString())+"&timeMax="+encodeURIComponent(end.toISOString())+"&singleEvents=true&orderBy=startTime&maxResults=100";
+          var eu="https://www.googleapis.com/calendar/v3/calendars/"+encodeURIComponent(extraIds[ei])+"/events?timeMin="+encodeURIComponent(now.toISOString())+"&timeMax="+encodeURIComponent(end.toISOString())+"&singleEvents=true&orderBy=startTime&maxResults=2500";
           var er=await fetch(eu,{headers:{Authorization:"Bearer "+gcToken}});
           var ed=await er.json();
           if(ed.items)ed.items.forEach(function(ev){ev._cal=extraNames[ei];allItems.push(ev);});
