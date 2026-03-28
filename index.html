@@ -735,7 +735,7 @@ function rCal(){
   var rem=(first+days)%7===0?0:7-(first+days)%7;
   for(var j=1;j<=rem;j++){var dj=document.createElement("div");dj.className="cday dim";dj.innerHTML="<div class='cnum'>"+j+"</div>";gr.appendChild(dj);}
 }
-function chMo(dir){CM+=dir;if(CM>11){CM=0;CY++;}if(CM<0){CM=11;CY--;}rCal();}
+function chMo(dir){CM+=dir;if(CM>11){CM=0;CY++;}if(CM<0){CM=11;CY--;}if(typeof GC_ALL_ITEMS!=="undefined"&&GC_ALL_ITEMS.length>0)applyCalFilter();else rCal();}
 function openAddEvt(){g("etitle").value="";g("enotes").value="";if(ACO!=="all"&&CO[ACO])g("eco").value=ACO;openMod("evt-mod");}
 function saveEvt(){
   var title=g("etitle").value.trim();if(!title)return;
@@ -1121,7 +1121,6 @@ function applyCalFilter(){
       CAL[key].push({t:ev.summary||"(No title)",co:"personal",time:timeStr,src:"google",gcol:getCalColor(ev)});
     }catch(ie){}
   });
-  var td=new Date();CY=td.getFullYear();CM=td.getMonth();
   try{rCal();}catch(e){}
   try{renderCalEvtsList(filtered);}catch(e){}
   try{var st=g("cal-status");if(st&&!st._dummy)st.textContent=filtered.length+" events"+(GC_FILTER!=="all"?" (filtered)":"");}catch(e){}
