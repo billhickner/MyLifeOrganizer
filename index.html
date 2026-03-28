@@ -1053,20 +1053,16 @@ function renderGCtoCAL(){
       if(!CAL[key])CAL[key]=[];
       var ts=ev.start.dateTime?d.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"}):"All day";
       CAL[key].push({t:(ev.summary||"(No title)").replace(/</g,"&lt;").replace(/>/g,"&gt;"),co:"personal",time:ts,src:"google",gcol:gcCalColor(ev)});
-    }catch(ie){}
+    }catch(ie){console.warn("Event inject error:",ie,ev);}
   });
   var today2=new Date();CY=today2.getFullYear();CM=today2.getMonth();
-  // Debug: count events injected into current month
-  var curMonKey=CY+"-"+(CM+1);
-  var curMonEvts=Object.keys(CAL).filter(function(k){return k.startsWith(curMonKey);}).reduce(function(sum,k){return sum+CAL[k].filter(function(e){return e.src==="google";}).length;},0);
-  var nextMonKey=CY+"-"+(CM+2);
-  var nextMonEvts=Object.keys(CAL).filter(function(k){return k.startsWith(nextMonKey);}).reduce(function(sum,k){return sum+CAL[k].filter(function(e){return e.src==="google";}).length;},0);
-  var st=document.getElementById("cal-status");
-  if(st)st.textContent=filtered.length+" events total | "+curMonEvts+" in "+["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][CM]+" | "+nextMonEvts+" in next month";
+  // Count how many actually made it into CAL
+  var injected=Object.keys(CAL).reduce(function(sum,k){return sum+CAL[k].filter(function(e){return e.src==="google";}).length;},0);
+  var calSt=document.getElementById("cal-status");
+  if(calSt)calSt.textContent=filtered.length+" events from Google | "+injected+" on calendar";
   rCal();
   try{renderUpcoming(filtered);}catch(e){}
-  var st=document.getElementById("cal-status");
-  if(st)st.textContent=filtered.length+" events"+(GC_FILTER!=="all"?" (filtered)":"")+" from Google Calendar";
+  updateDebug();
 }
 
 function renderUpcoming(items){
