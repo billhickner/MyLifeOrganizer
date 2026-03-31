@@ -408,7 +408,7 @@ input[type=date],input[type=time]{width:100%}
 // ── CONFIG ─────────────────────────────────────────────────────────────────
 const GCAL_KEY    = 'AIzaSyAjwhrGc-7C0O2HY2fy5p-9LvvH1BOCyeI';
 const GCAL_CAL    = 'aakus6fs5ogpjk6e1c8emec078kkuhlf@import.calendar.google.com';
-const ELEVEN_KEY  = 'sk_6f8e5205a272394658a45c65b3b07cf4e60bc0207088c271';
+const ELEVEN_KEY  = ''; // routed through Netlify function
 const DANIEL_ID   = 'onwK4e9ZLuTAKqWW03F9';
 const CLAUDE_KEY  = ''; // Key stored server-side in Netlify env var
 const DEADLINE    = new Date('2026-05-14');
@@ -957,10 +957,10 @@ const speakDaniel = async (text) => {
   isSpeaking=true;
   document.getElementById('muteBtn').style.display='inline-block';
   try {
-    const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${DANIEL_ID}/stream`,{
+    const res = await fetch('/.netlify/functions/tts',{
       method:'POST',
-      headers:{'xi-api-key':ELEVEN_KEY,'Content-Type':'application/json'},
-      body:JSON.stringify({text,model_id:'eleven_turbo_v2',voice_settings:{stability:0.5,similarity_boost:0.75,style:0.3,use_speaker_boost:true}})
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({text,voiceId:DANIEL_ID,model_id:'eleven_turbo_v2',voice_settings:{stability:0.5,similarity_boost:0.75,style:0.3,use_speaker_boost:true}})
     });
     if(!res.ok) throw new Error('ElevenLabs error '+res.status);
     const blob = await res.blob();
