@@ -410,7 +410,7 @@ const GCAL_KEY    = 'AIzaSyAjwhrGc-7C0O2HY2fy5p-9LvvH1BOCyeI';
 const GCAL_CAL    = 'aakus6fs5ogpjk6e1c8emec078kkuhlf@import.calendar.google.com';
 const ELEVEN_KEY  = 'sk_6f8e5205a272394658a45c65b3b07cf4e60bc0207088c271';
 const DANIEL_ID   = 'onwK4e9ZLuTAKqWW03F9';
-const CLAUDE_KEY  = 'sk-ant-api03-mKU2dk6fZbqdnaENL91484IHFILYFFlxYTIdMAuY1fqBCTmlETFyG31PIdPLPq4xWxAqiWQrEv-sOG_iJ8clQ-cD9gTAAA';
+const CLAUDE_KEY  = ''; // Key stored server-side in Netlify env var
 const DEADLINE    = new Date('2026-05-14');
 const TODAY       = new Date();
 const TODAY_STR   = TODAY.toISOString().split('T')[0];
@@ -887,9 +887,9 @@ const genPath = async () => {
 // ── CLAUDE API ─────────────────────────────────────────────────────────────
 const callClaude = async (prompt, system='') => {
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages',{
+    const res = await fetch('/.netlify/functions/claude',{
       method:'POST',
-      headers:{'Content-Type':'application/json','x-api-key':CLAUDE_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-allow-browser':'true'},
+      headers:{'Content-Type':'application/json'},
       body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:system||undefined,messages:[{role:'user',content:prompt}]})
     });
     const d=await res.json();
@@ -915,7 +915,7 @@ const sendToMax = async () => {
   const loadEl = addMaxMessage('max','<div class="dots"><span></span><span></span><span></span></div>');
 
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages',{
+    const res = await fetch('/.netlify/functions/claude',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:maxContext(),messages:maxHistory})
