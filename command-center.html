@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PulsAIO Command Center</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=IBM+Plex+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --primary: #0057B8;
+  --accent:  #00A3E0;
+  --gold:    #F5A623;
+  --green:   #00C48C;
+  --red:     #E84C4C;
+  --dark:    #0D1B2A;
+  --mid:     #374151;
+  --soft:    #6B7280;
+  --muted:   #9CA3AF;
+  --border:  #9CA3AF;
+  --bg:      #F0F4F8;
+  --white:   #FFFFFF;
+  --lb:      #EBF5FF;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--dark);min-height:100vh}
+
+/* HEADER */
+.header{background:var(--primary);padding:0 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,87,184,0.3)}
+.logo{display:flex;align-items:center;gap:10px;padding:14px 0}
+.logo-icon{width:32px;height:32px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:16px;color:white}
+.logo-text{font-family:'Syne',sans-serif;font-weight:800;font-size:16px;color:white;line-height:1.1}
+.logo-sub{font-size:9px;color:rgba(255,255,255,0.55);font-weight:500;letter-spacing:0.1em;text-transform:uppercase}
+.nav{display:flex;gap:2px}
+.nav-btn{background:none;border:none;color:rgba(255,255,255,0.6);font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;padding:8px 14px;border-radius:6px;cursor:pointer;transition:all 0.15s}
+.nav-btn:hover{color:white;background:rgba(255,255,255,0.1)}
+.nav-btn.active{color:white;background:rgba(255,255,255,0.15)}
+.header-date{font-family:'IBM Plex Mono',monospace;font-size:10px;color:rgba(255,255,255,0.55)}
+
+/* BANNER */
+.banner{background:white;border-bottom:1px solid var(--border);padding:9px 24px;display:flex;align-items:center;gap:20px;flex-wrap:wrap;font-size:11px}
+.banner-dot{width:8px;height:8px;border-radius:50%}
+.banner-label{font-weight:600;color:var(--soft);text-transform:uppercase;letter-spacing:0.08em}
+.banner-val{font-weight:700;color:var(--dark)}
+.banner-sep{width:1px;height:18px;background:var(--border)}
+.pill{display:inline-flex;align-items:center;font-size:10px;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;padding:3px 8px;border-radius:20px;white-space:nowrap}
+
+/* PAGE */
+.page{padding:20px 24px;max-width:1160px;margin:0 auto}
+.hidden{display:none}
+
+/* CARDS */
+.card{background:white;border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:14px;box-shadow:0 1px 3px rgba(0,0,0,0.06)}
+.card-title{font-size:10px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.card-accent{width:3px;height:14px;background:var(--primary);border-radius:2px;flex-shrink:0}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.stat-chip{background:white;border:1px solid var(--border);border-radius:8px;padding:14px 16px;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
+.stat-val{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;line-height:1;margin-bottom:4px}
+.stat-lbl{font-size:10px;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;font-weight:600}
+
+/* LAYOUT */
+.main-grid{display:grid;grid-template-columns:1fr 340px;gap:16px}
+.pilot-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+
+/* INPUTS */
+input,textarea,select{font-family:'DM Sans',sans-serif}
+.inp{border:1.5px solid var(--border);border-radius:8px;padding:9px 13px;font-size:13px;color:var(--dark);outline:none;transition:border-color 0.15s;width:100%;background:white}
+.inp:focus{border-color:var(--primary)}
+.sel{border:1.5px solid var(--border);border-radius:8px;padding:9px 10px;font-size:12px;color:var(--soft);outline:none;cursor:pointer;background:white}
+.ta{border:1.5px solid var(--border);border-radius:8px;padding:10px 13px;font-size:13px;color:var(--dark);outline:none;transition:border-color 0.15s;width:100%;background:white;resize:vertical;line-height:1.7;min-height:110px}
+.ta:focus{border-color:var(--primary)}
+.btn-primary{background:var(--primary);color:white;border:none;padding:9px 18px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;border-radius:8px;cursor:pointer;white-space:nowrap;transition:background 0.15s}
+.btn-primary:hover{background:#0046a0}
+.btn-primary:disabled{opacity:0.4;cursor:not-allowed}
+.btn-outline{background:white;color:var(--primary);border:1.5px solid var(--primary);padding:8px 16px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;border-radius:8px;cursor:pointer;white-space:nowrap;transition:all 0.15s}
+.btn-outline:hover{background:var(--lb)}
+.btn-add{background:var(--primary);color:white;border:none;padding:9px 16px;font-size:18px;border-radius:8px;cursor:pointer;font-weight:600;line-height:1}
+
+/* TASKS */
+.task-row{display:flex;align-items:center;gap:8px;padding:9px 3px;border-bottom:1px solid var(--bg)}
+.task-check{width:18px;height:18px;border-radius:4px;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;transition:all 0.2s;border:2px solid var(--border);background:white;color:white}
+.task-check.done{background:var(--green);border-color:var(--green)}
+.task-label{flex:1;font-size:13px;color:var(--dark);line-height:1.4}
+.task-label.done{text-decoration:line-through;color:var(--muted)}
+
+/* PROGRESS BAR */
+.pbar{height:6px;background:var(--bg);border-radius:3px;overflow:hidden;margin-top:6px}
+.pbar-fill{height:100%;border-radius:3px;transition:width 0.5s}
+
+/* AI BOX */
+.ai-box{background:var(--lb);border:1px solid rgba(0,87,184,0.2);border-radius:10px;padding:16px;margin-top:14px}
+.ai-header{font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--primary);margin-bottom:10px;display:flex;align-items:center;gap:7px}
+.ai-dot{width:7px;height:7px;border-radius:50%;background:var(--primary)}
+.ai-text{font-size:13px;line-height:1.8;color:var(--mid);white-space:pre-wrap}
+.dots span{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--primary);opacity:0.5;animation:bounce 1.2s infinite}
+.dots span:nth-child(2){animation-delay:.2s}
+.dots span:nth-child(3){animation-delay:.4s}
+@keyframes bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-6px)}}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:1000;display:flex;align-items:center;justify-content:center}
+.modal{background:white;border-radius:14px;padding:28px;width:460px;max-width:90vw;box-shadow:0 20px 60px rgba(0,0,0,0.2)}
+.modal h3{font-size:16px;font-weight:700;color:var(--dark);margin-bottom:20px}
+.form-label{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:5px;display:block}
+.form-row{margin-bottom:12px}
+.form-2col{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+
+/* MAX CHAT */
+.max-panel{background:white;border:1px solid var(--border);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;height:calc(100vh - 160px);box-shadow:0 2px 12px rgba(0,0,0,0.08)}
+.max-header{background:var(--primary);padding:14px 16px;display:flex;align-items:center;justify-content:space-between}
+.max-avatar{width:38px;height:38px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:20px}
+.max-name{font-size:15px;font-weight:700;color:white}
+.max-sub{font-size:10px;color:rgba(255,255,255,0.55);font-weight:500}
+.max-messages{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px}
+.max-msg{max-width:82%;padding:10px 14px;font-size:13px;line-height:1.65;border-radius:14px}
+.max-msg.user{background:var(--primary);color:white;border-radius:14px 14px 3px 14px;align-self:flex-end}
+.max-msg.max{background:var(--bg);color:var(--dark);border-radius:14px 14px 14px 3px;align-self:flex-start}
+.max-input-row{padding:10px 12px;border-top:1px solid var(--border);display:flex;gap:8px;align-items:flex-end}
+.max-ta{flex:1;resize:none;border:1.5px solid var(--border);border-radius:8px;padding:8px 11px;font-size:13px;color:var(--dark);font-family:'DM Sans',sans-serif;outline:none;line-height:1.5}
+.max-ta:focus{border-color:var(--primary)}
+.mic-btn{width:40px;height:40px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;transition:all 0.2s}
+.mic-btn.idle{background:var(--primary);color:white}
+.mic-btn.listening{background:#E84C4C;color:white;box-shadow:0 0 14px rgba(232,76,76,0.6)}
+.send-btn{width:40px;height:40px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;color:white;transition:all 0.2s}
+.max-listen-bar{background:#FEF2F2;padding:7px 14px;display:flex;align-items:center;gap:8px;border-top:1px solid var(--border)}
+.listen-dot{width:8px;height:8px;border-radius:50%;background:#E84C4C;animation:ping 1s infinite}
+@keyframes ping{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.3;transform:scale(1.4)}}
+
+/* CALENDAR */
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.cal-day-header{text-align:center;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;padding:4px 0}
+.cal-cell{min-height:80px;padding:6px 8px;border-radius:8px;cursor:pointer;border:1.5px solid var(--border);background:white;transition:all 0.15s;position:relative}
+.cal-cell:hover{border-color:var(--primary)}
+.cal-cell.today{border-color:rgba(0,87,184,0.4);background:rgba(0,87,184,0.03)}
+.cal-cell.selected{border-color:var(--primary);background:var(--lb)}
+.cal-cell.empty{border:none;background:none;cursor:default}
+.cal-day-num{font-size:13px;font-weight:500;margin-bottom:4px}
+.cal-day-num.today-num{background:var(--primary);color:white;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px}
+.cal-evt{font-size:10px;font-weight:500;color:white;border-radius:3px;padding:1px 5px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cal-more{font-size:9px;color:var(--muted);font-weight:600}
+.cal-month-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.cal-month-title{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--dark)}
+.selected-day-panel{padding:14px 16px;background:var(--bg);border-radius:8px;margin-bottom:10px;border-left:4px solid var(--primary)}
+.evt-card{display:flex;align-items:center;gap:12px;padding:12px 14px;background:white;border-radius:8px;margin-bottom:8px;border-left:4px solid var(--accent)}
+.evt-card.personal{border-left-color:var(--green)}
+
+input[type=range]{width:100%;accent-color:var(--primary);margin-top:8px}
+input[type=date],input[type=time]{width:100%}
+
+@media(max-width:900px){.main-grid,.stats-grid,.pilot-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="logo">
+    <div class="logo-icon">P</div>
+    <div>
+      <div class="logo-text">PulsAIO</div>
+      <div class="logo-sub">Command Center</div>
+    </div>
+  </div>
+  <nav class="nav">
+    <button class="nav-btn active" onclick="showTab('today')">Today</button>
+    <button class="nav-btn" onclick="showTab('pilots')">Pilots</button>
+    <button class="nav-btn" onclick="showTab('goals')">Goals</button>
+    <button class="nav-btn" onclick="showTab('calendar')">Calendar</button>
+    <button class="nav-btn" onclick="showTab('max')">🤖 Max</button>
+    <button class="nav-btn" onclick="showTab('path')">AI Path</button>
+  </nav>
+  <div class="header-date" id="headerDate"></div>
+</div>
+
+<!-- BANNER -->
+<div class="banner">
+  <div style="display:flex;align-items:center;gap:8px">
+    <div class="banner-dot" id="deadlineDot"></div>
+    <span class="banner-label">Pilot Deadline</span>
+    <span class="banner-val">May 14, 2026</span>
+    <span class="pill" id="daysLeftPill"></span>
+  </div>
+  <div class="banner-sep"></div>
+  <div style="display:flex;align-items:center;gap:8px">
+    <span class="banner-label">Revenue Target</span>
+    <span class="banner-val" style="color:var(--primary)">$25,000 / mo</span>
+  </div>
+  <div class="banner-sep"></div>
+  <div style="display:flex;align-items:center;gap:8px">
+    <span class="banner-label">Post-Pilot</span>
+    <span style="color:var(--mid);font-size:12px">10+ stores · Wholesale deal · Profitable & scaling</span>
+  </div>
+</div>
+
+<!-- ══ TODAY TAB ══ -->
+<div id="tab-today" class="page">
+  <div class="stats-grid">
+    <div class="stat-chip"><div class="stat-val" id="statTasks" style="color:var(--primary)">0/0</div><div class="stat-lbl">Tasks Done</div></div>
+    <div class="stat-chip"><div class="stat-val" id="statPilots" style="color:var(--gold)">0/4</div><div class="stat-lbl">Pilots Live</div></div>
+    <div class="stat-chip"><div class="stat-val" id="statProgress" style="color:var(--green)">0%</div><div class="stat-lbl">Avg Progress</div></div>
+    <div class="stat-chip"><div class="stat-val" id="statHigh" style="color:var(--red)">0</div><div class="stat-lbl">High Priority Open</div></div>
+  </div>
+  <div class="main-grid">
+    <div>
+      <!-- Tasks -->
+      <div class="card">
+        <div class="card-title"><div class="card-accent"></div>Today's Priority List</div>
+        <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+          <input class="inp" id="taskInput" placeholder="Add a task…" style="flex:1;min-width:160px" onkeydown="if(event.key==='Enter')addTask()">
+          <select class="sel" id="taskCat">
+            <option>general</option><option>revenue</option><option>acquisition</option><option>product</option><option>team</option><option>pilot</option>
+          </select>
+          <select class="sel" id="taskPrio">
+            <option>high</option><option selected>med</option><option>low</option>
+          </select>
+          <button class="btn-add" onclick="addTask()">+</button>
+        </div>
+        <div id="taskList"></div>
+      </div>
+      <!-- Journal -->
+      <div class="card">
+        <div class="card-title"><div class="card-accent"></div>Daily Journal Entry</div>
+        <textarea class="ta" id="journalInput" placeholder="What's driving your decisions today? Capture it here…"></textarea>
+        <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap">
+          <button class="btn-primary" onclick="saveEntry()">Save Entry</button>
+          <button class="btn-outline" onclick="aiReflect()">✦ AI Reflect</button>
+        </div>
+        <div id="reflectionBox" style="display:none" class="ai-box">
+          <div class="ai-header"><div class="ai-dot"></div>Claude's Reflection</div>
+          <div class="ai-text" id="reflectionText"></div>
+        </div>
+      </div>
+    </div>
+    <!-- Sidebar -->
+    <div>
+      <div class="card">
+        <div class="card-title"><div class="card-accent"></div>Pilot Stores</div>
+        <div id="pilotSnapshot"></div>
+        <button class="btn-outline" style="width:100%;margin-top:6px" onclick="showTab('pilots')">Manage Pilots →</button>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="card-accent"></div>AI Daily Path</div>
+        <p style="font-size:13px;color:var(--soft);line-height:1.6;margin-bottom:14px">Generate today's prioritized action plan based on your tasks, pilots, and goals.</p>
+        <button class="btn-primary" style="width:100%" onclick="genPath()">✦ Generate Today's Path</button>
+        <div id="pathBoxToday" style="display:none" class="ai-box">
+          <div class="ai-header"><div class="ai-dot"></div>Your Path for Today</div>
+          <div class="ai-text" id="pathTextToday"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PILOTS TAB ══ -->
+<div id="tab-pilots" class="page hidden">
+  <div class="card">
+    <div class="card-title"><div class="card-accent"></div>PulsAIO Pilot Store Tracker</div>
+    <p style="font-size:13px;color:var(--soft);margin-bottom:20px;line-height:1.6">Goal: Wholesale AIO <strong>actively running on all 4 stores</strong> by May 14, 2026 · $25K/month target</p>
+    <div class="pilot-grid" id="pilotCards"></div>
+  </div>
+</div>
+
+<!-- ══ GOALS TAB ══ -->
+<div id="tab-goals" class="page hidden">
+  <div class="card">
+    <div class="card-title"><div class="card-accent"></div>Add New Goal</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <input class="inp" id="goalInput" placeholder="New goal…" style="flex:2;min-width:200px" onkeydown="if(event.key==='Enter')addGoal()">
+      <select class="sel" id="goalCat"><option>product</option><option>revenue</option><option>acquisition</option><option>team</option><option>general</option></select>
+      <select class="sel" id="goalTf"><option>daily</option><option>weekly</option><option>monthly</option></select>
+      <button class="btn-primary" onclick="addGoal()">Add Goal</button>
+    </div>
+  </div>
+  <div id="goalsList"></div>
+</div>
+
+<!-- ══ CALENDAR TAB ══ -->
+<div id="tab-calendar" class="page hidden">
+  <div class="card">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+      <div class="card-title" style="margin-bottom:0"><div class="card-accent"></div>My Command Center Calendar</div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted)">
+          <div style="width:10px;height:10px;border-radius:2px;background:var(--accent)"></div>UTBSC
+          <div style="width:10px;height:10px;border-radius:2px;background:var(--green);margin-left:6px"></div>Personal
+        </div>
+        <button class="btn-primary" onclick="openAddEvent()">+ Add Event</button>
+      </div>
+    </div>
+    <div class="cal-month-nav">
+      <button class="btn-outline" onclick="changeMonth(-1)" style="padding:6px 14px;font-size:18px;line-height:1">‹</button>
+      <div class="cal-month-title" id="calMonthTitle"></div>
+      <button class="btn-outline" onclick="changeMonth(1)" style="padding:6px 14px;font-size:18px;line-height:1">›</button>
+    </div>
+    <div class="cal-grid" id="calDayHeaders"></div>
+    <div class="cal-grid" id="calGrid" style="margin-top:6px"></div>
+  </div>
+  <div id="selectedDayPanel" style="display:none" class="card">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <div class="card-title" style="margin-bottom:0"><div class="card-accent"></div><span id="selectedDayTitle"></span></div>
+      <button class="btn-outline" style="font-size:12px;padding:6px 12px" onclick="openAddEvent()">+ Add to this day</button>
+    </div>
+    <div id="selectedDayEvents"></div>
+  </div>
+</div>
+
+<!-- ══ MAX TAB ══ -->
+<div id="tab-max" class="page hidden">
+  <div class="max-panel">
+    <div class="max-header">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="max-avatar">🤖</div>
+        <div>
+          <div class="max-name">Max</div>
+          <div class="max-sub">PulsAIO Assistant · <span id="maxDeadline"></span>d to deadline</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px">
+        <button id="muteBtn" onclick="stopSpeaking()" style="display:none;background:none;border:1px solid rgba(255,255,255,0.3);color:white;font-size:11px;padding:4px 9px;border-radius:4px;cursor:pointer">Mute</button>
+        <button onclick="clearChat()" style="background:none;border:1px solid rgba(255,255,255,0.25);color:rgba(255,255,255,0.65);font-size:11px;padding:4px 9px;border-radius:4px;cursor:pointer">Clear</button>
+      </div>
+    </div>
+    <div class="max-messages" id="maxMessages">
+      <div id="maxWelcome" style="text-align:center;padding:24px 8px">
+        <div style="font-size:40px;margin-bottom:10px">👋</div>
+        <div style="font-size:15px;font-weight:700;color:var(--dark);margin-bottom:6px">Hey Bill, I'm Max.</div>
+        <div style="font-size:13px;color:var(--muted);line-height:1.7;max-width:380px;margin:0 auto">Tap 🎙️ to speak or type below. Ask me about tasks, pilots, goals, or anything PulsAIO.</div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:16px" id="maxSuggestions"></div>
+      </div>
+    </div>
+    <div class="max-input-row">
+      <textarea class="max-ta" id="maxInput" rows="2" placeholder="Ask Max anything… or tap 🎙️" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendToMax()}"></textarea>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <button class="mic-btn idle" id="micBtn" onclick="toggleMic()">🎙️</button>
+        <button class="send-btn" id="sendBtn" onclick="sendToMax()" style="background:var(--accent)">➤</button>
+      </div>
+    </div>
+    <div id="listeningBar" style="display:none" class="max-listen-bar">
+      <div class="listen-dot"></div>
+      <span style="font-size:12px;color:#E84C4C;font-weight:600">Listening… speak now</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══ AI PATH TAB ══ -->
+<div id="tab-path" class="page hidden">
+  <div class="card">
+    <div class="card-title"><div class="card-accent"></div>AI-Powered Path to Success</div>
+    <p style="font-size:13px;color:var(--soft);line-height:1.7;margin-bottom:16px">Claude analyzes your open tasks, pilot store progress, and goals to generate a focused daily plan — keeping you <strong>on the path to $25K/month</strong> by May 14.</p>
+    <button class="btn-primary" onclick="genPath()">✦ Generate Today's Action Path</button>
+  </div>
+  <div id="pathBoxFull" style="display:none" class="card" style="background:var(--lb)">
+    <div class="ai-header"><div class="ai-dot"></div>Your Path — <span id="pathDate"></span></div>
+    <div class="ai-text" id="pathTextFull"></div>
+  </div>
+  <div id="entriesPanel" class="card" style="display:none">
+    <div class="card-title"><div class="card-accent"></div>Recent Journal Entries</div>
+    <div id="entriesList"></div>
+  </div>
+</div>
+
+<!-- Event Modal -->
+<div id="eventModal" class="modal-overlay" style="display:none" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <h3 id="modalTitle">Add Event</h3>
+    <div class="form-row">
+      <label class="form-label">Event Title *</label>
+      <input class="inp" id="evtTitle" placeholder="Event title…">
+    </div>
+    <div class="form-2col">
+      <div>
+        <label class="form-label">Date *</label>
+        <input class="inp" type="date" id="evtDate">
+      </div>
+      <div>
+        <label class="form-label">Time</label>
+        <input class="inp" type="time" id="evtTime" id="evtTime">
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+      <input type="checkbox" id="evtAllDay" style="width:15px;height:15px;accent-color:var(--primary)" onchange="document.getElementById('evtTime').disabled=this.checked">
+      <label for="evtAllDay" style="font-size:13px;color:var(--mid);cursor:pointer">All day event</label>
+    </div>
+    <div class="form-row">
+      <label class="form-label">Category</label>
+      <select class="sel inp" id="evtCat" style="width:100%">
+        <option>general</option><option>revenue</option><option>acquisition</option><option>product</option><option>team</option><option>pilot</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <label class="form-label">Location</label>
+      <input class="inp" id="evtLocation" placeholder="Location (optional)…">
+    </div>
+    <div class="form-row">
+      <label class="form-label">Notes</label>
+      <textarea class="ta" id="evtNotes" rows="2" style="min-height:60px" placeholder="Notes (optional)…"></textarea>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
+      <button class="btn-outline" onclick="closeModal()">Cancel</button>
+      <button class="btn-primary" onclick="saveEvent()" id="modalSaveBtn">Add Event</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── CONFIG ─────────────────────────────────────────────────────────────────
+const GCAL_KEY    = 'AIzaSyAjwhrGc-7C0O2HY2fy5p-9LvvH1BOCyeI';
+const GCAL_CAL    = 'aakus6fs5ogpjk6e1c8emec078kkuhlf@import.calendar.google.com';
+const ELEVEN_KEY  = 'sk_6f8e5205a272394658a45c65b3b07cf4e60bc0207088c271';
+const DANIEL_ID   = 'onwK4e9ZLuTAKqWW03F9';
+const CLAUDE_KEY  = 'sk-ant-api03-mKU2dk6fZbqdnaENL91484IHFILYFFlxYTIdMAuY1fqBCTmlETFyG31PIdPLPq4xWxAqiWQrEv-sOG_iJ8clQ-cD9gTAAA';
+const DEADLINE    = new Date('2026-05-14');
+const TODAY       = new Date();
+const TODAY_STR   = TODAY.toISOString().split('T')[0];
+const DAYS_LEFT   = Math.ceil((DEADLINE - TODAY) / 86400000);
+
+// ── STATE ──────────────────────────────────────────────────────────────────
+let tasks   = JSON.parse(localStorage.getItem('pac:tasks:'+ TODAY_STR) || 'null') || [
+  {id:1,text:'Check in on rental property — cancelled weekend trip',category:'general',priority:'med',done:false},
+  {id:2,text:'Follow up on Journal/Life Organizer integration (Netlify)',category:'product',priority:'med',done:false},
+  {id:3,text:'Talk to Claude: Modbus controllers → M1 72 integration',category:'product',priority:'high',done:false},
+  {id:4,text:'Follow up with Nate Essin — get shop status update',category:'team',priority:'high',done:false},
+  {id:5,text:'Talk to Ron Snider about Nate\'s hours going forward',category:'team',priority:'high',done:false},
+  {id:6,text:'PulsAIO Hardware List — finalize AI board spec',category:'product',priority:'high',done:false},
+  {id:7,text:'✈️ WED Apr 1 @ 9PM — Pack & prep for TPA→SEA flight. Delta F7HIIA Seat 23F.',category:'general',priority:'high',done:false},
+  {id:8,text:'✈️ THU Apr 2 @ 3:30AM — DEPART Punta Gorda NOW. Arrive TPA by 5:30AM for 7:30AM Delta.',category:'general',priority:'high',done:false},
+  {id:9,text:'✈️ THU Apr 2 @ 3:45AM — LAST CALL: Leave for Tampa Airport NOW. Delta TPA→SEA 7:30AM.',category:'general',priority:'high',done:false},
+];
+let pilots  = JSON.parse(localStorage.getItem('pac:pilots') || 'null') || [
+  {id:'dg',name:'David Glaser',store:'David Glaser Store',status:'planning',progress:0,notes:''},
+  {id:'lg',name:'Laurie Glaser',store:'Laurie Glaser Store',status:'planning',progress:0,notes:''},
+  {id:'omh',name:'One Medical Houston',store:'Houston Location',status:'planning',progress:0,notes:''},
+  {id:'km',name:'Kevin Moore',store:'Kevin Moore Store',status:'planning',progress:0,notes:''},
+];
+let goals   = JSON.parse(localStorage.getItem('pac:goals') || 'null') || [
+  {id:1,title:'All 4 pilot stores LIVE by May 14, 2026',category:'product',timeframe:'monthly',progress:0},
+  {id:2,title:'Hit $25,000/month recurring revenue',category:'revenue',timeframe:'monthly',progress:0},
+  {id:3,title:'Expand to 10+ wholesale AIO stores post-pilot',category:'acquisition',timeframe:'monthly',progress:0},
+  {id:4,title:'Follow up with all 4 pilot contacts this week',category:'acquisition',timeframe:'weekly',progress:0},
+  {id:5,title:'Confirm deployment checklist for next pilot',category:'product',timeframe:'weekly',progress:0},
+  {id:6,title:'Review pilot store onboarding checklist',category:'product',timeframe:'daily',progress:0},
+  {id:7,title:'Discuss Nate\'s hours with Ron Snider',category:'team',timeframe:'daily',progress:0},
+];
+let entries = JSON.parse(localStorage.getItem('pac:entries') || '[]');
+let myEvents = JSON.parse(localStorage.getItem('cal:myevents') || '[]');
+let utbscEvents = [
+  {id:'u1',date:'2026-03-30',title:'UTJC2069 NSN 41216 — Unity BAS',location:'2040 Aldine Mail Route Rd, Houston TX 77039',time:'',allDay:true,source:'utbsc'},
+  {id:'u2',date:'2026-03-30',title:'UTJC2068 NSN 41216 — TAB / Startup',location:'2040 Aldine Mail Route Rd, Houston TX 77039',time:'',allDay:true,source:'utbsc'},
+  {id:'u3',date:'2026-04-01',title:'UTJC2631 MCD 042-3182 — TAB & StartUp Zone(A) 2nd Visit',location:'2727 School Street, Needville TX 77461',time:'',allDay:true,source:'utbsc'},
+  {id:'u4',date:'2026-04-02',title:'✈️ Flight: TPA → SEA',location:'Tampa International Airport',time:'7:30 AM',allDay:false,source:'utbsc'},
+  {id:'u5',date:'2026-04-08',title:'Ready to Install Erqos Test',location:'',time:'',allDay:true,source:'utbsc'},
+  {id:'u6',date:'2026-04-16',title:'Bill Snider Phone Bill $99',location:'',time:'',allDay:true,source:'utbsc'},
+  {id:'u7',date:'2026-04-26',title:'Keith Internet Payment',location:'',time:'',allDay:true,source:'utbsc'},
+  {id:'u8',date:'2026-04-30',title:"Keith's Medical Debt Paid off",location:'',time:'',allDay:true,source:'utbsc'},
+];
+
+let calYear = TODAY.getFullYear();
+let calMonth = TODAY.getMonth();
+let selectedDay = null;
+let editingEventId = null;
+let maxHistory = [];
+let isListening = false;
+let isSpeaking = false;
+let recognition = null;
+let currentAudio = null;
+let currentTab = 'today';
+let pathCache = null;
+
+// ── SAVE ───────────────────────────────────────────────────────────────────
+const save = () => {
+  localStorage.setItem('pac:tasks:'+TODAY_STR, JSON.stringify(tasks));
+  localStorage.setItem('pac:pilots', JSON.stringify(pilots));
+  localStorage.setItem('pac:goals', JSON.stringify(goals));
+  localStorage.setItem('pac:entries', JSON.stringify(entries));
+  localStorage.setItem('cal:myevents', JSON.stringify(myEvents));
+};
+
+// ── INIT ───────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('headerDate').textContent = TODAY.toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  document.getElementById('maxDeadline').textContent = DAYS_LEFT;
+  document.getElementById('pathDate').textContent = TODAY.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+
+  const dl = document.getElementById('deadlineDot');
+  const pill = document.getElementById('daysLeftPill');
+  const color = DAYS_LEFT<=14?'var(--red)':DAYS_LEFT<=30?'var(--gold)':'var(--green)';
+  dl.style.background = color;
+  pill.textContent = DAYS_LEFT+'d left';
+  pill.style.cssText = `background:${color}22;color:${color};border:1px solid ${color}44`;
+
+  ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(d=>{
+    const el = document.createElement('div');
+    el.className = 'cal-day-header';
+    el.textContent = d;
+    document.getElementById('calDayHeaders').appendChild(el);
+  });
+
+  // Max suggestions
+  const suggs = ["What should I focus on today?","How are my pilots tracking?","What's my path to $25K/month?","Summarize my open tasks"];
+  const sc = document.getElementById('maxSuggestions');
+  suggs.forEach(q=>{
+    const b = document.createElement('button');
+    b.textContent = q;
+    b.style.cssText = 'background:var(--lb);border:1px solid rgba(0,87,184,0.2);border-radius:20px;padding:6px 14px;font-size:12px;color:var(--primary);cursor:pointer;font-weight:500;font-family:DM Sans,sans-serif';
+    b.onclick = ()=>{ document.getElementById('maxInput').value=q; sendToMax(); };
+    sc.appendChild(b);
+  });
+
+  fetchCalendar();
+  renderAll();
+});
+
+// ── RENDER ALL ─────────────────────────────────────────────────────────────
+const renderAll = () => {
+  renderStats();
+  renderTasks();
+  renderPilotSnapshot();
+  renderPilotCards();
+  renderGoals();
+  renderCalendar();
+  renderEntries();
+};
+
+// ── STATS ──────────────────────────────────────────────────────────────────
+const renderStats = () => {
+  const done = tasks.filter(t=>t.done).length;
+  const live = pilots.filter(p=>p.status==='live').length;
+  const avg  = Math.round(pilots.reduce((a,p)=>a+p.progress,0)/pilots.length);
+  const hi   = tasks.filter(t=>!t.done&&t.priority==='high').length;
+  document.getElementById('statTasks').textContent = done+'/'+tasks.length;
+  document.getElementById('statPilots').textContent = live+'/4';
+  document.getElementById('statProgress').textContent = avg+'%';
+  document.getElementById('statHigh').textContent = hi;
+};
+
+// ── COLOR HELPERS ──────────────────────────────────────────────────────────
+const catColor  = {general:'#9CA3AF',revenue:'#00C48C',acquisition:'#00A3E0',product:'#0057B8',team:'#F5A623',pilot:'#8B5CF6'};
+const prioColor = {high:'#E84C4C',med:'#F5A623',low:'#9CA3AF'};
+const statColor = {planning:'#9CA3AF',active:'#F5A623',live:'#00C48C',blocked:'#E84C4C'};
+const barColor  = p => p>=75?'#00C48C':p>=40?'#F5A623':p>0?'#00A3E0':'#e5e7eb';
+const pillStyle = (text,color) => `<span style="display:inline-flex;align-items:center;font-size:10px;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;padding:2px 7px;border-radius:20px;background:${color}22;color:${color};border:1px solid ${color}33;white-space:nowrap">${text}</span>`;
+
+// ── TASKS ──────────────────────────────────────────────────────────────────
+const renderTasks = () => {
+  const sorted = [...tasks].sort((a,b)=>({high:0,med:1,low:2}[a.priority]-{high:0,med:1,low:2}[b.priority]));
+  document.getElementById('taskList').innerHTML = sorted.length===0
+    ? '<div style="text-align:center;padding:16px 0;color:var(--muted);font-size:13px;font-style:italic">No tasks yet.</div>'
+    : sorted.map(t=>`
+      <div class="task-row">
+        <div class="task-check ${t.done?'done':''}" onclick="toggleTask(${t.id})">${t.done?'✓':''}</div>
+        <span class="task-label ${t.done?'done':''}">${t.text}</span>
+        ${pillStyle(t.category,catColor[t.category]||'#9CA3AF')}
+        ${pillStyle(t.priority,prioColor[t.priority])}
+        <button onclick="deleteTask(${t.id})" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:14px;padding:0 4px">×</button>
+      </div>`).join('');
+};
+
+const addTask = () => {
+  const v = document.getElementById('taskInput').value.trim();
+  if(!v) return;
+  tasks.push({id:Date.now(),text:v,category:document.getElementById('taskCat').value,priority:document.getElementById('taskPrio').value,done:false});
+  document.getElementById('taskInput').value='';
+  save(); renderTasks(); renderStats();
+};
+
+const toggleTask = id => {
+  tasks = tasks.map(t=>t.id===id?{...t,done:!t.done}:t);
+  save(); renderTasks(); renderStats();
+};
+
+const deleteTask = id => {
+  tasks = tasks.filter(t=>t.id!==id);
+  save(); renderTasks(); renderStats();
+};
+
+// ── JOURNAL ────────────────────────────────────────────────────────────────
+const saveEntry = () => {
+  const v = document.getElementById('journalInput').value.trim();
+  if(!v) return;
+  entries.unshift({id:Date.now(),date:TODAY_STR,text:v});
+  document.getElementById('journalInput').value='';
+  save(); renderEntries();
+};
+
+const aiReflect = async () => {
+  const v = document.getElementById('journalInput').value.trim();
+  if(!v) return;
+  const box = document.getElementById('reflectionBox');
+  const txt = document.getElementById('reflectionText');
+  box.style.display='block';
+  txt.innerHTML='<div class="dots"><span></span><span></span><span></span></div>';
+  const r = await callClaude(`You are a strategic advisor for Bill, an entrepreneur running PulsAIO, Unity Controls, and UTBSC TAB. His journal: "${v}". Give 2-3 sentences: acknowledge entry, identify key themes, one sharp strategic observation. Be direct and entrepreneurial.`);
+  txt.textContent = r;
+};
+
+const renderEntries = () => {
+  const p = document.getElementById('entriesPanel');
+  const l = document.getElementById('entriesList');
+  if(entries.length===0){p.style.display='none';return;}
+  p.style.display='block';
+  l.innerHTML = entries.slice(0,5).map(e=>`
+    <div style="border-bottom:1px solid var(--bg);padding:11px 0">
+      <div style="font-size:10px;font-weight:600;color:var(--muted);margin-bottom:4px;letter-spacing:0.06em;text-transform:uppercase">${e.date}</div>
+      <div style="font-size:13px;color:var(--soft);line-height:1.6">${e.text}</div>
+    </div>`).join('');
+};
+
+// ── PILOTS ─────────────────────────────────────────────────────────────────
+const renderPilotSnapshot = () => {
+  document.getElementById('pilotSnapshot').innerHTML = pilots.map(p=>`
+    <div style="margin-bottom:14px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
+        <div>
+          <div style="font-size:13px;font-weight:600">${p.name}</div>
+          <div style="font-size:11px;color:var(--muted)">${p.store}</div>
+        </div>
+        ${pillStyle(p.status,statColor[p.status])}
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:4px"><span>Deployment</span><span style="font-weight:600;color:var(--mid)">${p.progress}%</span></div>
+      <div class="pbar"><div class="pbar-fill" style="width:${p.progress}%;background:${barColor(p.progress)}"></div></div>
+    </div>`).join('');
+};
+
+const renderPilotCards = () => {
+  document.getElementById('pilotCards').innerHTML = pilots.map(p=>`
+    <div style="background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:18px">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px">
+        <div>
+          <div style="font-size:15px;font-weight:700;font-family:Syne,sans-serif">${p.name}</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px">${p.store}</div>
+        </div>
+        ${pillStyle(p.status,statColor[p.status])}
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:6px"><span>Deployment Progress</span><span style="font-weight:700;color:var(--dark)">${p.progress}%</span></div>
+      <div class="pbar" style="height:8px;margin-bottom:10px"><div class="pbar-fill" style="width:${p.progress}%;background:${barColor(p.progress)}"></div></div>
+      <select onchange="updatePilot('${p.id}','status',this.value)" style="width:100%;margin-bottom:10px;padding:7px 10px;border:1.5px solid var(--border);border-radius:6px;font-size:12px;background:white;font-family:DM Sans,sans-serif;outline:none;cursor:pointer">
+        ${['planning','active','live','blocked'].map(s=>`<option${p.status===s?' selected':''}>${s}</option>`).join('')}
+      </select>
+      <div style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">Progress: ${p.progress}%</div>
+      <input type="range" min="0" max="100" value="${p.progress}" oninput="updatePilot('${p.id}','progress',+this.value);this.previousElementSibling.textContent='Progress: '+this.value+'%'" style="margin-bottom:10px">
+      <textarea rows="2" placeholder="Notes…" style="width:100%;border:1.5px solid var(--border);border-radius:6px;padding:7px 10px;font-size:12px;font-family:DM Sans,sans-serif;outline:none;resize:none;min-height:52px" onchange="updatePilot('${p.id}','notes',this.value)">${p.notes}</textarea>
+    </div>`).join('');
+};
+
+const updatePilot = (id,field,val) => {
+  pilots = pilots.map(p=>p.id===id?{...p,[field]:val}:p);
+  save(); renderPilotSnapshot(); renderStats();
+};
+
+// ── GOALS ──────────────────────────────────────────────────────────────────
+const renderGoals = () => {
+  const tfs = ['daily','weekly','monthly'];
+  const tfColor = {daily:'#0057B8',weekly:'#F5A623',monthly:'#00C48C'};
+  document.getElementById('goalsList').innerHTML = tfs.map(tf=>{
+    const g = goals.filter(g=>g.timeframe===tf);
+    return `<div class="card">
+      <div class="card-title"><div class="card-accent"></div>${pillStyle(tf,tfColor[tf])} Goals</div>
+      ${g.length===0?'<div style="text-align:center;padding:14px 0;color:var(--muted);font-size:13px;font-style:italic">No '+tf+' goals yet.</div>':
+      g.map(g=>`<div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:13px 15px;margin-bottom:10px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+          ${pillStyle(g.category,catColor[g.category]||'#9CA3AF')}
+          <span style="flex:1;font-size:13px;font-weight:500">${g.title}</span>
+          <span style="font-family:IBM Plex Mono,monospace;font-size:12px;color:var(--soft)">${g.progress}%</span>
+          <button onclick="deleteGoal(${g.id})" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:14px">×</button>
+        </div>
+        <div class="pbar" style="margin-bottom:6px"><div class="pbar-fill" style="width:${g.progress}%;background:${barColor(g.progress)}"></div></div>
+        <input type="range" min="0" max="100" value="${g.progress}" oninput="updateGoal(${g.id},+this.value)">
+      </div>`).join('')}
+    </div>`;
+  }).join('');
+};
+
+const addGoal = () => {
+  const v = document.getElementById('goalInput').value.trim();
+  if(!v) return;
+  goals.push({id:Date.now(),title:v,category:document.getElementById('goalCat').value,timeframe:document.getElementById('goalTf').value,progress:0});
+  document.getElementById('goalInput').value='';
+  save(); renderGoals();
+};
+
+const updateGoal = (id,v) => {
+  goals = goals.map(g=>g.id===id?{...g,progress:v}:g);
+  save();
+};
+
+const deleteGoal = id => {
+  goals = goals.filter(g=>g.id!==id);
+  save(); renderGoals();
+};
+
+// ── CALENDAR ───────────────────────────────────────────────────────────────
+const allEvents = () => [...utbscEvents, ...myEvents];
+
+const eventsForDate = d => allEvents().filter(e=>e.date===d);
+
+const fetchCalendar = async () => {
+  try {
+    const now = new Date();
+    const ahead = new Date(); ahead.setDate(now.getDate()+45);
+    const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(GCAL_CAL)}/events?key=${GCAL_KEY}&timeMin=${now.toISOString()}&timeMax=${ahead.toISOString()}&singleEvents=true&orderBy=startTime&maxResults=50`;
+    const res = await fetch(url);
+    if(!res.ok) return;
+    const data = await res.json();
+    utbscEvents = (data.items||[]).map(e=>({
+      id:'u'+e.id,
+      date:(e.start.dateTime||e.start.date).split('T')[0],
+      title:e.summary||'(No title)',
+      location:e.location||'',
+      time:e.start.dateTime?new Date(e.start.dateTime).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}):'',
+      allDay:!e.start.dateTime,
+      source:'utbsc'
+    }));
+    renderCalendar();
+  } catch(e){ console.log('Calendar fetch error:',e); }
+};
+
+const renderCalendar = () => {
+  const grid = document.getElementById('calGrid');
+  const title = document.getElementById('calMonthTitle');
+  grid.innerHTML = '';
+  title.textContent = new Date(calYear,calMonth,1).toLocaleDateString('en-US',{month:'long',year:'numeric'});
+  const firstDay = new Date(calYear,calMonth,1).getDay();
+  const daysInMonth = new Date(calYear,calMonth+1,0).getDate();
+
+  for(let i=0;i<firstDay;i++){
+    const el=document.createElement('div');
+    el.className='cal-cell empty';
+    grid.appendChild(el);
+  }
+
+  for(let d=1;d<=daysInMonth;d++){
+    const ds = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const evts = eventsForDate(ds);
+    const isToday = ds===TODAY_STR;
+    const isSel = selectedDay===d && calYear===TODAY.getFullYear() && calMonth===TODAY.getMonth();
+    const cell = document.createElement('div');
+    cell.className = 'cal-cell'+(isToday?' today':'')+(isSel?' selected':'');
+    cell.onclick = ()=>{ selectedDay=d; renderCalendar(); renderSelectedDay(); };
+
+    const numEl = document.createElement('div');
+    numEl.className = 'cal-day-num'+(isToday?' today-num':'');
+    numEl.textContent = d;
+    cell.appendChild(numEl);
+
+    evts.slice(0,3).forEach(e=>{
+      const ev=document.createElement('div');
+      ev.className='cal-evt';
+      ev.style.background=e.source==='utbsc'?'var(--accent)':(catColor[e.category]||'var(--green)');
+      ev.textContent=(e.time&&!e.allDay?e.time+' ':'')+e.title;
+      cell.appendChild(ev);
+    });
+    if(evts.length>3){
+      const m=document.createElement('div');
+      m.className='cal-more';
+      m.textContent=`+${evts.length-3} more`;
+      cell.appendChild(m);
+    }
+    grid.appendChild(cell);
+  }
+
+  if(selectedDay) renderSelectedDay();
+};
+
+const renderSelectedDay = () => {
+  const panel = document.getElementById('selectedDayPanel');
+  const title = document.getElementById('selectedDayTitle');
+  const list  = document.getElementById('selectedDayEvents');
+  const ds = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(selectedDay).padStart(2,'0')}`;
+  const evts = eventsForDate(ds);
+  title.textContent = new Date(calYear,calMonth,selectedDay).toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+  panel.style.display='block';
+
+  if(evts.length===0){
+    list.innerHTML='<div style="text-align:center;padding:16px 0;color:var(--muted);font-size:13px;font-style:italic">No events — click "+ Add to this day" to create one.</div>';
+    return;
+  }
+
+  list.innerHTML = evts.map(e=>`
+    <div class="evt-card ${e.source==='utbsc'?'':'personal'}">
+      <div style="flex:1">
+        <div style="font-size:14px;font-weight:600;color:var(--dark)">${e.title}</div>
+        ${e.time&&!e.allDay?`<div style="font-size:12px;color:var(--primary);font-weight:500;margin-top:2px">🕐 ${e.time}</div>`:''}
+        ${e.allDay?'<div style="font-size:11px;color:var(--muted);margin-top:2px">All day</div>':''}
+        ${e.location?`<div style="font-size:12px;color:var(--soft);margin-top:2px">📍 ${e.location}</div>`:''}
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+        ${pillStyle(e.source==='utbsc'?'UTBSC':'Personal',e.source==='utbsc'?'#00A3E0':'#00C48C')}
+        ${e.source!=='utbsc'?`<div style="display:flex;gap:5px">
+          <button onclick="editEvent('${e.id}')" style="background:none;border:1px solid var(--border);border-radius:4px;padding:3px 8px;font-size:11px;cursor:pointer;color:var(--mid)">Edit</button>
+          <button onclick="deleteEvent('${e.id}')" style="background:none;border:1px solid var(--border);border-radius:4px;padding:3px 8px;font-size:11px;cursor:pointer;color:var(--red)">Delete</button>
+        </div>`:''}
+      </div>
+    </div>`).join('');
+};
+
+const changeMonth = d => {
+  calMonth+=d;
+  if(calMonth<0){calMonth=11;calYear--;}
+  if(calMonth>11){calMonth=0;calYear++;}
+  selectedDay=null;
+  document.getElementById('selectedDayPanel').style.display='none';
+  renderCalendar();
+};
+
+const openAddEvent = () => {
+  editingEventId=null;
+  document.getElementById('modalTitle').textContent='Add Event';
+  document.getElementById('modalSaveBtn').textContent='Add Event';
+  document.getElementById('evtTitle').value='';
+  const ds = selectedDay?`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(selectedDay).padStart(2,'0')}`:TODAY_STR;
+  document.getElementById('evtDate').value=ds;
+  document.getElementById('evtTime').value='';
+  document.getElementById('evtAllDay').checked=false;
+  document.getElementById('evtTime').disabled=false;
+  document.getElementById('evtCat').value='general';
+  document.getElementById('evtLocation').value='';
+  document.getElementById('evtNotes').value='';
+  document.getElementById('eventModal').style.display='flex';
+};
+
+const editEvent = id => {
+  const e = myEvents.find(e=>e.id===id);
+  if(!e) return;
+  editingEventId=id;
+  document.getElementById('modalTitle').textContent='Edit Event';
+  document.getElementById('modalSaveBtn').textContent='Save Changes';
+  document.getElementById('evtTitle').value=e.title;
+  document.getElementById('evtDate').value=e.date;
+  document.getElementById('evtTime').value=e.time||'';
+  document.getElementById('evtAllDay').checked=e.allDay||false;
+  document.getElementById('evtTime').disabled=e.allDay||false;
+  document.getElementById('evtCat').value=e.category||'general';
+  document.getElementById('evtLocation').value=e.location||'';
+  document.getElementById('evtNotes').value=e.notes||'';
+  document.getElementById('eventModal').style.display='flex';
+};
+
+const saveEvent = () => {
+  const title = document.getElementById('evtTitle').value.trim();
+  const date  = document.getElementById('evtDate').value;
+  if(!title||!date) return;
+  const evt = {
+    id: editingEventId||'p'+Date.now(),
+    title,date,
+    time:document.getElementById('evtTime').value,
+    allDay:document.getElementById('evtAllDay').checked,
+    category:document.getElementById('evtCat').value,
+    location:document.getElementById('evtLocation').value,
+    notes:document.getElementById('evtNotes').value,
+    source:'personal'
+  };
+  if(editingEventId) myEvents=myEvents.map(e=>e.id===editingEventId?evt:e);
+  else myEvents.push(evt);
+  save(); closeModal(); renderCalendar();
+};
+
+const deleteEvent = id => {
+  myEvents=myEvents.filter(e=>e.id!==id);
+  save(); renderCalendar();
+};
+
+const closeModal = () => document.getElementById('eventModal').style.display='none';
+
+// ── AI PATH ────────────────────────────────────────────────────────────────
+const genPath = async () => {
+  const openT = tasks.filter(t=>!t.done).map(t=>`[${t.priority.toUpperCase()}] ${t.text}`).join('\n')||'None';
+  const pilotS = pilots.map(p=>`${p.name}: ${p.status} ${p.progress}%`).join(', ');
+  const prompt = `You are a strategic business advisor for Bill, entrepreneur running PulsAIO — wholesale AIO platform.\nTARGETS: 4 pilots live by May 14 (${DAYS_LEFT} days), $25K/month, then 10+ stores & wholesale distribution.\nPilots: David Glaser, Laurie Glaser, One Medical Houston, Kevin Moore.\nToday: ${TODAY.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'})}\nOpen tasks:\n${openT}\nPilot statuses: ${pilotS}\nGive a numbered list of 5-7 specific actions Bill should take TODAY toward $25K/month and the pilot deadline. End with one "North Star" sentence.`;
+
+  ['pathBoxToday','pathBoxFull'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el){el.style.display='block';}
+  });
+  document.getElementById('pathTextToday').innerHTML='<div class="dots"><span></span><span></span><span></span></div>';
+  document.getElementById('pathTextFull').innerHTML='<div class="dots"><span></span><span></span><span></span></div>';
+
+  const r = await callClaude(prompt);
+  pathCache=r;
+  document.getElementById('pathTextToday').textContent=r;
+  document.getElementById('pathTextFull').textContent=r;
+  document.getElementById('pathBoxFull').style.display='block';
+  renderEntries();
+};
+
+// ── CLAUDE API ─────────────────────────────────────────────────────────────
+const callClaude = async (prompt, system='') => {
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':CLAUDE_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-allow-browser':'true'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:system||undefined,messages:[{role:'user',content:prompt}]})
+    });
+    const d=await res.json();
+    return d.content?.map(b=>b.text||'').join('')||'Unable to generate response.';
+  } catch { return 'Error connecting. Please try again.'; }
+};
+
+// ── MAX ASSISTANT ──────────────────────────────────────────────────────────
+const maxContext = () => {
+  const openT = tasks.filter(t=>!t.done).map(t=>t.text).join(', ')||'none';
+  const pilotS = pilots.map(p=>`${p.name}: ${p.status} ${p.progress}%`).join(', ');
+  return `You are Max, Bill Hickner's AI assistant built into his PulsAIO Command Center. Bill is an entrepreneur running PulsAIO (wholesale AIO platform, 4 pilot stores to launch by May 14 2026, target $25K/month revenue), Unity Controls, and UTBSC TAB. Key team: Ron Snider (CEO), Nate Essin (Shop Supervisor). Open tasks: ${openT}. Pilots: ${pilotS}. ${DAYS_LEFT} days to pilot deadline. Be concise, direct, and entrepreneurial. Keep voice responses under 3 sentences.`;
+};
+
+const sendToMax = async () => {
+  const input = document.getElementById('maxInput');
+  const text = input.value.trim();
+  if(!text) return;
+  input.value='';
+  document.getElementById('maxWelcome')&&(document.getElementById('maxWelcome').style.display='none');
+  addMaxMessage('user',text);
+  maxHistory.push({role:'user',content:text});
+  const loadEl = addMaxMessage('max','<div class="dots"><span></span><span></span><span></span></div>');
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:maxContext(),messages:maxHistory})
+    });
+    const d=await res.json();
+    const reply = d.content?.map(b=>b.text||'').join('')||'Sorry, try again.';
+    loadEl.innerHTML=reply;
+    loadEl.className='max-msg max';
+    maxHistory.push({role:'assistant',content:reply});
+    speakDaniel(reply);
+  } catch {
+    loadEl.textContent='Connection error. Try again.';
+  }
+};
+
+const addMaxMessage = (role,content) => {
+  const msgs = document.getElementById('maxMessages');
+  const el = document.createElement('div');
+  el.className = 'max-msg '+role;
+  el.innerHTML = content;
+  msgs.appendChild(el);
+  msgs.scrollTop = msgs.scrollHeight;
+  return el;
+};
+
+const clearChat = () => {
+  maxHistory=[];
+  document.getElementById('maxMessages').innerHTML='';
+  const w=document.createElement('div');
+  w.id='maxWelcome';
+  w.style.cssText='text-align:center;padding:24px 8px';
+  w.innerHTML='<div style="font-size:40px;margin-bottom:10px">👋</div><div style="font-size:15px;font-weight:700;color:var(--dark);margin-bottom:6px">Hey Bill, I\'m Max.</div><div style="font-size:13px;color:var(--muted);line-height:1.7">Ask me anything about PulsAIO.</div>';
+  document.getElementById('maxMessages').appendChild(w);
+};
+
+// ── ELEVENLABS DANIEL VOICE ────────────────────────────────────────────────
+const speakDaniel = async (text) => {
+  if(currentAudio){currentAudio.pause();currentAudio=null;}
+  isSpeaking=true;
+  document.getElementById('muteBtn').style.display='inline-block';
+  try {
+    const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${DANIEL_ID}/stream`,{
+      method:'POST',
+      headers:{'xi-api-key':ELEVEN_KEY,'Content-Type':'application/json'},
+      body:JSON.stringify({text,model_id:'eleven_turbo_v2',voice_settings:{stability:0.5,similarity_boost:0.75,style:0.3,use_speaker_boost:true}})
+    });
+    if(!res.ok) throw new Error('ElevenLabs error '+res.status);
+    const blob = await res.blob();
+    const url  = URL.createObjectURL(blob);
+    const audio = new Audio(url);
+    currentAudio = audio;
+    audio.onended = ()=>{isSpeaking=false;currentAudio=null;URL.revokeObjectURL(url);document.getElementById('muteBtn').style.display='none';};
+    audio.onerror = ()=>{isSpeaking=false;document.getElementById('muteBtn').style.display='none';};
+    audio.play();
+  } catch(e){
+    console.log('ElevenLabs error, falling back:',e);
+    isSpeaking=false;
+    document.getElementById('muteBtn').style.display='none';
+    // Browser fallback
+    const utt=new SpeechSynthesisUtterance(text);
+    utt.rate=1.05;
+    window.speechSynthesis.speak(utt);
+  }
+};
+
+const stopSpeaking = () => {
+  if(currentAudio){currentAudio.pause();currentAudio=null;}
+  window.speechSynthesis.cancel();
+  isSpeaking=false;
+  document.getElementById('muteBtn').style.display='none';
+};
+
+// ── VOICE RECOGNITION ──────────────────────────────────────────────────────
+const toggleMic = () => {
+  if(isListening){stopListening();}else{startListening();}
+};
+
+const startListening = () => {
+  const SR = window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){alert('Voice requires Chrome browser.');return;}
+  recognition = new SR();
+  recognition.continuous=false;recognition.interimResults=true;recognition.lang='en-US';
+  recognition.onstart=()=>{isListening=true;document.getElementById('micBtn').className='mic-btn listening';document.getElementById('micBtn').textContent='⏹';document.getElementById('listeningBar').style.display='flex';};
+  recognition.onresult=e=>{document.getElementById('maxInput').value=Array.from(e.results).map(r=>r[0].transcript).join('');};
+  recognition.onend=()=>{isListening=false;document.getElementById('micBtn').className='mic-btn idle';document.getElementById('micBtn').textContent='🎙️';document.getElementById('listeningBar').style.display='none';const v=document.getElementById('maxInput').value.trim();if(v)sendToMax();};
+  recognition.onerror=()=>{isListening=false;document.getElementById('micBtn').className='mic-btn idle';document.getElementById('micBtn').textContent='🎙️';document.getElementById('listeningBar').style.display='none';};
+  recognition.start();
+};
+
+const stopListening = () => {recognition&&recognition.stop();};
+
+// ── TAB ROUTING ────────────────────────────────────────────────────────────
+const showTab = (tab) => {
+  currentTab=tab;
+  document.querySelectorAll('[id^=tab-]').forEach(el=>el.classList.add('hidden'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.remove('hidden');
+  const btns = document.querySelectorAll('.nav-btn');
+  const tabMap=['today','pilots','goals','calendar','max','path'];
+  const idx=tabMap.indexOf(tab);
+  if(idx>=0)btns[idx].classList.add('active');
+  if(tab==='calendar')renderCalendar();
+};
+</script>
+</body>
+</html>
