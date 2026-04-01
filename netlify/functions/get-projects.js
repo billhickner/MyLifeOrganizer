@@ -1,6 +1,5 @@
-// get-projects.js — returns project list for Gmail extension + syncs from Command Center
-const { getStore } = require('@netlify/blobs');
-
+// get-projects.js — returns projects list
+// Projects are passed directly from the extension's localStorage bridge
 exports.handler = async (event) => {
   const headers = {
     'Access-Control-Allow-Origin': '*',
@@ -8,21 +7,7 @@ exports.handler = async (event) => {
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
     'Content-Type': 'application/json'
   };
-
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers, body: '' };
-
-  try {
-    const store = getStore('project-emails');
-
-    if (event.httpMethod === 'POST') {
-      const { projects } = JSON.parse(event.body);
-      await store.setJSON('all-projects', projects || []);
-      return { statusCode: 200, headers, body: JSON.stringify({ success: true }) };
-    }
-
-    const projects = await store.get('all-projects', { type: 'json' }).catch(() => []);
-    return { statusCode: 200, headers, body: JSON.stringify({ projects: Array.isArray(projects) ? projects : [] }) };
-  } catch (err) {
-    return { statusCode: 500, headers, body: JSON.stringify({ error: err.message, projects: [] }) };
-  }
+  // Projects come from localStorage in the browser — return empty array as fallback
+  return { statusCode: 200, headers, body: JSON.stringify({ projects: [] }) };
 };
