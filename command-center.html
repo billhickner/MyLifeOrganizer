@@ -150,6 +150,38 @@ input[type=range]{width:100%;accent-color:var(--primary);margin-top:8px}
 input[type=date],input[type=time]{width:100%}
 
 @media(max-width:900px){.main-grid,.stats-grid,.pilot-grid{grid-template-columns:1fr}}
+
+/* ===== REMINDERS ===== */
+.reminders-section{background:#fff;border:1px solid #e5e9f0;border-radius:12px;padding:20px;margin-top:20px}
+.reminders-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.reminders-title{font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#64748b;display:flex;align-items:center;gap:6px}
+.reminders-title::before{content:'🔔'}
+.reminders-add{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.reminders-add input{flex:1;min-width:180px;border:1px solid #e2e8f0;border-radius:8px;padding:8px 12px;font-size:13px;color:#1e293b;outline:none;background:#f8fafc}
+.reminders-add input:focus{border-color:#3b82f6;background:#fff}
+.reminders-add select{border:1px solid #e2e8f0;border-radius:8px;padding:8px 10px;font-size:12px;color:#475569;background:#f8fafc;outline:none;cursor:pointer}
+.reminders-add button{background:#3b82f6;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap}
+.reminders-add button:hover{background:#2563eb}
+.reminder-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid #f1f5f9}
+.reminder-item:last-child{border-bottom:none}
+.reminder-check{width:16px;height:16px;border-radius:4px;border:2px solid #cbd5e1;cursor:pointer;flex-shrink:0;margin-top:2px;accent-color:#3b82f6}
+.reminder-body{flex:1;min-width:0}
+.reminder-text{font-size:13px;color:#1e293b;line-height:1.4;margin-bottom:3px}
+.reminder-item.done .reminder-text{text-decoration:line-through;color:#94a3b8}
+.reminder-meta{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.reminder-tag{font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px;letter-spacing:0.05em;text-transform:uppercase}
+.reminder-tag.pulsaio{background:#dbeafe;color:#1d4ed8}
+.reminder-tag.unity{background:#dcfce7;color:#15803d}
+.reminder-tag.utbsc{background:#fef3c7;color:#b45309}
+.reminder-tag.general{background:#f1f5f9;color:#475569}
+.reminder-date{font-size:11px;color:#94a3b8}
+.reminder-date.overdue{color:#ef4444;font-weight:600}
+.reminder-del{background:none;border:none;color:#cbd5e1;cursor:pointer;font-size:14px;padding:0 2px;flex-shrink:0;margin-top:1px}
+.reminder-del:hover{color:#ef4444}
+.reminders-empty{text-align:center;color:#94a3b8;font-size:13px;padding:16px 0}
+.reminder-voice-btn{background:#eff6ff;border:1px solid #bfdbfe;color:#3b82f6;border-radius:8px;padding:7px 12px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px}
+.reminder-voice-btn.active{background:#fee2e2;border-color:#fca5a5;color:#ef4444}
+.reminder-voice-btn:hover{opacity:0.85}
 </style>
 </head>
 <body>
@@ -229,6 +261,27 @@ input[type=date],input[type=time]{width:100%}
         </div>
         <div id="reflectionBox" style="display:none" class="ai-box">
           <div class="ai-header"><div class="ai-dot"></div>Claude's Reflection</div>
+
+      <!-- REMINDERS SECTION -->
+      <div class="reminders-section" id="remindersSection">
+        <div class="reminders-header">
+          <div class="reminders-title">Reminders</div>
+          <button class="reminder-voice-btn" id="reminderVoiceBtn" onclick="toggleReminderMic()">🎙️ Tell Max</button>
+        </div>
+        <div class="reminders-add">
+          <input type="text" id="reminderInput" placeholder="Add a reminder… or click Tell Max" onkeydown="if(event.key==='Enter')addReminder()">
+          <select id="reminderProject">
+            <option value="general">General</option>
+            <option value="pulsaio">PulsAIO</option>
+            <option value="unity">Unity</option>
+            <option value="utbsc">UTBSC</option>
+          </select>
+          <input type="datetime-local" id="reminderDate" style="border:1px solid #e2e8f0;border-radius:8px;padding:8px 10px;font-size:12px;color:#475569;background:#f8fafc;outline:none">
+          <button onclick="addReminder()">+ Add</button>
+        </div>
+        <div id="remindersList"></div>
+      </div>
+
           <div class="ai-text" id="reflectionText"></div>
         </div>
       </div>
@@ -1019,6 +1072,149 @@ const showTab = (tab) => {
   if(idx>=0)btns[idx].classList.add('active');
   if(tab==='calendar')renderCalendar();
 };
+
+// ===== REMINDER SYSTEM =====
+let reminders = JSON.parse(localStorage.getItem('pulsaio_reminders') || '[]');
+let reminderRecog = null, reminderListening = false;
+
+function saveReminders(){ localStorage.setItem('pulsaio_reminders', JSON.stringify(reminders)); }
+
+function addReminder(text, project, dateStr) {
+  const inp = document.getElementById('reminderInput');
+  const proj = document.getElementById('reminderProject');
+  const dt = document.getElementById('reminderDate');
+  const t = text || inp.value.trim();
+  if (!t) return;
+  const reminder = {
+    id: Date.now(),
+    text: t,
+    project: project || proj.value || 'general',
+    date: dateStr || dt.value || null,
+    done: false,
+    created: new Date().toISOString()
+  };
+  reminders.unshift(reminder);
+  saveReminders();
+  inp.value = '';
+  dt.value = '';
+  renderReminders();
+}
+
+function toggleReminder(id) {
+  const r = reminders.find(x => x.id === id);
+  if (r) { r.done = !r.done; saveReminders(); renderReminders(); }
+}
+
+function deleteReminder(id) {
+  reminders = reminders.filter(x => x.id !== id);
+  saveReminders();
+  renderReminders();
+}
+
+function renderReminders() {
+  const list = document.getElementById('remindersList');
+  if (!list) return;
+  const active = reminders.filter(r => !r.done);
+  const done = reminders.filter(r => r.done);
+  const all = [...active, ...done];
+  if (all.length === 0) {
+    list.innerHTML = '<div class="reminders-empty">No reminders yet — add one or tell Max!</div>';
+    return;
+  }
+  list.innerHTML = all.map(r => {
+    const overdue = r.date && new Date(r.date) < new Date() && !r.done;
+    const dateLabel = r.date ? new Date(r.date).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}) : '';
+    return `<div class="reminder-item ${r.done ? 'done' : ''}">
+      <input type="checkbox" class="reminder-check" ${r.done ? 'checked' : ''} onchange="toggleReminder(${r.id})">
+      <div class="reminder-body">
+        <div class="reminder-text">${r.text}</div>
+        <div class="reminder-meta">
+          <span class="reminder-tag ${r.project}">${r.project}</span>
+          ${dateLabel ? `<span class="reminder-date ${overdue ? 'overdue' : ''}">📅 ${dateLabel}${overdue ? ' · OVERDUE' : ''}</span>` : ''}
+        </div>
+      </div>
+      <button class="reminder-del" onclick="deleteReminder(${r.id})" title="Delete">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function toggleReminderMic() {
+  if (reminderListening) { stopReminderMic(); return; }
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { alert('Voice requires Chrome'); return; }
+  reminderRecog = new SR();
+  reminderRecog.lang = 'en-US';
+  reminderRecog.interimResults = false;
+  reminderRecog.onstart = () => {
+    reminderListening = true;
+    const btn = document.getElementById('reminderVoiceBtn');
+    if (btn) { btn.textContent = '⏹ Listening…'; btn.classList.add('active'); }
+  };
+  reminderRecog.onresult = e => {
+    const transcript = e.results[0][0].transcript;
+    parseReminderWithMax(transcript);
+  };
+  reminderRecog.onend = () => {
+    reminderListening = false;
+    const btn = document.getElementById('reminderVoiceBtn');
+    if (btn) { btn.textContent = '🎙️ Tell Max'; btn.classList.remove('active'); }
+  };
+  reminderRecog.onerror = () => {
+    reminderListening = false;
+    const btn = document.getElementById('reminderVoiceBtn');
+    if (btn) { btn.textContent = '🎙️ Tell Max'; btn.classList.remove('active'); }
+  };
+  reminderRecog.start();
+}
+
+function stopReminderMic() { if (reminderRecog) reminderRecog.stop(); }
+
+async function parseReminderWithMax(transcript) {
+  // Show transcript in input while Max parses it
+  document.getElementById('reminderInput').value = transcript;
+  try {
+    const res = await fetch('/.netlify/functions/claude', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 200,
+        system: 'You are a reminder parser. Extract reminder details from natural language. Return ONLY valid JSON with keys: text (string, the reminder), project (one of: pulsaio, unity, utbsc, general), date (ISO datetime string or null). No explanation, just JSON.',
+        messages: [{role:'user', content: transcript}]
+      })
+    });
+    const data = await res.json();
+    const raw = data.content?.map(b => b.text || '').join('').trim();
+    const parsed = JSON.parse(raw.replace(/```json|```/g,'').trim());
+    // Set the project dropdown
+    const proj = document.getElementById('reminderProject');
+    if (proj && parsed.project) proj.value = parsed.project;
+    // Set the date
+    if (parsed.date) {
+      const dt = document.getElementById('reminderDate');
+      if (dt) dt.value = new Date(parsed.date).toISOString().slice(0,16);
+    }
+    // Set the text
+    if (parsed.text) document.getElementById('reminderInput').value = parsed.text;
+    // Auto-add it
+    addReminder(parsed.text, parsed.project, parsed.date ? new Date(parsed.date).toISOString().slice(0,16) : null);
+  } catch {
+    // If parsing fails, just add as-is
+    addReminder(transcript, 'general', null);
+  }
+}
+
+// Make Max aware of reminders when answering questions
+function getRemindersContext() {
+  const active = reminders.filter(r => !r.done);
+  if (active.length === 0) return '';
+  return '\n\nCurrent reminders: ' + active.map(r => `[${r.project}] ${r.text}${r.date ? ' (due: ' + new Date(r.date).toLocaleDateString() + ')' : ''}`).join('; ');
+}
+
+// Init reminders on load
+document.addEventListener('DOMContentLoaded', renderReminders);
+renderReminders();
+
 </script>
 </body>
 </html>
