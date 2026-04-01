@@ -1423,11 +1423,25 @@ function renderProjectFiles(p){
   const el = document.getElementById('modalProjectFiles');
   const files = p.files || [];
   if (files.length === 0) { el.innerHTML = '<div style="font-size:12px;color:#94a3b8;padding:4px 0">No files attached yet</div>'; return; }
-  el.innerHTML = files.map((f,i) => `<div class="project-file-item">
-    <span class="project-file-icon">📄</span>
-    <span class="project-file-name">${f.name}</span>
-    <button class="project-file-del" onclick="removeProjectFile(${i})" title="Remove">✕</button>
-  </div>`).join('');
+  el.innerHTML = files.map((f,i) => {
+    const icon = f.type && f.type.startsWith('image/') ? '🖼️' : f.type === 'application/pdf' ? '📋' : '📄';
+    const canOpen = !!f.data;
+    return `<div class="project-file-item">
+      <span class="project-file-icon">${icon}</span>
+      <span class="project-file-name" style="cursor:${canOpen?'pointer':'default'};color:${canOpen?'#2563eb':'#334155'}" onclick="${canOpen?'openProjectFile('+i+')':''}" title="${canOpen?'Click to open':f.name}">${f.name}</span>
+      <button class="project-file-del" onclick="removeProjectFile(${i})" title="Remove">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function openProjectFile(index){
+  const p = projects.find(x => x.id === currentProjectId);
+  if (!p || !p.files[index] || !p.files[index].data) return;
+  const f = p.files[index];
+  const link = document.createElement('a');
+  link.href = f.data;
+  link.download = f.name;
+  link.click();
 }
 
 function renderFolderLink(p){
@@ -1501,9 +1515,17 @@ function handleProjectFiles(e){
   const p = projects.find(x => x.id === currentProjectId);
   if (!p) return;
   if (!p.files) p.files = [];
-  Array.from(e.target.files).forEach(f => p.files.push({ name: f.name, size: f.size, added: new Date().toISOString() }));
-  saveProjects();
-  renderProjectFiles(p);
+  const fileArr = Array.from(e.target.files);
+  let processed = 0;
+  fileArr.forEach(f => {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      p.files.push({ name: f.name, size: f.size, type: f.type, data: ev.target.result, added: new Date().toISOString() });
+      processed++;
+      if (processed === fileArr.length) { saveProjects(); renderProjectFiles(p); }
+    };
+    reader.readAsDataURL(f);
+  });
   e.target.value = '';
 }
 
