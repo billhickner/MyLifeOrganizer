@@ -278,7 +278,7 @@ input[type=date],input[type=time]{width:100%}
     <button class="nav-btn" onclick="showTab('goals')">Goals</button>
     <button class="nav-btn" onclick="showTab('calendar')">Calendar</button>
     <button class="nav-btn" onclick="showTab('max')">🤖 Max</button>
-    <button class="nav-btn" onclick="showTab('projects')">📁 Projects</button>
+    <button class="nav-btn" onclick="showTab('projects');renderProjects()">📁 Projects</button>
     <button class="nav-btn" onclick="showTab('path')">AI Path</button>
   </nav>
   <div class="header-date" id="headerDate"></div>
@@ -1149,7 +1149,7 @@ const showTab = (tab) => {
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('tab-'+tab).classList.remove('hidden');
   const btns = document.querySelectorAll('.nav-btn');
-  const tabMap=['today','pilots','goals','calendar','max','path'];
+  const tabMap=['today','pilots','goals','calendar','max','projects','path'];
   const idx=tabMap.indexOf(tab);
   if(idx>=0)btns[idx].classList.add('active');
   if(tab==='calendar')renderCalendar();
