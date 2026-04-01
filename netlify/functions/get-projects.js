@@ -1,5 +1,5 @@
-// get-projects.js — returns projects list
-// Projects are passed directly from the extension's localStorage bridge
+const { getStore } = require('@netlify/blobs');
+
 exports.handler = async (event) => {
   const headers = {
     'Access-Control-Allow-Origin': '*',
@@ -8,6 +8,24 @@ exports.handler = async (event) => {
     'Content-Type': 'application/json'
   };
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers, body: '' };
-  // Projects come from localStorage in the browser — return empty array as fallback
-  return { statusCode: 200, headers, body: JSON.stringify({ projects: [] }) };
+
+  const store = getStore({ name: 'max-data', siteID: process.env.SITE_ID, token: process.env.NETLIFY_API_TOKEN });
+
+  if (event.httpMethod === 'POST') {
+    try {
+      const { projects } = JSON.parse(event.body);
+      await store.set('projects', JSON.stringify(projects || []));
+      return { statusCode: 200, headers, body: JSON.stringify({ success: true }) };
+    } catch(e) {
+      return { statusCode: 500, headers, body: JSON.stringify({ error: e.message }) };
+    }
+  }
+
+  try {
+    const raw = await store.get('projects');
+    const projects = JSON.parse(raw || '[]');
+    return { statusCode: 200, headers, body: JSON.stringify({ projects }) };
+  } catch(e) {
+    return { statusCode: 200, headers, body: JSON.stringify({ projects: [] }) };
+  }
 };
