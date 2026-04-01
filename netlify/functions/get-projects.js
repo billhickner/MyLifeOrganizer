@@ -1,4 +1,6 @@
-const { getStore } = require('@netlify/blobs');
+const fs = require('fs');
+const path = require('path');
+const FILE = path.join('/tmp', 'max-projects.json');
 
 exports.handler = async (event) => {
   const headers = {
@@ -9,22 +11,19 @@ exports.handler = async (event) => {
   };
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers, body: '' };
 
-  const store = getStore({ name: 'max-data', siteID: process.env.SITE_ID, token: process.env.NETLIFY_API_TOKEN });
-
   if (event.httpMethod === 'POST') {
     try {
       const { projects } = JSON.parse(event.body);
-      await store.set('projects', JSON.stringify(projects || []));
-      return { statusCode: 200, headers, body: JSON.stringify({ success: true }) };
+      fs.writeFileSync(FILE, JSON.stringify(projects || []));
+      return { statusCode: 200, headers, body: JSON.stringify({ success: true, count: (projects||[]).length }) };
     } catch(e) {
       return { statusCode: 500, headers, body: JSON.stringify({ error: e.message }) };
     }
   }
 
   try {
-    const raw = await store.get('projects');
-    const projects = JSON.parse(raw || '[]');
-    return { statusCode: 200, headers, body: JSON.stringify({ projects }) };
+    const data = fs.existsSync(FILE) ? fs.readFileSync(FILE, 'utf8') : '[]';
+    return { statusCode: 200, headers, body: JSON.stringify({ projects: JSON.parse(data) }) };
   } catch(e) {
     return { statusCode: 200, headers, body: JSON.stringify({ projects: [] }) };
   }
