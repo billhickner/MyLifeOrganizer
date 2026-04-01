@@ -1613,9 +1613,9 @@ async function renderProjectEmails(p) {
   if (!el) return;
   el.innerHTML = '<div class="project-emails-loading">Loading emails…</div>';
   try {
-    const res = await fetch('/.netlify/functions/get-emails?projectId=' + p.id);
-    const data = await res.json();
-    const emails = data.emails || [];
+    // Read from localStorage (synced by Gmail extension)
+    const allEmails = JSON.parse(localStorage.getItem('pulsaio_emails') || '[]');
+    const emails = allEmails.filter(e => String(e.projectId) === String(p.id));
     if (emails.length === 0) {
       el.innerHTML = '<div class="project-emails-empty">No emails saved yet — use the Gmail extension to save emails to this project.</div>';
       return;
