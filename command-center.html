@@ -262,7 +262,12 @@ input[type=date],input[type=time]{width:100%}
         <div id="reflectionBox" style="display:none" class="ai-box">
           <div class="ai-header"><div class="ai-dot"></div>Claude's Reflection</div>
 
-      <!-- REMINDERS SECTION -->
+      
+        <div id="remindersList"></div>
+      </div>
+
+          <div class="ai-text" id="reflectionText"></div>
+<!-- REMINDERS SECTION -->
       <div class="reminders-section" id="remindersSection">
         <div class="reminders-header">
           <div class="reminders-title">Reminders</div>
@@ -279,10 +284,7 @@ input[type=date],input[type=time]{width:100%}
           <input type="datetime-local" id="reminderDate" style="border:1px solid #e2e8f0;border-radius:8px;padding:8px 10px;font-size:12px;color:#475569;background:#f8fafc;outline:none">
           <button onclick="addReminder()">+ Add</button>
         </div>
-        <div id="remindersList"></div>
-      </div>
 
-          <div class="ai-text" id="reflectionText"></div>
         </div>
       </div>
     </div>
