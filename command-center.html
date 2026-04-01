@@ -259,6 +259,18 @@ input[type=date],input[type=time]{width:100%}
 .create-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px}
 .btn-cancel{background:#f1f5f9;color:#475569;border:none;border-radius:8px;padding:9px 18px;font-size:13px;font-weight:600;cursor:pointer}
 .btn-create-confirm{background:#2563eb;color:#fff;border:none;border-radius:8px;padding:9px 18px;font-size:13px;font-weight:600;cursor:pointer}
+
+/* ===== PROJECT EMAILS ===== */
+.project-emails-list{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+.project-email-item{background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:12px 14px;cursor:pointer;transition:all 0.15s}
+.project-email-item:hover{border-color:#93c5fd;background:#eff6ff}
+.project-email-subject{font-size:13px;font-weight:600;color:#1e293b;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.project-email-meta{display:flex;gap:10px;font-size:11px;color:#94a3b8;flex-wrap:wrap}
+.project-email-note{font-size:12px;color:#64748b;margin-top:5px;font-style:italic}
+.project-email-body{font-size:12px;color:#475569;margin-top:6px;line-height:1.5;display:none;white-space:pre-wrap;border-top:1px solid #e2e8f0;padding-top:8px}
+.project-email-item.expanded .project-email-body{display:block}
+.project-emails-empty{font-size:12px;color:#94a3b8;padding:8px 0}
+.project-emails-loading{font-size:12px;color:#94a3b8;padding:8px 0;display:flex;align-items:center;gap:6px}
 </style>
 </head>
 <body>
@@ -1402,6 +1414,8 @@ function openProject(id){
   renderProjectFiles(p);
   renderFolderLink(p);
   document.getElementById('projectModal').classList.add('open');
+  renderProjectEmails(p);
+  syncProjectsToServer();
 }
 
 function closeProjectModal(){
@@ -1592,6 +1606,54 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 renderProjects();
 
+
+// ===== PROJECT EMAILS =====
+async function renderProjectEmails(p) {
+  const el = document.getElementById('modalProjectEmails');
+  if (!el) return;
+  el.innerHTML = '<div class="project-emails-loading">Loading emails…</div>';
+  try {
+    const res = await fetch('/.netlify/functions/get-emails?projectId=' + p.id);
+    const data = await res.json();
+    const emails = data.emails || [];
+    if (emails.length === 0) {
+      el.innerHTML = '<div class="project-emails-empty">No emails saved yet — use the Gmail extension to save emails to this project.</div>';
+      return;
+    }
+    el.innerHTML = '<div class="project-emails-list">' + emails.map((e,i) => `
+      <div class="project-email-item" onclick="toggleEmailExpand(this)">
+        <div class="project-email-subject">${e.subject || '(No subject)'}</div>
+        <div class="project-email-meta">
+          <span>👤 ${e.senderName || e.sender || 'Unknown'}</span>
+          ${e.date ? '<span>📅 ' + e.date + '</span>' : ''}
+          <span>🕐 ${new Date(e.savedAt).toLocaleDateString()}</span>
+          ${e.url ? '<a href="'+e.url+'" target="_blank" onclick="event.stopPropagation()" style="color:#2563eb;text-decoration:none">Open in Gmail ↗</a>' : ''}
+        </div>
+        ${e.note ? '<div class="project-email-note">📝 ' + e.note + '</div>' : ''}
+        ${e.body ? '<div class="project-email-body">' + e.body.replace(/</g,'&lt;') + '</div>' : ''}
+      </div>
+    `).join('') + '</div>';
+  } catch {
+    el.innerHTML = '<div class="project-emails-empty">Could not load emails. Install the Gmail extension and save emails to this project.</div>';
+  }
+}
+
+function toggleEmailExpand(el) {
+  el.classList.toggle('expanded');
+}
+
+// Sync projects to Netlify Blobs so Gmail extension can read them
+async function syncProjectsToServer() {
+  if (projects.length === 0) return;
+  try {
+    await fetch('/.netlify/functions/get-projects', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ projects: projects.map(p => ({ id: p.id, name: p.name, biz: p.biz, status: p.status })) })
+    });
+  } catch {}
+}
+
 </script>
 
   <!-- PROJECTS TAB -->
@@ -1640,7 +1702,10 @@ renderProjects();
         <input type="file" id="projectFileInput" multiple style="display:none" onchange="handleProjectFiles(event)">
         <button class="btn-add-update" onclick="document.getElementById('projectFileInput').click()" style="margin-top:8px">＋ Attach File</button>
       </div>
-      <div class="modal-actions">
+      
+        <div class="project-section-label" style="margin-top:20px">📧 Emails</div>
+        <div id="modalProjectEmails"><div class="project-emails-loading"><span>Loading…</span></div></div>
+<div class="modal-actions">
         <button class="btn-delete-project" onclick="deleteCurrentProject()">Delete Project</button>
         <button class="btn-save-project" onclick="saveProjectChanges()">Save Changes</button>
       </div>
