@@ -922,7 +922,7 @@ const closeModal = () => document.getElementById('eventModal').style.display='no
 const genPath = async () => {
   const openT = tasks.filter(t=>!t.done).map(t=>`[${t.priority.toUpperCase()}] ${t.text}`).join('\n')||'None';
   const pilotS = pilots.map(p=>`${p.name}: ${p.status} ${p.progress}%`).join(', ');
-  const prompt = `You are a strategic business advisor for Bill, entrepreneur running PulsAIO — wholesale AIO platform.\nTARGETS: 4 pilots live by May 14 (${DAYS_LEFT} days), $25K/month, then 10+ stores & wholesale distribution.\nPilots: David Glaser, Laurie Glaser, One Medical Houston, Kevin Moore.\nToday: ${TODAY.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'})}\nOpen tasks:\n${openT}\nPilot statuses: ${pilotS}\nGive a numbered list of 5-7 specific actions Bill should take TODAY toward $25K/month and the pilot deadline. End with one "North Star" sentence. You have a built-in REMINDER SYSTEM. When the user asks you to set, add, or create a reminder, tell them to use the Reminders section on the Today page (below the journal) — they can type it directly or click "Tell Max" to speak it. You can also read back their reminders using getRemindersContext(). When asked "what are my reminders?" summarize the active reminders from your context.`;
+  const prompt = `You are a strategic business advisor for Bill, entrepreneur running PulsAIO — wholesale AIO platform.\nTARGETS: 4 pilots live by May 14 (${DAYS_LEFT} days), $25K/month, then 10+ stores & wholesale distribution.\nPilots: David Glaser, Laurie Glaser, One Medical Houston, Kevin Moore.\nToday: ${TODAY.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'})}\nOpen tasks:\n${openT}\nPilot statuses: ${pilotS}\nGive a numbered list of 5-7 specific actions Bill should take TODAY toward $25K/month and the pilot deadline. End with one "North Star" sentence. REMINDER SYSTEM: You CAN and SHOULD set reminders when asked. When the user says "remind me to X" or "set a reminder for Y", respond with "Got it! I've set that reminder for you." — the system will automatically save it. You have full access to create, read, and confirm reminders. When the user asks you to set, add, or create a reminder, tell them to use the Reminders section on the Today page (below the journal) — they can type it directly or click "Tell Max" to speak it. You can also read back their reminders using getRemindersContext(). When asked "what are my reminders?" summarize the active reminders from your context.`;
 
   ['pathBoxToday','pathBoxFull'].forEach(id=>{
     const el=document.getElementById(id);
@@ -980,6 +980,8 @@ const sendToMax = async () => {
     loadEl.innerHTML=reply;
     loadEl.className='max-msg max';
     maxHistory.push({role:'assistant',content:reply});
+    // Auto-set reminder if Max detected one in the conversation
+    interceptReminderFromReply(userText, reply);
     speakDaniel(reply);
   } catch {
     loadEl.textContent='Connection error. Try again.';
@@ -1100,6 +1102,16 @@ function addReminder(text, project, dateStr) {
   inp.value = '';
   dt.value = '';
   renderReminders();
+}
+
+
+function interceptReminderFromReply(userText, maxReply) {
+  // Check if user was asking to set a reminder
+  const reminderTriggers = ['remind me', 'set a reminder', 'add a reminder', 'reminder to', 'don\'t let me forget', 'remember to'];
+  const isReminderRequest = reminderTriggers.some(t => userText.toLowerCase().includes(t));
+  if (!isReminderRequest) return;
+  // Parse with Max
+  parseReminderWithMax(userText);
 }
 
 function toggleReminder(id) {
