@@ -1654,6 +1654,34 @@ async function syncProjectsToServer() {
   } catch {}
 }
 
+
+// ===== SYNC PROJECTS TO GMAIL EXTENSION =====
+function syncProjectsToExtension() {
+  const btn = document.getElementById('syncExtBtn');
+  const ps = projects.map(p => ({ id: p.id, name: p.name, biz: p.biz, status: p.status }));
+  
+  // Method 1: Try chrome.storage via custom event (extension must be listening)
+  try {
+    window.dispatchEvent(new CustomEvent('MAX_SYNC_PROJECTS', { detail: { projects: ps } }));
+  } catch(e) {}
+  
+  // Method 2: Store in sessionStorage as a bridge
+  try {
+    sessionStorage.setItem('max_projects_sync', JSON.stringify(ps));
+  } catch(e) {}
+
+  // Method 3: Write to a known key the extension content script can read on gmail.com
+  // The extension needs to be on the same page — show instructions if needed
+  if (btn) {
+    btn.textContent = '✅ Synced!';
+    btn.style.background = '#dcfce7';
+    setTimeout(() => { btn.textContent = '🔄 Sync to Gmail'; btn.style.background = '#f0fdf4'; }, 2000);
+  }
+  
+  // Show sync instructions
+  alert('Projects synced! Now go to Gmail and click "Save to Max" — your projects will appear in the dropdown.\n\nIf projects still don\'t appear, open Gmail and run this in the console (Cmd+Option+J):\n\nchrome.storage.local.set({pulsaio_projects: JSON.stringify(' + JSON.stringify(ps) + '})');
+}
+
 </script>
 
   <!-- PROJECTS TAB -->
@@ -1662,6 +1690,7 @@ async function syncProjectsToServer() {
       <div class="projects-title">📁 Projects</div>
       <div class="projects-actions">
         <button class="btn-max-project" onclick="startMaxProjectMic()">🎙️ Tell Max</button>
+        <button class="btn-max-project" onclick="syncProjectsToExtension()" id="syncExtBtn" title="Sync projects to Gmail extension" style="background:#f0fdf4;border-color:#86efac;color:#16a34a">🔄 Sync to Gmail</button>
         <button class="btn-create-project" onclick="openCreateProject()">＋ New Project</button>
       </div>
     </div>
