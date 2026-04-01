@@ -1,45 +1,23 @@
-// save-email.js — saves a Gmail email to a project
-const { getStore } = require('@netlify/blobs');
+import { getStore } from '@netlify/blobs';
 
-exports.handler = async (event) => {
-  const headers = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'Content-Type',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Content-Type': 'application/json'
-  };
-
-  if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers, body: '' };
-  if (event.httpMethod !== 'POST') return { statusCode: 405, headers, body: 'Method not allowed' };
-
+export default async (req, context) => {
+  const h = {'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'Content-Type','Access-Control-Allow-Methods':'POST,OPTIONS','Content-Type':'application/json'};
+  if (req.method === 'OPTIONS') return new Response('',{status:200,headers:h});
+  if (req.method !== 'POST') return new Response('Method not allowed',{status:405,headers:h});
   try {
-    const data = JSON.parse(event.body);
-    const { projectId, subject, sender, senderName, date, body, url, note, savedAt } = data;
-
-    if (!projectId) return { statusCode: 400, headers, body: JSON.stringify({ error: 'projectId required' }) };
-
+    const data = await req.json();
+    const {projectId,subject,sender,senderName,date,body,url,note,savedAt} = data;
+    if (!projectId) return new Response(JSON.stringify({error:'projectId required'}),{status:400,headers:h});
     const store = getStore('project-emails');
-    const existing = await store.get('project-' + projectId, { type: 'json' }).catch(() => []);
-    const emails = Array.isArray(existing) ? existing : [];
-
-    const newEmail = {
-      id: Date.now(),
-      projectId,
-      subject: subject || '(No subject)',
-      sender: sender || '',
-      senderName: senderName || sender || 'Unknown',
-      date: date || '',
-      body: (body || '').substring(0, 2000),
-      url: url || '',
-      note: note || '',
-      savedAt: savedAt || new Date().toISOString()
-    };
-
+    let emails = [];
+    try { emails = await store.get('project-'+projectId,{type:'json'}) || []; } catch {}
+    const newEmail = {id:Date.now(),projectId,subject:subject||'(No subject)',sender:sender||'',senderName:senderName||'Unknown',date:date||'',body:(body||'').substring(0,2000),url:url||'',note:note||'',savedAt:savedAt||new Date().toISOString()};
     emails.unshift(newEmail);
-    await store.setJSON('project-' + projectId, emails.slice(0, 100));
-
-    return { statusCode: 200, headers, body: JSON.stringify({ success: true, email: newEmail }) };
-  } catch (err) {
-    return { statusCode: 500, headers, body: JSON.stringify({ error: err.message }) };
+    await store.set('project-'+projectId, JSON.stringify(emails.slice(0,100)));
+    return new Response(JSON.stringify({success:true,email:newEmail}),{status:200,headers:h});
+  } catch(err) {
+    return new Response(JSON.stringify({error:err.message}),{status:500,headers:h});
   }
 };
+
+export const config = { path: '/api/save-email' };
