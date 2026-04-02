@@ -10,19 +10,18 @@ exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers, body: '' };
 
   try {
-    const store = getStore('max-projects');
+    const store = getStore('max-data');
 
     if (event.httpMethod === 'POST') {
       const { projects } = JSON.parse(event.body || '{}');
-      await store.setJSON('projects', projects || []);
-      return { statusCode: 200, headers, body: JSON.stringify({ success: true, count: (projects||[]).length }) };
+      await store.set('projects', JSON.stringify(projects || []));
+      return { statusCode: 200, headers, body: JSON.stringify({ success: true }) };
     }
 
     // GET
-    let projects = [];
-    try { projects = await store.get('projects', { type: 'json' }) || []; } catch(e) {}
+    const raw = await store.get('projects');
+    const projects = raw ? JSON.parse(raw) : [];
     return { statusCode: 200, headers, body: JSON.stringify({ projects }) };
-
   } catch(e) {
     return { statusCode: 200, headers, body: JSON.stringify({ projects: [], error: e.message }) };
   }
