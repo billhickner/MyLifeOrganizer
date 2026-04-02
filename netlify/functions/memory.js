@@ -1,30 +1,42 @@
-// memory.js — Max Memory Bank persistence
-const fs = require('fs');
-const FILE = '/tmp/max-memory.json';
+// memory.js — Supabase persistent storage
+const SUPA_URL = 'https://akyadzfkpseyxlhahoej.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFreWFkemZrcHNleXhsaGFob2VqIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NTE1OTAyMCwiZXhwIjoyMDkwNzM1MDIwfQ.B2Y1YwFCiM4drsvGTARUl9kjpr50s6gO1OeL8JpLMyg';
+
+const headers = {
+  'apikey': SUPA_KEY,
+  'Authorization': 'Bearer ' + SUPA_KEY,
+  'Content-Type': 'application/json',
+  'Prefer': 'return=representation'
+};
+
+const CORS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
+  'Content-Type': 'application/json'
+};
 
 exports.handler = async (event) => {
-  const headers = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'Content-Type',
-    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-    'Content-Type': 'application/json'
-  };
-  if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers, body: '' };
-
-  if (event.httpMethod === 'POST') {
-    try {
-      const { memories } = JSON.parse(event.body || '{}');
-      fs.writeFileSync(FILE, JSON.stringify(memories || []));
-      return { statusCode: 200, headers, body: JSON.stringify({ success: true }) };
-    } catch(e) {
-      return { statusCode: 500, headers, body: JSON.stringify({ error: e.message }) };
-    }
-  }
+  if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: CORS, body: '' };
 
   try {
-    const memories = fs.existsSync(FILE) ? JSON.parse(fs.readFileSync(FILE, 'utf8')) : [];
-    return { statusCode: 200, headers, body: JSON.stringify({ memories }) };
+    if (event.httpMethod === 'POST') {
+      const { memories } = JSON.parse(event.body || '{}');
+      if (!memories) return { statusCode: 400, headers: CORS, body: JSON.stringify({ error: 'no memories' }) };
+      // Delete all then insert fresh
+      await fetch(SUPA_URL + '/rest/v1/memories?id=gte.0', { method: 'DELETE', headers });
+      if (memories.length > 0) {
+        const rows = memories.map(m => ({ id: m.id, text: m.text, tag: m.tag || 'fact', created: m.created || new Date().toISOString() }));
+        await fetch(SUPA_URL + '/rest/v1/memories', { method: 'POST', headers, body: JSON.stringify(rows) });
+      }
+      return { statusCode: 200, headers: CORS, body: JSON.stringify({ success: true, count: memories.length }) };
+    }
+
+    // GET
+    const res = await fetch(SUPA_URL + '/rest/v1/memories?select=*&order=created.desc', { headers });
+    const memories = await res.json();
+    return { statusCode: 200, headers: CORS, body: JSON.stringify({ memories: Array.isArray(memories) ? memories : [] }) };
   } catch(e) {
-    return { statusCode: 200, headers, body: JSON.stringify({ memories: [] }) };
+    return { statusCode: 500, headers: CORS, body: JSON.stringify({ error: e.message }) };
   }
 };
