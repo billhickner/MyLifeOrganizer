@@ -271,6 +271,30 @@ input[type=date],input[type=time]{width:100%}
 .project-email-item.expanded .project-email-body{display:block}
 .project-emails-empty{font-size:12px;color:#94a3b8;padding:8px 0}
 .project-emails-loading{font-size:12px;color:#94a3b8;padding:8px 0;display:flex;align-items:center;gap:6px}
+
+/* ===== MAX MEMORY BANK ===== */
+.memory-bank{background:#fff;border:1px solid #e5e9f0;border-radius:12px;padding:20px;margin-top:20px}
+.memory-bank-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.memory-bank-title{font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#64748b}
+.memory-bank-title::before{content:'🧠 '}
+.memory-add-row{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.memory-add-row input{flex:1;min-width:200px;border:1px solid #e2e8f0;border-radius:8px;padding:8px 12px;font-size:13px;color:#1e293b;outline:none;background:#f8fafc}
+.memory-add-row input:focus{border-color:#3b82f6;background:#fff}
+.memory-add-row select{border:1px solid #e2e8f0;border-radius:8px;padding:8px 10px;font-size:12px;color:#475569;background:#f8fafc;outline:none}
+.memory-add-row button{background:#3b82f6;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer}
+.memory-item{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid #f1f5f9}
+.memory-item:last-child{border-bottom:none}
+.memory-tag{font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px;letter-spacing:0.05em;text-transform:uppercase;flex-shrink:0;margin-top:2px}
+.memory-tag.fact{background:#dbeafe;color:#1d4ed8}
+.memory-tag.code{background:#fef3c7;color:#b45309}
+.memory-tag.contact{background:#dcfce7;color:#15803d}
+.memory-tag.note{background:#f3e8ff;color:#7c3aed}
+.memory-tag.remind{background:#fee2e2;color:#dc2626}
+.memory-text{flex:1;font-size:13px;color:#1e293b;line-height:1.5}
+.memory-time{font-size:11px;color:#94a3b8;flex-shrink:0;margin-top:2px}
+.memory-del{background:none;border:none;color:#cbd5e1;cursor:pointer;font-size:13px;flex-shrink:0}
+.memory-del:hover{color:#ef4444}
+.memory-empty{text-align:center;color:#94a3b8;font-size:13px;padding:12px 0}
 </style>
 </head>
 <body>
@@ -361,6 +385,27 @@ input[type=date],input[type=time]{width:100%}
       <div class="reminders-section" id="remindersSection">
         <div class="reminders-header">
           <div class="reminders-title">Reminders</div>
+
+      <!-- MEMORY BANK -->
+      <div class="memory-bank" id="memoryBank">
+        <div class="memory-bank-header">
+          <div class="memory-bank-title">Max Memory Bank</div>
+          <button onclick="parseMemoryWithMax()" style="background:#eff6ff;border:1px solid #bfdbfe;color:#2563eb;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer">🎙️ Tell Max</button>
+        </div>
+        <div class="memory-add-row">
+          <input type="text" id="memoryInput" placeholder="Remember: gate code is 1234, or remind me every Monday at 9am..." onkeydown="if(event.key==='Enter')addMemory()">
+          <select id="memoryTag">
+            <option value="fact">Fact</option>
+            <option value="code">Code/Password</option>
+            <option value="contact">Contact</option>
+            <option value="note">Note</option>
+            <option value="remind">Reminder</option>
+          </select>
+          <button onclick="addMemory()">+ Save</button>
+        </div>
+        <div id="memoryList"></div>
+      </div>
+
           <button class="reminder-voice-btn" id="reminderVoiceBtn" onclick="toggleReminderMic()">🎙️ Tell Max</button>
         </div>
         <div class="reminders-add">
@@ -1076,7 +1121,7 @@ const sendToMax = async (userText) => {
   try {
     const sys = (typeof maxContext !== 'undefined' ? maxContext : 'You are Max, PulsAIO assistant for Bill Hickner.') +
       (typeof getRemindersContext === 'function' ? getRemindersContext() : '') +
-      (typeof getProjectsContext === 'function' ? getProjectsContext() : '');
+      (typeof getProjectsContext === 'function' ? getProjectsContext() : '') + (typeof getMemoryContext === 'function' ? getMemoryContext() : '');
 
     const res = await fetch('/.netlify/functions/claude', {
       method: 'POST',
@@ -1734,6 +1779,99 @@ function syncProjectsToExtension() {
   // Show sync instructions
   alert('Projects synced! Now go to Gmail and click "Save to Max" — your projects will appear in the dropdown.\n\nIf projects still don\'t appear, open Gmail and run this in the console (Cmd+Option+J):\n\nchrome.storage.local.set({pulsaio_projects: JSON.stringify(' + JSON.stringify(ps) + '})');
 }
+
+
+// ===== MAX MEMORY BANK =====
+let memories = JSON.parse(localStorage.getItem('max_memories') || '[]');
+
+function saveMemories() {
+  localStorage.setItem('max_memories', JSON.stringify(memories));
+  // Sync to server so iPhone/iPad get it too
+  fetch('/.netlify/functions/get-projects', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({memories: memories})
+  }).catch(()=>{});
+}
+
+function addMemory(text, tag) {
+  const inp = document.getElementById('memoryInput');
+  const tagSel = document.getElementById('memoryTag');
+  const t = text || inp?.value?.trim();
+  if (!t) return;
+  const m = {
+    id: Date.now(),
+    text: t,
+    tag: tag || tagSel?.value || 'fact',
+    created: new Date().toISOString()
+  };
+  memories.unshift(m);
+  saveMemories();
+  if (inp) inp.value = '';
+  renderMemories();
+}
+
+function deleteMemory(id) {
+  memories = memories.filter(m => m.id !== id);
+  saveMemories();
+  renderMemories();
+}
+
+function renderMemories() {
+  const list = document.getElementById('memoryList');
+  if (!list) return;
+  if (memories.length === 0) {
+    list.innerHTML = '<div class="memory-empty">Nothing saved yet — tell Max something to remember!</div>';
+    return;
+  }
+  list.innerHTML = memories.map(m => `
+    <div class="memory-item">
+      <span class="memory-tag ${m.tag}">${m.tag}</span>
+      <span class="memory-text">${m.text}</span>
+      <span class="memory-time">${new Date(m.created).toLocaleDateString()}</span>
+      <button class="memory-del" onclick="deleteMemory(${m.id})" title="Forget this">✕</button>
+    </div>
+  `).join('');
+}
+
+async function parseMemoryWithMax() {
+  const text = document.getElementById('memoryInput')?.value?.trim();
+  if (!text) {
+    document.getElementById('memoryInput')?.focus();
+    return;
+  }
+  try {
+    const res = await fetch('/.netlify/functions/claude', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 200,
+        system: 'Extract a memory from natural language. Return ONLY JSON: {"text": "the memory fact", "tag": one of fact|code|contact|note|remind}. No explanation.',
+        messages: [{role:'user', content: text}]
+      })
+    });
+    const data = await res.json();
+    const raw = data.content?.map(b=>b.text||'').join('').replace(/```json|```/g,'').trim();
+    const parsed = JSON.parse(raw);
+    if (parsed.text) {
+      if (document.getElementById('memoryTag')) document.getElementById('memoryTag').value = parsed.tag || 'fact';
+      addMemory(parsed.text, parsed.tag || 'fact');
+    }
+  } catch {
+    addMemory(text, 'fact');
+  }
+}
+
+function getMemoryContext() {
+  if (memories.length === 0) return '';
+  return '\n\nMax Memory Bank (things Bill told you to remember):\n' +
+    memories.map(m => '- [' + m.tag + '] ' + m.text).join('\n');
+}
+
+// Init
+document.addEventListener('DOMContentLoaded', renderMemories);
+renderMemories();
 
 </script>
 
