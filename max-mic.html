@@ -140,8 +140,10 @@ async function sendToMax(text){
     const reply=data.content?.map(b=>b.text||'').join('')||'Sorry, try again.';
     conversationHistory.push({role:'assistant',content:reply});
     // Parse SCHEDULE_REMINDER tag
-const schedMatch = reply.match(/SCHEDULE_REMINDER:({[^}]+})/);
-let cleanReply = reply.replace(/SCHEDULE_REMINDER:{[^}]+}/,'').trim();
+// Parse optional SCHEDULE_REMINDER tag
+let cleanReply = reply.replace(/SCHEDULE_REMINDER:\{[^}]+\}/g,'').trim();
+if(!cleanReply) cleanReply = reply; // Safety: never show empty response
+const schedMatch = reply.match(/SCHEDULE_REMINDER:(\{[^}]+\})/);
 if (schedMatch) {
   try {
     const sched = JSON.parse(schedMatch[1]);
