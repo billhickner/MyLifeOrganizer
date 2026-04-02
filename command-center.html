@@ -1402,26 +1402,37 @@ renderReminders();
 const PROJECT_COLORS = {pulsaio:'#2563eb',unity:'#16a34a',utbsc:'#d97706',personal:'#7c3aed',general:'#64748b'};
 let projects = JSON.parse(localStorage.getItem('pulsaio_projects') || '[]');
 
-// On iPhone/new device: fetch from server if localStorage is empty
-if (projects.length === 0) {
-  fetch('/.netlify/functions/get-projects')
-    .then(r=>r.json())
-    .then(d=>{
-      if(d.projects && d.projects.length > 0){
-        projects = d.projects;
-        localStorage.setItem('pulsaio_projects', JSON.stringify(projects));
-        renderProjects();
-        console.log('Max: loaded', projects.length, 'projects from server');
-      }
-    }).catch(()=>{});
-}
+// Load from Supabase on any device — always get latest
+fetch('/.netlify/functions/get-projects')
+  .then(r=>r.json())
+  .then(d=>{
+    if(d.projects && d.projects.length > 0){
+      // Merge server projects with local (local wins for newer data)
+      const serverIds = new Set(d.projects.map(p=>p.id));
+      const localOnly = projects.filter(p=>!serverIds.has(String(p.id)));
+      projects = [...d.projects, ...localOnly];
+      localStorage.setItem('pulsaio_projects', JSON.stringify(projects));
+      renderProjects();
+    }
+  }).catch(()=>{});
+
+// Load memories from Supabase
+fetch('/.netlify/functions/memory')
+  .then(r=>r.json())
+  .then(d=>{
+    if(d.memories && d.memories.length > 0 && memories.length === 0){
+      memories = d.memories;
+      localStorage.setItem('max_memories', JSON.stringify(memories));
+      renderMemories();
+    }
+  }).catch(()=>{});
 let currentProjectId = null;
 let projectFolderHandle = null;
 
 function saveProjects(){
   localStorage.setItem('pulsaio_projects', JSON.stringify(projects));
-  // Sync to server so iPhone stays updated
-  const data = projects.map(p=>({id:String(p.id),name:p.name,biz:p.biz||'general',status:p.status||'active'}));
+  // Sync to Supabase for permanent cross-device storage
+  const data = projects.map(p=>({id:String(p.id),name:p.name,biz:p.biz||'general',status:p.status||'active',notes:p.notes||''}));
   fetch('/.netlify/functions/get-projects',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({projects:data})}).catch(()=>{});
 }
 
@@ -1711,8 +1722,22 @@ async function renderProjectEmails(p) {
   el.innerHTML = '<div class="project-emails-loading">Loading emails…</div>';
   try {
     // Read from localStorage (synced by Gmail extension)
-    const allEmails = JSON.parse(localStorage.getItem('pulsaio_emails') || '[]');
-    const emails = allEmails.filter(e => String(e.projectId) === String(p.id));
+    // Fetch emails from Supabase
+    let emails = [];
+    try {
+      const er = await fetch('/.netlify/functions/get-emails?projectId=' + p.id);
+      const ed = await er.json();
+      emails = ed.emails || [];
+      // Also merge any local emails not yet synced
+      const localEmails = JSON.parse(localStorage.getItem('pulsaio_emails') || '[]');
+      const localFiltered = localEmails.filter(e => String(e.projectId) === String(p.id));
+      // Combine, deduplicate by id
+      const ids = new Set(emails.map(e => String(e.id)));
+      localFiltered.forEach(e => { if (!ids.has(String(e.id))) emails.push(e); });
+    } catch {
+      const allEmails = JSON.parse(localStorage.getItem('pulsaio_emails') || '[]');
+      emails = allEmails.filter(e => String(e.projectId) === String(p.id));
+    }
     if (emails.length === 0) {
       el.innerHTML = '<div class="project-emails-empty">No emails saved yet — use the Gmail extension to save emails to this project.</div>';
       return;
@@ -1786,7 +1811,11 @@ let memoryMicRecog = null, memoryMicListening = false;
 
 function saveMemories() {
   localStorage.setItem('max_memories', JSON.stringify(memories));
-  fetch('/.netlify/functions/memory', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({memories})}).catch(()=>{});
+  fetch('/.netlify/functions/memory', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({memories: memories})
+  }).catch(()=>{});
 }
 
 function addMemory(text, tag) {
