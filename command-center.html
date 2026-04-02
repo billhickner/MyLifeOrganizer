@@ -1097,6 +1097,7 @@ const sendToMax = async (userText) => {
     replyDiv.style.cssText = 'text-align:left;margin:8px 0';
     replyDiv.innerHTML = '<span style="background:#f1f5f9;color:#1e293b;padding:8px 14px;border-radius:16px;display:inline-block;max-width:80%;font-size:14px;line-height:1.6">' + reply.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</span>';
     if (msgs) { msgs.appendChild(replyDiv); msgs.scrollTop = msgs.scrollHeight; }
+    if (typeof speakDaniel === 'function') speakDaniel(reply);
   } catch(e) {
     loadDiv.remove();
     const errDiv = document.createElement('div');
