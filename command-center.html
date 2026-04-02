@@ -463,7 +463,7 @@ input[type=date],input[type=time]{width:100%}
         </div>
       </div>
       <div style="display:flex;gap:6px">
-        <button id="muteBtn" onclick="stopSpeaking()" style="display:none;background:none;border:1px solid rgba(255,255,255,0.3);color:white;font-size:11px;padding:4px 9px;border-radius:4px;cursor:pointer">Mute</button>
+        <button id="muteBtn" onclick="stopSpeaking()" style="display:none;background:none;border:1px solid rgba(255,255,255,0.3);color:white;font-size:11px;padding:4px 9px;border-radius:4px;cursor:pointer">Mute</button><button onclick="stopSpeaking()" id="maxStopBtn" style="display:none;background:#ef4444;color:white;border:none;border-radius:4px;padding:5px 10px;font-size:11px;cursor:pointer;margin-left:4px">⏹ Stop</button>
         <button onclick="clearChat()" style="background:none;border:1px solid rgba(255,255,255,0.25);color:rgba(255,255,255,0.65);font-size:11px;padding:4px 9px;border-radius:4px;cursor:pointer">Clear</button>
       </div>
     </div>
@@ -1097,7 +1097,12 @@ const sendToMax = async (userText) => {
     replyDiv.style.cssText = 'text-align:left;margin:8px 0';
     replyDiv.innerHTML = '<span style="background:#f1f5f9;color:#1e293b;padding:8px 14px;border-radius:16px;display:inline-block;max-width:80%;font-size:14px;line-height:1.6">' + reply.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</span>';
     if (msgs) { msgs.appendChild(replyDiv); msgs.scrollTop = msgs.scrollHeight; }
-    if (typeof speakDaniel === 'function') speakDaniel(reply);
+    // Speak reply with Daniel voice + show stop button
+    if (typeof speakDaniel === 'function') {
+      const sb = document.getElementById('maxStopBtn');
+      if (sb) sb.style.display = 'inline-block';
+      speakDaniel(reply);
+    }
   } catch(e) {
     loadDiv.remove();
     const errDiv = document.createElement('div');
