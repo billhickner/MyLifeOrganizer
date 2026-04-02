@@ -276,7 +276,6 @@ input[type=date],input[type=time]{width:100%}
 .memory-bank{background:#fff;border:1px solid #e5e9f0;border-radius:12px;padding:20px;margin-top:20px}
 .memory-bank-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
 .memory-bank-title{font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#64748b}
-.memory-bank-title::before{content:'🧠 '}
 .memory-add-row{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
 .memory-add-row input{flex:1;min-width:200px;border:1px solid #e2e8f0;border-radius:8px;padding:8px 12px;font-size:13px;color:#1e293b;outline:none;background:#f8fafc}
 .memory-add-row input:focus{border-color:#3b82f6;background:#fff}
@@ -389,19 +388,19 @@ input[type=date],input[type=time]{width:100%}
       <!-- MEMORY BANK -->
       <div class="memory-bank" id="memoryBank">
         <div class="memory-bank-header">
-          <div class="memory-bank-title">Max Memory Bank</div>
-          <button onclick="parseMemoryWithMax()" style="background:#eff6ff;border:1px solid #bfdbfe;color:#2563eb;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer">🎙️ Tell Max</button>
+          <div class="memory-bank-title">🧠 Max Memory Bank</div>
+          <button onclick="toggleMemoryMic()" id="memoryMicBtn" style="background:#eff6ff;border:1px solid #bfdbfe;color:#2563eb;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer">🎙️ Tell Max</button>
         </div>
         <div class="memory-add-row">
-          <input type="text" id="memoryInput" placeholder="Remember: gate code is 1234, or remind me every Monday at 9am..." onkeydown="if(event.key==='Enter')addMemory()">
+          <input type="text" id="memoryInput" placeholder="e.g. Bird Storm Marina gate code is 1234" onkeydown="if(event.key==='Enter')parseMemoryWithMax()">
           <select id="memoryTag">
             <option value="fact">Fact</option>
-            <option value="code">Code/Password</option>
+            <option value="code">Code</option>
             <option value="contact">Contact</option>
             <option value="note">Note</option>
             <option value="remind">Reminder</option>
           </select>
-          <button onclick="addMemory()">+ Save</button>
+          <button onclick="parseMemoryWithMax()">+ Save</button>
         </div>
         <div id="memoryList"></div>
       </div>
@@ -1783,30 +1782,18 @@ function syncProjectsToExtension() {
 
 // ===== MAX MEMORY BANK =====
 let memories = JSON.parse(localStorage.getItem('max_memories') || '[]');
+let memoryMicRecog = null, memoryMicListening = false;
 
 function saveMemories() {
   localStorage.setItem('max_memories', JSON.stringify(memories));
-  // Sync to server so iPhone/iPad get it too
-  fetch('/.netlify/functions/get-projects', {
-    method: 'POST',
-    headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({memories: memories})
-  }).catch(()=>{});
+  fetch('/.netlify/functions/memory', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({memories})}).catch(()=>{});
 }
 
 function addMemory(text, tag) {
-  const inp = document.getElementById('memoryInput');
-  const tagSel = document.getElementById('memoryTag');
-  const t = text || inp?.value?.trim();
-  if (!t) return;
-  const m = {
-    id: Date.now(),
-    text: t,
-    tag: tag || tagSel?.value || 'fact',
-    created: new Date().toISOString()
-  };
-  memories.unshift(m);
+  if (!text) return;
+  memories.unshift({id:Date.now(), text, tag:tag||'fact', created:new Date().toISOString()});
   saveMemories();
+  const inp = document.getElementById('memoryInput');
   if (inp) inp.value = '';
   renderMemories();
 }
@@ -1821,55 +1808,81 @@ function renderMemories() {
   const list = document.getElementById('memoryList');
   if (!list) return;
   if (memories.length === 0) {
-    list.innerHTML = '<div class="memory-empty">Nothing saved yet — tell Max something to remember!</div>';
+    list.innerHTML = '<div class="memory-empty">Nothing saved yet — speak or type something for Max to remember!</div>';
     return;
   }
-  list.innerHTML = memories.map(m => `
-    <div class="memory-item">
-      <span class="memory-tag ${m.tag}">${m.tag}</span>
-      <span class="memory-text">${m.text}</span>
-      <span class="memory-time">${new Date(m.created).toLocaleDateString()}</span>
-      <button class="memory-del" onclick="deleteMemory(${m.id})" title="Forget this">✕</button>
-    </div>
-  `).join('');
+  list.innerHTML = memories.map(m => `<div class="memory-item">
+    <span class="memory-tag ${m.tag}">${m.tag}</span>
+    <span class="memory-text">${m.text}</span>
+    <span class="memory-time">${new Date(m.created).toLocaleDateString()}</span>
+    <button class="memory-del" onclick="deleteMemory(${m.id})">✕</button>
+  </div>`).join('');
 }
 
-async function parseMemoryWithMax() {
-  const text = document.getElementById('memoryInput')?.value?.trim();
-  if (!text) {
-    document.getElementById('memoryInput')?.focus();
-    return;
-  }
+function toggleMemoryMic() {
+  if (memoryMicListening) { if(memoryMicRecog) memoryMicRecog.stop(); return; }
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { alert('Voice requires Chrome'); return; }
+  memoryMicRecog = new SR();
+  memoryMicRecog.lang = 'en-US';
+  memoryMicRecog.interimResults = false;
+  memoryMicRecog.onstart = () => {
+    memoryMicListening = true;
+    const btn = document.getElementById('memoryMicBtn');
+    if (btn) { btn.textContent = '⏹ Listening...'; btn.style.background='#fee2e2'; btn.style.color='#dc2626'; }
+  };
+  memoryMicRecog.onresult = e => {
+    const t = e.results[0][0].transcript;
+    const inp = document.getElementById('memoryInput');
+    if (inp) inp.value = t;
+    parseMemoryWithMax(t);
+  };
+  memoryMicRecog.onend = () => {
+    memoryMicListening = false;
+    const btn = document.getElementById('memoryMicBtn');
+    if (btn) { btn.textContent = '🎙️ Tell Max'; btn.style.background='#eff6ff'; btn.style.color='#2563eb'; }
+  };
+  memoryMicRecog.start();
+}
+
+async function parseMemoryWithMax(voiceText) {
+  const text = voiceText || document.getElementById('memoryInput')?.value?.trim();
+  if (!text) return;
+  const btn = document.getElementById('memoryMicBtn');
+  if (btn && !memoryMicListening) btn.textContent = '⏳ Saving...';
   try {
     const res = await fetch('/.netlify/functions/claude', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 200,
-        system: 'Extract a memory from natural language. Return ONLY JSON: {"text": "the memory fact", "tag": one of fact|code|contact|note|remind}. No explanation.',
-        messages: [{role:'user', content: text}]
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514', max_tokens:200,
+        system:'Extract a memory from natural language. Return ONLY valid JSON: {"text":"the memory to store","tag":"fact|code|contact|note|remind"}. No markdown.',
+        messages:[{role:'user',content:text}]
       })
     });
     const data = await res.json();
     const raw = data.content?.map(b=>b.text||'').join('').replace(/```json|```/g,'').trim();
     const parsed = JSON.parse(raw);
     if (parsed.text) {
-      if (document.getElementById('memoryTag')) document.getElementById('memoryTag').value = parsed.tag || 'fact';
-      addMemory(parsed.text, parsed.tag || 'fact');
+      if (document.getElementById('memoryTag')) document.getElementById('memoryTag').value = parsed.tag||'fact';
+      addMemory(parsed.text, parsed.tag||'fact');
     }
-  } catch {
-    addMemory(text, 'fact');
-  }
+  } catch { addMemory(text, 'fact'); }
+  if (btn && !memoryMicListening) btn.textContent = '🎙️ Tell Max';
 }
 
 function getMemoryContext() {
   if (memories.length === 0) return '';
   return '\n\nMax Memory Bank (things Bill told you to remember):\n' +
-    memories.map(m => '- [' + m.tag + '] ' + m.text).join('\n');
+    memories.map(m => '- ['+m.tag+'] '+m.text).join('\n');
 }
 
-// Init
+// Load from server on start if local is empty
+if (memories.length === 0) {
+  fetch('/.netlify/functions/memory').then(r=>r.json()).then(d=>{
+    if(d.memories&&d.memories.length>0){memories=d.memories;localStorage.setItem('max_memories',JSON.stringify(memories));renderMemories();}
+  }).catch(()=>{});
+}
+
 document.addEventListener('DOMContentLoaded', renderMemories);
 renderMemories();
 
