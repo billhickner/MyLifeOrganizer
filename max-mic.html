@@ -136,13 +136,13 @@ async function sendToMax(text){
     const data=await res.json();
     const reply=data.content?.map(b=>b.text||'').join('')||'Sorry, try again.';
     conversationHistory.push({role:'assistant',content:reply});
-    showResponse(reply);speakDaniel(reply);setStatus('Tap to speak again',false);
+    showResponse(reply);if(!window.isSpeaking)speakDaniel(reply);setStatus('Tap to speak again',false);
   }catch{setStatus('Connection error. Try again.',false);setLoading(false);}
 }
 
 function showResponse(text){document.getElementById('responseCard').classList.add('visible');document.getElementById('responseText').textContent=text;setLoading(false);}
 
-async function speakDaniel(text){
+async function speakDaniel(text){if(window.isSpeaking)return;window.isSpeaking=true;
   stopSpeaking();
   document.getElementById('muteBtn').classList.add('visible');
   try{
@@ -163,7 +163,7 @@ async function speakDaniel(text){
       const url=URL.createObjectURL(blob);
       const audio=new Audio(url);
       currentAudio=audio;
-      audio.onended=()=>{currentAudio=null;URL.revokeObjectURL(url);document.getElementById('muteBtn').classList.remove('visible');};
+      audio.onended=()=>{currentAudio=null;window.isSpeaking=false;URL.revokeObjectURL(url);document.getElementById('muteBtn').classList.remove('visible');};
       await audio.play();
     }
   }catch{
@@ -173,7 +173,7 @@ async function speakDaniel(text){
   }
 }
 
-function stopSpeaking(){
+function stopSpeaking(){window.isSpeaking=false;
   if(currentAudio){try{currentAudio.stop?currentAudio.stop():currentAudio.pause();}catch(e){}currentAudio=null;}
   window.speechSynthesis.cancel();
   document.getElementById('muteBtn').classList.remove('visible');
@@ -194,6 +194,41 @@ function stopListening(){if(recognition)recognition.stop();}
 function sendText(){const val=document.getElementById('textInput').value.trim();if(!val)return;document.getElementById('textInput').value='';sendToMax(val);}
 function setStatus(text,active){const el=document.getElementById('statusText');el.textContent=text;el.className='status-text'+(active?' active':'');}
 function setLoading(on){if(on){document.getElementById('responseCard').classList.add('visible');document.getElementById('responseText').innerHTML='<div class="dots"><span></span><span></span><span></span></div>';}}
+
+// ===== REMINDER SYSTEM =====
+// Request notification permission on load
+if ('Notification' in window && Notification.permission === 'default') {
+  Notification.requestPermission();
+}
+
+function checkReminders() {
+  try {
+    const reminders = JSON.parse(localStorage.getItem('pulsaio_reminders') || '[]');
+    const now = new Date();
+    reminders.forEach(r => {
+      if (r.completed || !r.dueDate) return;
+      const due = new Date(r.dueDate);
+      const diffMin = (due - now) / 60000;
+      // Fire if within 1 minute of due time
+      if (diffMin >= -1 && diffMin <= 1 && !r.notified) {
+        r.notified = true;
+        // Show notification
+        if (Notification.permission === 'granted') {
+          new Notification('Max Reminder', {body: r.text, icon: '/icons/icon-192.png'});
+        }
+        // Also speak it
+        speakDaniel('Reminder: ' + r.text);
+        // Show on screen
+        showResponse('⏰ Reminder: ' + r.text);
+      }
+    });
+    localStorage.setItem('pulsaio_reminders', JSON.stringify(reminders));
+  } catch(e) {}
+}
+
+// Check every 30 seconds
+setInterval(checkReminders, 30000);
+checkReminders();
 </script>
 </body>
 </html>
