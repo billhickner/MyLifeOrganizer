@@ -97,7 +97,14 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 </div>
 <script>
 const DANIEL_ID='onwK4e9ZLuTAKqWW03F9';
-let isListening=false,recognition=null,currentAudio=null,audioCtx=null,conversationHistory=[];
+let isListening=false,recognition=null,currentAudio=null,audioCtx=null,conversationHistory=[],serverProjects=[];
+
+// Fetch projects from server on load
+fetch('/.netlify/functions/get-projects')
+  .then(r=>r.json())
+  .then(d=>{serverProjects=d.projects||[];console.log('Max loaded',serverProjects.length,'projects');})
+  .catch(()=>{});
+function getServerProjectsContext(){return serverProjects.length ? "\n\nProjects: "+serverProjects.map(p=>"["+p.biz+"] "+p.name+" ("+p.status+")").join("; ") : "";}
 const maxContext="You are Max, Bill Hickner's AI assistant for PulsAIO — a wholesale AIO platform with 4 pilots launching by May 14 2026 targeting $25K/month. Bill runs PulsAIO, Unity Controls, and UTBSC TAB. Team: Ron Snider CEO, Nate Essin Shop Supervisor. Be concise, direct, entrepreneurial. Keep voice responses under 3 sentences.";
 
 // iOS requires AudioContext created/resumed on a user gesture
@@ -115,7 +122,7 @@ async function sendToMax(text){
   setStatus('Max is thinking…',true);setLoading(true);
   conversationHistory.push({role:'user',content:text});
   try{
-    const res=await fetch('/.netlify/functions/claude',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:300,system:maxContext,messages:conversationHistory})});
+    const res=await fetch('/.netlify/functions/claude',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:300,system:maxContext+getServerProjectsContext(),messages:conversationHistory})});
     const data=await res.json();
     const reply=data.content?.map(b=>b.text||'').join('')||'Sorry, try again.';
     conversationHistory.push({role:'assistant',content:reply});
