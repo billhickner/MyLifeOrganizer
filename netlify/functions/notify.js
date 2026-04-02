@@ -9,6 +9,11 @@ const CORS = {
   'Content-Type': 'application/json'
 };
 
+// Strip emojis from header strings (ntfy headers must be ASCII)
+function toAscii(str) {
+  return (str || '').replace(/[^\x00-\x7F]/g, '').trim() || 'Max Reminder';
+}
+
 exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: CORS, body: '' };
   if (event.httpMethod !== 'POST') return { statusCode: 405, headers: CORS, body: 'Method not allowed' };
@@ -18,19 +23,17 @@ exports.handler = async (event) => {
     if (!message) return { statusCode: 400, headers: CORS, body: JSON.stringify({ error: 'message required' }) };
 
     const ntfyHeaders = {
-      'Title': title || 'Max Reminder',
+      'Title': toAscii(title),
       'Priority': String(priority || 4),
-      'Tags': 'bell,pulsaio',
-      'Content-Type': 'text/plain'
+      'Tags': 'bell',
+      'Content-Type': 'text/plain; charset=utf-8'
     };
 
-    // If dueDate provided, schedule the notification for that exact time
+    // Schedule if dueDate provided
     if (dueDate) {
       const due = new Date(dueDate);
       const now = new Date();
-      const diffMs = due - now;
-      if (diffMs > 0) {
-        // ntfy supports X-Delay as Unix timestamp
+      if (due > now) {
         ntfyHeaders['X-Delay'] = String(Math.floor(due.getTime() / 1000));
       }
     }
@@ -41,7 +44,10 @@ exports.handler = async (event) => {
       body: message
     });
 
-    if (!res.ok) throw new Error('ntfy error: ' + res.status);
+    if (!res.ok) {
+      const errText = await res.text();
+      throw new Error('ntfy error ' + res.status + ': ' + errText);
+    }
 
     return {
       statusCode: 200,
