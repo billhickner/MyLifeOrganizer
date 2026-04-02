@@ -1323,10 +1323,29 @@ renderReminders();
 // ===== PROJECTS SYSTEM =====
 const PROJECT_COLORS = {pulsaio:'#2563eb',unity:'#16a34a',utbsc:'#d97706',personal:'#7c3aed',general:'#64748b'};
 let projects = JSON.parse(localStorage.getItem('pulsaio_projects') || '[]');
+
+// On iPhone/new device: fetch from server if localStorage is empty
+if (projects.length === 0) {
+  fetch('/.netlify/functions/get-projects')
+    .then(r=>r.json())
+    .then(d=>{
+      if(d.projects && d.projects.length > 0){
+        projects = d.projects;
+        localStorage.setItem('pulsaio_projects', JSON.stringify(projects));
+        renderProjects();
+        console.log('Max: loaded', projects.length, 'projects from server');
+      }
+    }).catch(()=>{});
+}
 let currentProjectId = null;
 let projectFolderHandle = null;
 
-function saveProjects(){ localStorage.setItem('pulsaio_projects', JSON.stringify(projects)); }
+function saveProjects(){
+  localStorage.setItem('pulsaio_projects', JSON.stringify(projects));
+  // Sync to server so iPhone stays updated
+  const data = projects.map(p=>({id:String(p.id),name:p.name,biz:p.biz||'general',status:p.status||'active'}));
+  fetch('/.netlify/functions/get-projects',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({projects:data})}).catch(()=>{});
+}
 
 function openCreateProject(prefill){
   const modal = document.getElementById('createProjectModal');
