@@ -1291,6 +1291,11 @@ function deleteReminder(id) {
   reminders = reminders.filter(x => x.id !== id);
   saveReminders();
   renderReminders();
+  // Schedule ntfy push if due date is set
+  if (dueDate) {
+    const projName = newReminder.project ? (projects.find(p=>String(p.id)===newReminder.project)||{}).name : '';
+    scheduleNtfyReminder(text, dueDate, projName);
+  }
 }
 
 function renderReminders() {
@@ -1915,6 +1920,25 @@ if (memories.length === 0) {
 document.addEventListener('DOMContentLoaded', renderMemories);
 renderMemories();
 
+
+// ===== NTFY.SH PUSH NOTIFICATIONS =====
+function scheduleNtfyReminder(text, dueDate, projectName) {
+  const msg = projectName ? '[' + projectName + '] ' + text : text;
+  fetch('/.netlify/functions/notify', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      title: 'Max Reminder',
+      message: msg,
+      dueDate: dueDate || null,
+      priority: 4
+    })
+  }).then(r => r.json()).then(d => {
+    if (d.success) {
+      console.log('Max: reminder scheduled via ntfy', dueDate ? 'for ' + dueDate : 'immediately');
+    }
+  }).catch(e => console.log('ntfy error:', e));
+}
 </script>
 
   <!-- PROJECTS TAB -->
