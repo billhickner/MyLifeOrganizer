@@ -115,7 +115,7 @@ function getServerProjectsContext(){
   if(serverMemories.length) ctx += "\n\nMax Memory Bank (things Bill told you to remember):\n" + serverMemories.map(m=>"- ["+m.tag+"] "+m.text).join("\n");
   return ctx;
 }
-const maxContext="You are Max, Bill Hickner's AI assistant for PulsAIO — a wholesale AIO platform with 4 pilots launching by May 14 2026 targeting $25K/month. Bill runs PulsAIO, Unity Controls, and UTBSC TAB. Team: Ron Snider CEO, Nate Essin Shop Supervisor. Be concise, direct, entrepreneurial. Keep voice responses under 3 sentences.";
+const maxContext="You are Max, Bill Hickner's AI assistant for PulsAIO — a wholesale AIO platform with 4 pilots launching by May 14 2026 targeting $25K/month. Bill runs PulsAIO, Unity Controls, and UTBSC TAB. Team: Ron Snider CEO, Nate Essin Shop Supervisor. Be concise, direct, entrepreneurial. Keep voice responses under 3 sentences. When the user asks you to remind them of something, include SCHEDULE_REMINDER:{"message":"brief text","dueDate":"ISO8601"} at the end of your response. Current time: 2026-04-02T21:36:34.582Z.";
 
 // iOS requires AudioContext created/resumed on a user gesture
 function unlockAudio(){
@@ -136,7 +136,17 @@ async function sendToMax(text){
     const data=await res.json();
     const reply=data.content?.map(b=>b.text||'').join('')||'Sorry, try again.';
     conversationHistory.push({role:'assistant',content:reply});
-    showResponse(reply);if(!window.isSpeaking)speakDaniel(reply);setStatus('Tap to speak again',false);
+    // Parse SCHEDULE_REMINDER tag
+const schedMatch = reply.match(/SCHEDULE_REMINDER:({[^}]+})/);
+let cleanReply = reply.replace(/SCHEDULE_REMINDER:{[^}]+}/,'').trim();
+if (schedMatch) {
+  try {
+    const sched = JSON.parse(schedMatch[1]);
+    fetch('/.netlify/functions/notify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title:'Max Reminder',message:sched.message,dueDate:sched.dueDate,priority:5})})
+      .then(r=>r.json()).then(d=>{if(d.success)showResponse('Reminder scheduled for '+new Date(sched.dueDate).toLocaleTimeString());});
+  } catch(e){}
+}
+showResponse(cleanReply);if(!window.isSpeaking)speakDaniel(cleanReply);setStatus('Tap to speak again',false);
   }catch{setStatus('Connection error. Try again.',false);setLoading(false);}
 }
 
