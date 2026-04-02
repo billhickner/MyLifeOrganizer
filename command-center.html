@@ -644,6 +644,19 @@ let goals   = JSON.parse(localStorage.getItem('pac:goals') || 'null') || [
 ];
 let entries = JSON.parse(localStorage.getItem('pac:entries') || '[]');
 let myEvents = JSON.parse(localStorage.getItem('cal:myevents') || '[]');
+  // Merge in Supabase events on load
+  fetch('/.netlify/functions/get-events')
+    .then(r=>r.json()).then(d=>{
+      if(d.events?.length) {
+        const ids = new Set(myEvents.map(e=>e.id));
+        const newEvts = d.events.filter(e=>!ids.has(e.id));
+        if(newEvts.length) {
+          myEvents = [...myEvents, ...newEvts];
+          localStorage.setItem('cal:myevents', JSON.stringify(myEvents));
+          renderCalendar();
+        }
+      }
+    }).catch(()=>{});
 let utbscEvents = [
   {id:'u1',date:'2026-03-30',title:'UTJC2069 NSN 41216 — Unity BAS',location:'2040 Aldine Mail Route Rd, Houston TX 77039',time:'',allDay:true,source:'utbsc'},
   {id:'u2',date:'2026-03-30',title:'UTJC2068 NSN 41216 — TAB / Startup',location:'2040 Aldine Mail Route Rd, Houston TX 77039',time:'',allDay:true,source:'utbsc'},
@@ -674,6 +687,13 @@ const save = () => {
   localStorage.setItem('pac:goals', JSON.stringify(goals));
   localStorage.setItem('pac:entries', JSON.stringify(entries));
   localStorage.setItem('cal:myevents', JSON.stringify(myEvents));
+  // Sync to Supabase
+  if (myEvents.length) {
+    fetch('/.netlify/functions/get-events', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({events: myEvents})
+    }).catch(e=>console.log('event sync err:',e));
+  }
 };
 
 // ── INIT ───────────────────────────────────────────────────────────────────
