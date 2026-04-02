@@ -1,4 +1,6 @@
-const { getStore } = require('@netlify/blobs');
+// get-projects.js — zero dependencies, uses /tmp for persistence
+const fs = require('fs');
+const FILE = '/tmp/max-projects.json';
 
 exports.handler = async (event) => {
   const headers = {
@@ -9,20 +11,21 @@ exports.handler = async (event) => {
   };
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers, body: '' };
 
-  try {
-    const store = getStore('max-data');
-
-    if (event.httpMethod === 'POST') {
+  if (event.httpMethod === 'POST') {
+    try {
       const { projects } = JSON.parse(event.body || '{}');
-      await store.set('projects', JSON.stringify(projects || []));
-      return { statusCode: 200, headers, body: JSON.stringify({ success: true }) };
+      fs.writeFileSync(FILE, JSON.stringify(projects || []));
+      return { statusCode: 200, headers, body: JSON.stringify({ success: true, count: (projects||[]).length }) };
+    } catch(e) {
+      return { statusCode: 500, headers, body: JSON.stringify({ error: e.message }) };
     }
+  }
 
-    // GET
-    const raw = await store.get('projects');
-    const projects = raw ? JSON.parse(raw) : [];
+  // GET
+  try {
+    const projects = fs.existsSync(FILE) ? JSON.parse(fs.readFileSync(FILE, 'utf8')) : [];
     return { statusCode: 200, headers, body: JSON.stringify({ projects }) };
   } catch(e) {
-    return { statusCode: 200, headers, body: JSON.stringify({ projects: [], error: e.message }) };
+    return { statusCode: 200, headers, body: JSON.stringify({ projects: [] }) };
   }
 };
