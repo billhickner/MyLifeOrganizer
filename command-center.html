@@ -416,6 +416,15 @@ input[type=date],input[type=time]{width:100%}
             <option value="utbsc">UTBSC</option>
           </select>
           <input type="datetime-local" id="reminderDate" style="border:1px solid #e2e8f0;border-radius:8px;padding:8px 10px;font-size:12px;color:#475569;background:#f8fafc;outline:none">
+          <select id="reminderRepeat" style="border:1px solid #e2e8f0;border-radius:8px;padding:8px 10px;font-size:12px;color:#475569;background:#f8fafc;outline:none" title="Repeat until acknowledged">
+            <option value="1">Once</option>
+            <option value="3">3x</option>
+            <option value="5" selected>5x (default)</option>
+            <option value="10">10x</option>
+            <option value="15">15x</option>
+            <option value="20">20x</option>
+            <option value="30">30x max</option>
+          </select>
           <button onclick="addReminder()">+ Add</button>
         </div>
 
@@ -1320,7 +1329,8 @@ function deleteReminder(id) {
   // Schedule ntfy push if due date is set
   if (dueDate) {
     const projName = newReminder.project ? (projects.find(p=>String(p.id)===newReminder.project)||{}).name : '';
-    scheduleNtfyReminder(text, dueDate, projName);
+    const repeatCount = parseInt(document.getElementById('reminderRepeat')?.value || '5');
+    scheduleNtfyReminder(text, dueDate, projName, repeatCount);
   }
 }
 
@@ -1948,7 +1958,7 @@ renderMemories();
 
 
 // ===== NTFY.SH PUSH NOTIFICATIONS =====
-function scheduleNtfyReminder(text, dueDate, projectName) {
+function scheduleNtfyReminder(text, dueDate, projectName, repeat) {
   const msg = projectName ? '[' + projectName + '] ' + text : text;
   fetch('/.netlify/functions/notify', {
     method: 'POST',
@@ -1957,13 +1967,20 @@ function scheduleNtfyReminder(text, dueDate, projectName) {
       title: 'Max Reminder',
       message: msg,
       dueDate: dueDate || null,
-      priority: 4
+      priority: 4,
+      repeat: repeat || 5
     })
   }).then(r => r.json()).then(d => {
     if (d.success) {
       console.log('Max: reminder scheduled via ntfy', dueDate ? 'for ' + dueDate : 'immediately');
     }
   }).catch(e => console.log('ntfy error:', e));
+}
+
+function acknowledgeReminder(id) {
+  reminders = reminders.map(r => r.id === id ? Object.assign({}, r, {completed: true, acknowledged: true}) : r);
+  saveReminders();
+  renderReminders();
 }
 </script>
 
