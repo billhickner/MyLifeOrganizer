@@ -105,13 +105,16 @@ fetch('/.netlify/functions/get-projects')
   .then(d=>{serverProjects=d.projects||[];console.log('Max loaded',serverProjects.length,'projects');})
   .catch(()=>{});
 
-// Load memories from server
+// Fetch memories from server on load — always fresh so iPhone gets latest
 fetch('/.netlify/functions/memory')
   .then(r=>r.json())
   .then(d=>{serverMemories=d.memories||[];console.log('Max loaded',serverMemories.length,'memories');})
   .catch(()=>{});
-function getServerProjectsContext(){return serverProjects.length ? "\n\nProjects: "+serverProjects.map(p=>"["+p.biz+"] "+p.name+" ("+p.status+")").join("; ") : "";}
-function getServerMemoryContext(){return serverMemories.length ? "\n\nMax Memory Bank (things Bill told you to remember):\n"+serverMemories.map(m=>"- ["+m.tag+"] "+m.text).join("\n") : "";}
+function getServerProjectsContext(){
+  let ctx = serverProjects.length ? "\n\nProjects: "+serverProjects.map(p=>"["+p.biz+"] "+p.name+" ("+p.status+")").join("; ") : "";
+  if(serverMemories.length) ctx += "\n\nMax Memory Bank (things Bill told you to remember):\n" + serverMemories.map(m=>"- ["+m.tag+"] "+m.text).join("\n");
+  return ctx;
+}
 const maxContext="You are Max, Bill Hickner's AI assistant for PulsAIO — a wholesale AIO platform with 4 pilots launching by May 14 2026 targeting $25K/month. Bill runs PulsAIO, Unity Controls, and UTBSC TAB. Team: Ron Snider CEO, Nate Essin Shop Supervisor. Be concise, direct, entrepreneurial. Keep voice responses under 3 sentences.";
 
 // iOS requires AudioContext created/resumed on a user gesture
@@ -129,7 +132,7 @@ async function sendToMax(text){
   setStatus('Max is thinking…',true);setLoading(true);
   conversationHistory.push({role:'user',content:text});
   try{
-    const res=await fetch('/.netlify/functions/claude',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:300,system:maxContext+getServerProjectsContext()+getServerMemoryContext(),messages:conversationHistory})});
+    const res=await fetch('/.netlify/functions/claude',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:300,system:maxContext+getServerProjectsContext(),messages:conversationHistory})});
     const data=await res.json();
     const reply=data.content?.map(b=>b.text||'').join('')||'Sorry, try again.';
     conversationHistory.push({role:'assistant',content:reply});
