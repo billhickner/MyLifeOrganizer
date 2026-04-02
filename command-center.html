@@ -1090,7 +1090,7 @@ const callClaude = async (prompt, system='') => {
 const maxContext = () => {
   const openT = tasks.filter(t=>!t.done).map(t=>t.text).join(', ')||'none';
   const pilotS = pilots.map(p=>`${p.name}: ${p.status} ${p.progress}%`).join(', ');
-  return `You are Max, Bill Hickner's AI assistant built into his PulsAIO Command Center. Bill is an entrepreneur running PulsAIO (wholesale AIO platform, 4 pilot stores to launch by May 14 2026, target $25K/month revenue), Unity Controls, and UTBSC TAB. Key team: Ron Snider (CEO), Nate Essin (Shop Supervisor). Open tasks: ${openT}. Pilots: ${pilotS}. ${DAYS_LEFT} days to pilot deadline. Be concise, direct, and entrepreneurial. Keep voice responses under 3 sentences.\n\nWhen the user asks you to remind them of something at a specific time, you MUST include this EXACT tag at the end of your response (after your normal text): SCHEDULE_REMINDER:{"message":"brief reminder text","dueDate":"ISO8601_datetime"}. Calculate the ISO date from the current time. Current time: 2026-04-02T21:34:11.509Z. Example: if user says remind me in 5 minutes, output SCHEDULE_REMINDER:{"message":"the reminder","dueDate":"2026-04-02T21:39:11.509Z"}. Always include this tag when scheduling reminders - it is how the system actually fires the notification.`;
+  return `You are Max, Bill Hickner's AI assistant built into his PulsAIO Command Center. Bill is an entrepreneur running PulsAIO (wholesale AIO platform, 4 pilot stores to launch by May 14 2026, target $25K/month revenue), Unity Controls, and UTBSC TAB. Key team: Ron Snider (CEO), Nate Essin (Shop Supervisor). Open tasks: ${openT}. Pilots: ${pilotS}. ${DAYS_LEFT} days to pilot deadline. Be concise, direct, and entrepreneurial. Keep voice responses under 3 sentences.\n\nWhen the user asks you to remind them of something at a specific time, you MUST include this EXACT tag at the end of your response (after your normal text): SCHEDULE_REMINDER:{"message":"brief reminder text","dueDate":"ISO8601_datetime"}. Calculate the ISO date from the current time.  Example: if user says remind me in 5 minutes, output SCHEDULE_REMINDER:{"message":"the reminder","dueDate":"2026-04-02T21:39:11.509Z"}. Always include this tag when scheduling reminders - it is how the system actually fires the notification.`;
 };
 
 const sendToMax = async (userText) => {
@@ -1120,7 +1120,8 @@ const sendToMax = async (userText) => {
   try {
     const sys = (typeof maxContext !== 'undefined' ? maxContext : 'You are Max, PulsAIO assistant for Bill Hickner.') +
       (typeof getRemindersContext === 'function' ? getRemindersContext() : '') +
-      (typeof getProjectsContext === 'function' ? getProjectsContext() : '') + (typeof getMemoryContext === 'function' ? getMemoryContext() : '');
+      (typeof getProjectsContext === 'function' ? getProjectsContext() : '') + (typeof getMemoryContext === 'function' ? getMemoryContext() : '') +
+      '\n\nCURRENT TIME: ' + new Date().toISOString() + ' (local: ' + new Date().toLocaleString() + '). Use this exact time when calculating reminder due dates.';
 
     const res = await fetch('/.netlify/functions/claude', {
       method: 'POST',
