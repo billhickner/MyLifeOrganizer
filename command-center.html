@@ -1325,6 +1325,7 @@ const stopListening = () => {recognition&&recognition.stop();};
 // ── TAB ROUTING ────────────────────────────────────────────────────────────
 const showTab = (tab) => {
   currentTab=tab;
+  if(tab==='calendar') setTimeout(syncCalendarEvents, 100);
   document.querySelectorAll('[id^=tab-]').forEach(el=>el.classList.add('hidden'));
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('tab-'+tab).classList.remove('hidden');
@@ -2130,6 +2131,21 @@ function showToast(msg) {
   t.textContent = msg;
   document.body.appendChild(t);
   setTimeout(() => t.remove(), 3000);
+}
+
+// ===== CALENDAR SYNC WITH SUPABASE =====
+function syncCalendarEvents() {
+  fetch('/.netlify/functions/get-events')
+    .then(r=>r.json()).then(d=>{
+      if(!d.events||!d.events.length) return;
+      const ids = new Set(myEvents.map(e=>String(e.id)));
+      const newEvts = d.events.filter(e=>!ids.has(String(e.id)));
+      if(newEvts.length) {
+        myEvents = [...myEvents, ...newEvts];
+        localStorage.setItem('cal:myevents', JSON.stringify(myEvents));
+        renderCalendar();
+      }
+    }).catch(()=>{});
 }
 </script>
 
