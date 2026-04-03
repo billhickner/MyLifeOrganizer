@@ -1152,10 +1152,12 @@ const sendToMax = async (userText) => {
   window.maxChatHistory.push({role:'user', content:text});
 
   try {
-    const sys = (typeof maxContext !== 'undefined' ? maxContext : 'You are Max, PulsAIO assistant for Bill Hickner.') +
+    const _ctx = typeof maxContext === 'function' ? maxContext() : (typeof maxContext === 'string' ? maxContext : 'You are Max, PulsAIO assistant for Bill Hickner.');
+    const sys = _ctx +
       (typeof getRemindersContext === 'function' ? getRemindersContext() : '') +
-      (typeof getProjectsContext === 'function' ? getProjectsContext() : '') + (typeof getMemoryContext === 'function' ? getMemoryContext() : '') +
-      '\n\nCURRENT TIME: ' + new Date().toISOString() + ' (local: ' + new Date().toLocaleString() + '). Use this exact time when calculating reminder due dates.';
+      (typeof getProjectsContext === 'function' ? getProjectsContext() : '') +
+      (typeof getMemoryContext === 'function' ? getMemoryContext() : '') +
+      '\n\nCURRENT TIME: ' + new Date().toISOString() + ' (local: ' + new Date().toLocaleString() + '). Use this exact time when calculating reminder and calendar event dates.';
 
     const res = await fetch('/.netlify/functions/claude', {
       method: 'POST',
