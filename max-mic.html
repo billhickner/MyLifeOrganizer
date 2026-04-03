@@ -118,7 +118,7 @@ function getServerProjectsContext(){
 function getServerMemoryContext(){
   return serverMemories.length ? "\n\nMax Memory Bank:\n"+serverMemories.map(m=>"- ["+m.tag+"] "+m.text).join("\n") : "";
 }
-const maxContext="You are Max, Bill Hickner's AI assistant for PulsAIO — a wholesale AIO platform with 4 pilots launching by May 14 2026 targeting $25K/month. Bill runs PulsAIO, Unity Controls, and UTBSC TAB. Team: Ron Snider CEO, Nate Essin Shop Supervisor. Be concise, direct, entrepreneurial. Keep voice responses under 3 sentences. When user asks for a reminder, include SCHEDULE_REMINDER:{\"message\":\"brief text\",\"dueDate\":\"ISO8601\"} at the end of your response. When asked to add a calendar event include CREATE_EVENT:{"title":"name","date":"YYYY-MM-DD","time":"HH:MM","category":"general","location":"","notes":""} at end of response."
+const maxContext="You are Max, Bill Hickner's AI assistant for PulsAIO — a wholesale AIO platform with 4 pilots launching by May 14 2026 targeting $25K/month. Bill runs PulsAIO, Unity Controls, and UTBSC TAB. Team: Ron Snider CEO, Nate Essin Shop Supervisor. Be concise, direct, entrepreneurial. Keep voice responses under 3 sentences. When user asks for a reminder, include SCHEDULE_REMINDER:{\"message\":\"brief text\",\"dueDate\":\"ISO8601\"} at the end of your response. When asked to add a calendar event, output CREATE_EVENT followed by a JSON object with keys title, date (YYYY-MM-DD), time (HH:MM), category, location, notes at the end of your response."
 
 // iOS requires AudioContext created/resumed on a user gesture
 function unlockAudio(){
@@ -144,7 +144,7 @@ async function sendToMax(text){
 let cleanReply = reply.replace(/SCHEDULE_REMINDER:\{[^}]+\}/g,'').trim();
 if(!cleanReply) cleanReply = reply; // Safety: never show empty response
 const schedMatch = reply.match(/SCHEDULE_REMINDER:(\{[^}]+\})/);
-    const evtMatch=reply.match(/CREATE_EVENT:([^\n]+)/);if(evtMatch){try{const ev=JSON.parse(evtMatch[1].trim());const ne={id:'p'+Date.now(),title:ev.title||'Event',date:ev.date||new Date().toISOString().split('T')[0],time:ev.time||'',category:'general',source:'personal'};fetch('/.netlify/functions/get-events',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({events:[ne]})}).catch(()=>{});setTimeout(()=>showResponse('Added: '+ne.title+' on '+ne.date),1500);}catch(e){}}
+    const evtM=reply.match(/CREATE_EVENT:(\{[^}]+\})/);if(evtM){try{const ev=JSON.parse(evtM[1].trim());const ne={id:'p'+Date.now(),title:ev.title||'Event',date:ev.date||new Date().toISOString().split('T')[0],time:ev.time||'',category:ev.category||'general',location:ev.location||'',notes:ev.notes||'',source:'personal'};fetch('/.netlify/functions/get-events',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({events:[ne]})}).catch(()=>{});setTimeout(()=>showResponse('Added to calendar: '+ne.title+' on '+ne.date),1500);}catch(e){}}
 if (schedMatch) {
   try {
     const sched = JSON.parse(schedMatch[1]);
