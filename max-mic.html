@@ -97,7 +97,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 </div>
 <script>
 const DANIEL_ID='onwK4e9ZLuTAKqWW03F9';
-let isListening=false,isProcessing=false,needsSetup=true,recognition=null,currentAudio=null,audioCtx=null,conversationHistory=[],serverProjects=[],serverMemories=[];
+let isListening=false,isProcessing=false,chatMode=false,recognition=null,currentAudio=null,audioCtx=null,conversationHistory=[],serverProjects=[],serverMemories=[];
 
 // Fetch projects from server on load
 fetch('/.netlify/functions/get-projects')
@@ -134,6 +134,7 @@ function toggleMic(){
 async function sendToMax(text){
   if(isProcessing)return;
   isProcessing=true;
+  if(chatMode&&/^(end chat|stop chat|goodbye max|stop listening|exit chat)/i.test(text.trim())){chatMode=false;isProcessing=false;document.getElementById('chatBtn').textContent='💬 CHAT MODE';document.getElementById('chatBtn').style.cssText='';showResponse('Chat mode ended.');return;}
   setStatus('Max is thinking…',true);setLoading(true);
   conversationHistory.push({role:'user',content:text});
   try{
@@ -181,7 +182,7 @@ async function speakDaniel(text){if(window.isSpeaking)return;window.isSpeaking=t
       const url=URL.createObjectURL(blob);
       const audio=new Audio(url);
       currentAudio=audio;
-      audio.onended=()=>{currentAudio=null;window.isSpeaking=false;URL.revokeObjectURL(url);document.getElementById('muteBtn').classList.remove('visible');};
+      audio.onended=()=>{currentAudio=null;window.isSpeaking=false;URL.revokeObjectURL(url);if(chatMode&&!isListening){setTimeout(()=>{if(chatMode)startListening();},700);}document.getElementById('muteBtn').classList.remove('visible');};
       await audio.play();
     }
   }catch{
@@ -200,13 +201,11 @@ function stopSpeaking(){window.isSpeaking=false;
 function startListening(){
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
   if(!SR){setStatus('Voice requires Safari on iPhone',false);return;}
-  if(!recognition||!recognition.onresult){recognition=new SR();needsSetup=true;}else{needsSetup=false;}
-  if(needsSetup){recognition.continuous=false;recognition.interimResults=true;recognition.lang='en-US';
+  recognition=new SR();recognition.continuous=false;recognition.interimResults=true;recognition.lang='en-US';
   recognition.onstart=()=>{isListening=true;document.getElementById('micBtn').classList.add('listening');document.getElementById('micRing').classList.add('listening');document.getElementById('micIcon').textContent='⏹';document.getElementById('micLabel').textContent='Listening…';setStatus('Listening… speak now',true);};
   recognition.onresult=e=>{const t=Array.from(e.results).map(r=>r[0].transcript).join('');document.getElementById('textInput').value=t;};
   recognition.onend=()=>{isListening=false;document.getElementById('micBtn').classList.remove('listening');document.getElementById('micRing').classList.remove('listening');document.getElementById('micIcon').textContent='🎙️';document.getElementById('micLabel').textContent='Tap to Talk';const val=document.getElementById('textInput').value.trim();if(val){document.getElementById('textInput').value='';sendToMax(val);}else{setStatus('Tap to speak to Max',false);}};
   recognition.onerror=()=>{isListening=false;document.getElementById('micBtn').classList.remove('listening');document.getElementById('micRing').classList.remove('listening');document.getElementById('micIcon').textContent='🎙️';document.getElementById('micLabel').textContent='Tap to Talk';setStatus('Mic error — try again',false);};
-  }
   recognition.start();
 }
 
@@ -250,39 +249,7 @@ function checkReminders() {
 setInterval(checkReminders, 30000);
 checkReminders();
 
-// Pre-warm microphone to eliminate startup lag
-window.addEventListener('load', ()=>{
-  setTimeout(()=>{
-    const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-    if(!SR) return;
-    try {
-      recognition=new SR();
-      recognition.continuous=false;
-      recognition.interimResults=true;
-      recognition.lang='en-US';
-      recognition.onresult=e=>{
-        const t=Array.from(e.results).map(r=>r[0].transcript).join('');
-        document.getElementById('textInput').value=t;
-      };
-      recognition.onend=()=>{
-        isListening=false;
-        document.getElementById('micBtn').classList.remove('listening');
-        document.getElementById('micLabel').textContent='Tap to Talk';
-        const val=document.getElementById('textInput').value.trim();
-        if(val){document.getElementById('textInput').value='';sendToMax(val);}
-        else{setStatus('Tap to speak again',false);}
-      };
-      recognition.onstart=()=>{
-        isListening=true;
-        document.getElementById('micBtn').classList.add('listening');
-        document.getElementById('micLabel').textContent='Listening...';
-        setStatus('Listening...', true);
-      };
-      recognition.onerror=e=>{if(e.error!=='aborted'){setStatus('Mic error: '+e.error,false);}};
-      needsSetup=false;
-    } catch(e){}
-  }, 500);
-});
+function toggleChatMode(){chatMode=!chatMode;const btn=document.getElementById('chatBtn');if(chatMode){btn.textContent='🔴 END CHAT';btn.style.cssText='margin-top:14px;background:rgba(239,68,68,0.15);border:2px solid #ef4444;border-radius:50px;padding:10px 28px;font-size:12px;font-weight:700;color:#ef4444;cursor:pointer;letter-spacing:1px;';showResponse('Chat mode on — talk to me! Say end chat when done.');setTimeout(startListening,400);}else{btn.textContent='💬 CHAT MODE';btn.style.cssText='margin-top:14px;background:transparent;border:2px solid rgba(255,255,255,0.2);border-radius:50px;padding:10px 28px;font-size:12px;font-weight:700;color:rgba(255,255,255,0.6);cursor:pointer;letter-spacing:1px;';if(isListening&&recognition)recognition.stop();showResponse('Chat mode off.');}}
 </script>
 </body>
 </html>
