@@ -97,7 +97,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 </div>
 <script>
 const DANIEL_ID='onwK4e9ZLuTAKqWW03F9';
-let isListening=false,recognition=null,currentAudio=null,audioCtx=null,conversationHistory=[],serverProjects=[],serverMemories=[];
+let isListening=false,isProcessing=false,needsSetup=true,recognition=null,currentAudio=null,audioCtx=null,conversationHistory=[],serverProjects=[],serverMemories=[];
 
 // Fetch projects from server on load
 fetch('/.netlify/functions/get-projects')
@@ -132,6 +132,8 @@ function toggleMic(){
 }
 
 async function sendToMax(text){
+  if(isProcessing)return;
+  isProcessing=true;
   setStatus('Max is thinking…',true);setLoading(true);
   conversationHistory.push({role:'user',content:text});
   try{
@@ -152,8 +154,8 @@ if (schedMatch) {
       .then(r=>r.json()).then(d=>{if(d.success)showResponse('Reminder scheduled for '+new Date(sched.dueDate).toLocaleTimeString());});
   } catch(e){}
 }
-showResponse(cleanReply);if(!window.isSpeaking)speakDaniel(cleanReply);setStatus('Tap to speak again',false);
-  }catch{setStatus('Connection error. Try again.',false);setLoading(false);}
+isProcessing=false;showResponse(cleanReply);if(!window.isSpeaking)speakDaniel(cleanReply);setStatus('Tap to speak again',false);
+  }catch{isProcessing=false;setStatus('Connection error. Try again.',false);setLoading(false);}
 }
 
 function showResponse(text){document.getElementById('responseCard').classList.add('visible');document.getElementById('responseText').textContent=text;setLoading(false);}
@@ -198,11 +200,13 @@ function stopSpeaking(){window.isSpeaking=false;
 function startListening(){
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
   if(!SR){setStatus('Voice requires Safari on iPhone',false);return;}
-  recognition=new SR();recognition.continuous=false;recognition.interimResults=true;recognition.lang='en-US';
+  if(!recognition||!recognition.onresult){recognition=new SR();needsSetup=true;}else{needsSetup=false;}
+  if(needsSetup){recognition.continuous=false;recognition.interimResults=true;recognition.lang='en-US';
   recognition.onstart=()=>{isListening=true;document.getElementById('micBtn').classList.add('listening');document.getElementById('micRing').classList.add('listening');document.getElementById('micIcon').textContent='⏹';document.getElementById('micLabel').textContent='Listening…';setStatus('Listening… speak now',true);};
   recognition.onresult=e=>{const t=Array.from(e.results).map(r=>r[0].transcript).join('');document.getElementById('textInput').value=t;};
   recognition.onend=()=>{isListening=false;document.getElementById('micBtn').classList.remove('listening');document.getElementById('micRing').classList.remove('listening');document.getElementById('micIcon').textContent='🎙️';document.getElementById('micLabel').textContent='Tap to Talk';const val=document.getElementById('textInput').value.trim();if(val){document.getElementById('textInput').value='';sendToMax(val);}else{setStatus('Tap to speak to Max',false);}};
   recognition.onerror=()=>{isListening=false;document.getElementById('micBtn').classList.remove('listening');document.getElementById('micRing').classList.remove('listening');document.getElementById('micIcon').textContent='🎙️';document.getElementById('micLabel').textContent='Tap to Talk';setStatus('Mic error — try again',false);};
+  }
   recognition.start();
 }
 
@@ -245,6 +249,40 @@ function checkReminders() {
 // Check every 30 seconds
 setInterval(checkReminders, 30000);
 checkReminders();
+
+// Pre-warm microphone to eliminate startup lag
+window.addEventListener('load', ()=>{
+  setTimeout(()=>{
+    const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+    if(!SR) return;
+    try {
+      recognition=new SR();
+      recognition.continuous=false;
+      recognition.interimResults=true;
+      recognition.lang='en-US';
+      recognition.onresult=e=>{
+        const t=Array.from(e.results).map(r=>r[0].transcript).join('');
+        document.getElementById('textInput').value=t;
+      };
+      recognition.onend=()=>{
+        isListening=false;
+        document.getElementById('micBtn').classList.remove('listening');
+        document.getElementById('micLabel').textContent='Tap to Talk';
+        const val=document.getElementById('textInput').value.trim();
+        if(val){document.getElementById('textInput').value='';sendToMax(val);}
+        else{setStatus('Tap to speak again',false);}
+      };
+      recognition.onstart=()=>{
+        isListening=true;
+        document.getElementById('micBtn').classList.add('listening');
+        document.getElementById('micLabel').textContent='Listening...';
+        setStatus('Listening...', true);
+      };
+      recognition.onerror=e=>{if(e.error!=='aborted'){setStatus('Mic error: '+e.error,false);}};
+      needsSetup=false;
+    } catch(e){}
+  }, 500);
+});
 </script>
 </body>
 </html>
