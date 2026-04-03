@@ -653,8 +653,9 @@ let myEvents = JSON.parse(localStorage.getItem('cal:myevents') || '[]');
         if(newEvts.length) {
           myEvents = [...myEvents, ...newEvts];
           localStorage.setItem('cal:myevents', JSON.stringify(myEvents));
-          renderCalendar();
         }
+        // Always re-render so iPad/iPhone pick up events even if tab not active yet
+        renderCalendar();
       }
     }).catch(()=>{});
 let utbscEvents = [
