@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Max">
+<meta name="theme-color" content="#0a0f1e">
+<title>Max - PulsAIO</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:sans-serif;background:#0a0f1e;color:#f0f4f8;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:40px 16px}
+.logo{display:flex;align-items:center;gap:10px}
+.li{width:36px;height:36px;background:#1e40af;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;color:white}
+.lt{font-weight:800;font-size:22px}
+.tag{font-size:11px;color:rgba(255,255,255,0.4);letter-spacing:0.12em;text-transform:uppercase}
+.mw{position:relative;display:flex;align-items:center;justify-content:center;width:240px;height:240px}
+.pulse{position:absolute;width:100%;height:100%;border-radius:50%;border:2px solid #1e40af;opacity:0.3}
+.listening .pulse{animation:p 1.2s ease-in-out infinite}
+@keyframes p{0%,100%{transform:scale(1);opacity:0.3}50%{transform:scale(1.12);opacity:0.6}}
+.mb{width:170px;height:170px;border-radius:50%;background:linear-gradient(135deg,#1e40af,#3b82f6);border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:white;-webkit-tap-highlight-color:transparent;touch-action:manipulation;user-select:none}
+.mb.listening{background:linear-gradient(135deg,#991b1b,#ef4444)}
+.mi{font-size:40px}
+.ml{font-size:10px;font-weight:700;letter-spacing:1.5px}
+.btns{display:flex;gap:10px;justify-content:center}
+.btn{background:transparent;border:2px solid rgba(255,255,255,0.2);border-radius:50px;padding:10px 20px;font-size:11px;font-weight:700;color:rgba(255,255,255,0.6);cursor:pointer;letter-spacing:1px;-webkit-tap-highlight-color:transparent;touch-action:manipulation;user-select:none;font-family:inherit}
+.btn.red{border-color:#ef4444;color:#ef4444;background:rgba(239,68,68,0.12)}
+.st{font-size:13px;color:rgba(255,255,255,0.5);min-height:20px;text-align:center}
+.rb{background:rgba(255,255,255,0.07);border-radius:16px;padding:16px;max-width:340px;width:100%;display:none}
+.rb.on{display:block}
+.rl{font-size:10px;font-weight:700;letter-spacing:1.5px;color:#3b82f6;margin-bottom:8px}
+.rt{font-size:14px;line-height:1.6;color:#e2e8f0}
+.ir{display:flex;gap:8px;max-width:340px;width:100%}
+input{flex:1;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:12px;padding:12px;font-size:14px;color:white;font-family:inherit;-webkit-appearance:none}
+input::placeholder{color:rgba(255,255,255,0.3)}
+.sb{background:#1e40af;border:none;border-radius:12px;padding:12px 14px;color:white;cursor:pointer;font-size:16px;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.foot{font-size:12px;color:rgba(255,255,255,0.3)}
+.foot a{color:#3b82f6;text-decoration:none}
+</style>
+</head>
+<body>
+<div class="logo"><div class="li">M</div><div class="lt">Max</div></div>
+<div class="tag">PULSAIO ASSISTANT</div>
+<div class="mw" id="mw"><div class="pulse"></div>
+<button class="mb" id="mb" onclick="toggleMic()"><span class="mi">&#127897;</span><span class="ml" id="ml">TAP TO TALK</span></button></div>
+<div class="btns"><button class="btn red" onclick="stopSpeaking()">Stop Audio</button><button class="btn" id="cb" onclick="toggleChat()">Chat Mode</button></div>
+<div class="st" id="st">Tap to speak to Max</div>
+<div class="rb" id="rb"><div class="rl">MAX</div><div class="rt" id="rt"></div></div>
+<div class="ir"><input type="text" id="ti" placeholder="Or type a message..." autocomplete="off" autocorrect="off"><button class="sb" onclick="send()">&#10148;</button></div>
+<div class="foot"><a href="/command-center.html">Full Dashboard</a></div>
+<script>
+var L=false,P=false,C=false,T=null,R=null,A=null,S=false,X=null;
+var VID="onwK4e9ZLuTAKqWW03F9";
+var CTX="You are Max, Bill Hickner assistant for PulsAIO. 4 pilots launching May 14 2026 targeting 25K/mo. Bill runs Unity Controls and UTBSC TAB. Be concise. You CAN set real push notifications. For reminder output SCHEDULE_REMINDER:{message:text,dueDate:ISO8601} at end. For calendar event output CREATE_EVENT:{title:name,date:YYYY-MM-DD,time:HH:MM,category:general} at end.";
+function ss(t){var e=document.getElementById("st");if(e)e.textContent=t;}
+function sr(t){var b=document.getElementById("rb"),x=document.getElementById("rt");if(x)x.textContent=t;if(b)b.className="rb on";}
+function ua(){if(!X){try{X=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}}if(X&&X.state==="suspended")X.resume();}
+function stopSpeaking(){if(A){try{A.pause();A.src="";}catch(e){}A=null;}S=false;}
+async function speak(txt){
+if(S)stopSpeaking();S=true;
+try{
+var r=await fetch("/.netlify/functions/tts",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text:txt,voiceId:VID})});
+if(!r.ok)throw new Error("fail");
+var buf=await r.arrayBuffer();
+if(!X){try{X=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}}
+if(X&&X.state==="suspended"){await X.resume();}
+if(X){
+var dec=await X.decodeAudioData(buf.slice(0));
+var src2=X.createBufferSource();src2.buffer=dec;src2.connect(X.destination);
+A={pause:function(){try{src2.stop();}catch(e){}},src:""};
+src2.onended=function(){A=null;S=false;if(C&&!L){T=setTimeout(function(){if(C)startL();},700);}};
+src2.start(0);
+}else{
+var blob=new Blob([buf],{type:"audio/mpeg"});var url=URL.createObjectURL(blob);
+var a=new Audio(url);A=a;
+a.onended=function(){A=null;S=false;URL.revokeObjectURL(url);if(C&&!L){T=setTimeout(function(){if(C)startL();},700);}};
+a.onerror=function(){A=null;S=false;};await a.play();
+}
+}catch(e){S=false;if(C&&!L){T=setTimeout(function(){if(C)startL();},700);}}}
+async function askMax(txt){
+if(P)return;if(!txt||!txt.trim()){P=false;return;}
+if(C&&/^(end chat|stop chat|goodbye max)/i.test(txt.trim())){endChat();return;}
+P=true;ss("Max is thinking...");
+try{
+var now=new Date();
+var sys="TODAY: "+now.toLocaleDateString("en-US",{weekday:"long",year:"numeric",month:"long",day:"numeric"})+". YEAR: "+now.getFullYear()+".\n\n"+CTX+"\n\nTIME: "+now.toISOString();
+var res=await fetch("/.netlify/functions/claude",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:300,system:sys,messages:[{role:"user",content:txt}]})});
+var d=await res.json();var reply=(d.content&&d.content[0]&&d.content[0].text)?d.content[0].text:"Sorry.";P=false;
+var sm=reply.match(/SCHEDULE_REMINDER:(\{[^}]+\})/);
+if(sm){try{var sc=JSON.parse(sm[1]);var ms=new Date(sc.dueDate).getTime()-Date.now();if(ms>0){setTimeout(function(){fetch("/.netlify/functions/notify",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({topic:"pulsaio-max-bill",title:"Max Reminder",message:sc.message})}).catch(function(){});},ms);}}catch(e){}}
+var em=reply.match(/CREATE_EVENT:(\{[^}]+\})/);
+if(em){try{var ev=JSON.parse(em[1]);var ne={id:"p"+Date.now(),title:ev.title||"Event",date:ev.date||now.toISOString().split("T")[0],time:ev.time||"",category:"general",source:"personal"};fetch("/.netlify/functions/get-events",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({events:[ne]})}).catch(function(){});setTimeout(function(){sr("Added: "+ne.title+" on "+ne.date);},1500);}catch(e){}}
+var clean=reply.replace(/SCHEDULE_REMINDER:[^\n]+/g,"").replace(/CREATE_EVENT:[^\n]+/g,"").trim()||reply;
+sr(clean);ss("Tap to speak again");
+speak(clean).catch(function(){if(C&&!L){T=setTimeout(function(){if(C)startL();},800);}});
+}catch(e){P=false;ss("Connection error.");if(C&&!L){T=setTimeout(function(){if(C)startL();},800);}}}
+function send(){var v=document.getElementById("ti").value.trim();if(!v)return;document.getElementById("ti").value="";askMax(v);}
+function startL(){
+var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+if(!SR){ss("Voice requires Safari");return;}if(L)return;
+var r=new SR();r.continuous=false;r.interimResults=true;r.lang="en-US";
+r.onstart=function(){L=true;document.getElementById("mb").classList.add("listening");document.getElementById("mw").classList.add("listening");document.getElementById("ml").textContent="LISTENING...";ss("Listening...");};
+r.onresult=function(e){document.getElementById("ti").value=Array.from(e.results).map(function(x){return x[0].transcript;}).join("");};
+r.onend=function(){L=false;document.getElementById("mb").classList.remove("listening");document.getElementById("mw").classList.remove("listening");document.getElementById("ml").textContent="TAP TO TALK";var v=document.getElementById("ti").value.trim();if(v&&!P){document.getElementById("ti").value="";askMax(v);}else if(!v){ss("Tap to speak");}};
+r.onerror=function(e){L=false;document.getElementById("mb").classList.remove("listening");document.getElementById("mw").classList.remove("listening");document.getElementById("ml").textContent="TAP TO TALK";if(e.error!=="aborted")ss("Mic error: "+e.error);};
+R=r;try{r.start();}catch(e){ss("Mic error: "+e.message);}}
+function stopL(){if(R){try{R.abort();}catch(e){}R=null;}L=false;document.getElementById("mb").classList.remove("listening");document.getElementById("mw").classList.remove("listening");document.getElementById("ml").textContent="TAP TO TALK";}
+function toggleMic(){ua();if(L)stopL();else startL();}
+function endChat(){C=false;if(T){clearTimeout(T);T=null;}P=false;stopL();stopSpeaking();var b=document.getElementById("cb");if(b){b.textContent="Chat Mode";b.className="btn";}sr("Chat mode off.");}
+function toggleChat(){if(C){endChat();return;}C=true;var b=document.getElementById("cb");if(b){b.textContent="END CHAT";b.className="btn red";}sr("Chat mode on. Say end chat to stop.");ua();startL();}
+document.getElementById("ti").addEventListener("keydown",function(e){if(e.key==="Enter")send();});
+</script>
+</body>
+</html>
