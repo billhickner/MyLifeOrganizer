@@ -212,7 +212,7 @@ input[type=date],input[type=time]{width:100%}
 
 /* Project Detail Modal */
 .project-modal{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px;display:none}
-.project-modal.open{display:flex}
+.project-modal.open{display:flex!important}
 .project-modal-inner{background:#fff;border-radius:20px;width:100%;max-width:760px;max-height:90vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 25px 80px rgba(0,0,0,0.2)}
 .project-modal-header{padding:24px 28px 16px;border-bottom:1px solid #f1f5f9;display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
 .project-modal-title-area{flex:1}
@@ -689,9 +689,10 @@ const save = () => {
   localStorage.setItem('cal:myevents', JSON.stringify(myEvents));
   // Sync to Supabase
   if (myEvents.length) {
+    const eventsClean = myEvents.map(({id,title,date,time,category,location,notes,source})=>({id,title,date,time:time||'',category:category||'general',location:location||'',notes:notes||'',source:source||'personal'}));
     fetch('/.netlify/functions/get-events', {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({events: myEvents})
+      body:JSON.stringify({events: eventsClean})
     }).catch(e=>console.log('event sync err:',e));
   }
 };
