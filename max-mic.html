@@ -81,6 +81,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
       <span class="mic-label" id="micLabel">Tap to Talk</span>
     </button>
   </div>
+  <button id="stopAudioBtn" onclick="stopSpeaking()" style="margin-top:10px;background:rgba(239,68,68,0.12);border:2px solid rgba(239,68,68,0.5);border-radius:50px;padding:8px 22px;font-size:11px;font-weight:700;color:#ef4444;cursor:pointer;letter-spacing:1px;">⏹ STOP AUDIO</button>
   <button id="chatBtn" onclick="toggleChatMode()" style="margin-top:16px;background:transparent;border:2px solid rgba(255,255,255,0.25);border-radius:50px;padding:11px 30px;font-size:12px;font-weight:700;color:rgba(255,255,255,0.65);cursor:pointer;letter-spacing:1px;transition:all 0.25s;">💬 CHAT MODE</button>
   <div class="status"><div class="status-text" id="statusText">Tap to speak to Max</div></div>
   <div class="response-card" id="responseCard">
@@ -98,7 +99,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 </div>
 <script>
 const DANIEL_ID='onwK4e9ZLuTAKqWW03F9';
-let isListening=false,isProcessing=false,chatMode=false,recognition=null,currentAudio=null,audioCtx=null,conversationHistory=[],serverProjects=[],serverMemories=[];
+let isListening=false,isProcessing=false,chatMode=false,chatRestartTimer=null,recognition=null,currentAudio=null,audioCtx=null,conversationHistory=[],serverProjects=[],serverMemories=[];
 
 // Fetch projects from server on load
 fetch('/.netlify/functions/get-projects')
@@ -135,7 +136,7 @@ function toggleMic(){
 async function sendToMax(text){
   if(isProcessing)return;
   isProcessing=true;
-  if(chatMode&&/^(end chat|stop chat|goodbye max|stop listening|exit chat)/i.test(text.trim())){chatMode=false;isProcessing=false;document.getElementById('chatBtn').textContent='💬 CHAT MODE';document.getElementById('chatBtn').style.cssText='';showResponse('Chat mode ended.');return;}
+  if(chatMode&&/^(end chat|stop chat|goodbye max|stop listening|exit chat)/i.test(text.trim())){endChatMode();return;}
   setStatus('Max is thinking…',true);setLoading(true);
   conversationHistory.push({role:'user',content:text});
   try{
@@ -177,13 +178,13 @@ async function speakDaniel(text){if(window.isSpeaking)return;window.isSpeaking=t
       source.connect(audioCtx.destination);
       source.start(0);
       currentAudio=source;
-      source.onended=()=>{currentAudio=null;window.isSpeaking=false;document.getElementById('muteBtn').classList.remove('visible');if(chatMode&&!isListening){setTimeout(()=>{if(chatMode)startListening();},700);}};
+      source.onended=()=>{currentAudio=null;window.isSpeaking=false;document.getElementById('muteBtn').classList.remove('visible');if(chatMode&&!isListening){chatRestartTimer=setTimeout(()=>{if(chatMode)startListening();},700);}};
     } else {
       const blob=new Blob([arrayBuffer],{type:'audio/mpeg'});
       const url=URL.createObjectURL(blob);
       const audio=new Audio(url);
       currentAudio=audio;
-      audio.onended=()=>{currentAudio=null;window.isSpeaking=false;URL.revokeObjectURL(url);if(chatMode&&!isListening){setTimeout(()=>{if(chatMode)startListening();},700);}document.getElementById('muteBtn').classList.remove('visible');};
+      audio.onended=()=>{currentAudio=null;window.isSpeaking=false;URL.revokeObjectURL(url);if(chatMode&&!isListening){chatRestartTimer=setTimeout(()=>{if(chatMode)startListening();},700);}document.getElementById('muteBtn').classList.remove('visible');};
       await audio.play();
     }
   }catch{
@@ -250,22 +251,27 @@ function checkReminders() {
 setInterval(checkReminders, 30000);
 checkReminders();
 
-function toggleChatMode(){chatMode=!chatMode;const btn=document.getElementById('chatBtn');if(chatMode){btn.textContent='🔴 END CHAT';btn.style.cssText='margin-top:14px;background:rgba(239,68,68,0.15);border:2px solid #ef4444;border-radius:50px;padding:10px 28px;font-size:12px;font-weight:700;color:#ef4444;cursor:pointer;letter-spacing:1px;';showResponse('Chat mode on — talk to me! Say end chat when done.');setTimeout(startListening,400);}else{btn.textContent='💬 CHAT MODE';btn.style.cssText='margin-top:14px;background:transparent;border:2px solid rgba(255,255,255,0.2);border-radius:50px;padding:10px 28px;font-size:12px;font-weight:700;color:rgba(255,255,255,0.6);cursor:pointer;letter-spacing:1px;';if(isListening&&recognition)recognition.stop();showResponse('Chat mode off.');}}
-
-function toggleChatMode(){
-  chatMode=!chatMode;
+function endChatMode(){
+  chatMode=false;
+  if(chatRestartTimer){clearTimeout(chatRestartTimer);chatRestartTimer=null;}
+  isProcessing=false;
+  try{if(recognition)recognition.abort();}catch(e){}
+  isListening=false;
+  stopSpeaking();
   const btn=document.getElementById('chatBtn');
-  if(chatMode){
-    btn.textContent='🔴 END CHAT';
-    btn.style.cssText='margin-top:16px;background:rgba(239,68,68,0.15);border:2px solid #ef4444;border-radius:50px;padding:11px 30px;font-size:12px;font-weight:700;color:#ef4444;cursor:pointer;letter-spacing:1px;transition:all 0.25s;';
-    showResponse('Chat mode on — talk to me! Say "end chat" when done.');
-    setTimeout(startListening,400);
-  } else {
-    btn.textContent='💬 CHAT MODE';
-    btn.style.cssText='margin-top:16px;background:transparent;border:2px solid rgba(255,255,255,0.25);border-radius:50px;padding:11px 30px;font-size:12px;font-weight:700;color:rgba(255,255,255,0.65);cursor:pointer;letter-spacing:1px;transition:all 0.25s;';
-    if(isListening&&recognition)recognition.stop();
-    showResponse('Chat mode off.');
-  }
+  if(btn){btn.textContent='💬 CHAT MODE';btn.style.cssText='margin-top:16px;background:transparent;border:2px solid rgba(255,255,255,0.25);border-radius:50px;padding:11px 30px;font-size:12px;font-weight:700;color:rgba(255,255,255,0.65);cursor:pointer;letter-spacing:1px;transition:all 0.25s;';}
+  document.getElementById('micBtn').classList.remove('listening');
+  document.getElementById('micLabel').textContent='Tap to Talk';
+  showResponse('Chat mode off. Tap the mic anytime.');
+}
+function toggleChatMode(){
+  if(chatMode){endChatMode();return;}
+  chatMode=true;
+  const btn=document.getElementById('chatBtn');
+  btn.textContent='🔴 END CHAT';
+  btn.style.cssText='margin-top:16px;background:rgba(239,68,68,0.15);border:2px solid #ef4444;border-radius:50px;padding:11px 30px;font-size:12px;font-weight:700;color:#ef4444;cursor:pointer;letter-spacing:1px;transition:all 0.25s;';
+  showResponse('Chat mode on — I'm listening! Tap 🔴 END CHAT to stop.');
+  setTimeout(startListening,400);
 }
 </script>
 </body>
