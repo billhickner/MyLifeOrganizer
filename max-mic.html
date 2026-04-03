@@ -103,7 +103,7 @@ r.onend=function(){L=false;document.getElementById("mb").classList.remove("liste
 r.onerror=function(e){L=false;document.getElementById("mb").classList.remove("listening");document.getElementById("mw").classList.remove("listening");document.getElementById("ml").textContent="TAP TO TALK";if(e.error!=="aborted")ss("Mic error: "+e.error);};
 R=r;try{r.start();}catch(e){ss("Mic error: "+e.message);}}
 function stopL(){if(R){try{R.abort();}catch(e){}R=null;}L=false;document.getElementById("mb").classList.remove("listening");document.getElementById("mw").classList.remove("listening");document.getElementById("ml").textContent="TAP TO TALK";}
-function toggleMic(){ua();stopSpeaking();if(L){stopL();}else{setTimeout(function(){startL();},150);}}
+function toggleMic(){ua();stopSpeaking();if(L){stopL();}else{startL();}}
 function endChat(){C=false;if(T){clearTimeout(T);T=null;}P=false;stopL();stopSpeaking();var b=document.getElementById("cb");if(b){b.textContent="Chat Mode";b.className="btn";}sr("Chat mode off.");}
 function toggleChat(){if(C){endChat();return;}C=true;var b=document.getElementById("cb");if(b){b.textContent="END CHAT";b.className="btn red";}sr("Chat mode on. Say end chat to stop.");ua();startL();}
 document.getElementById("ti").addEventListener("keydown",function(e){if(e.key==="Enter")send();});
