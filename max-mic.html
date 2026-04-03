@@ -107,7 +107,7 @@ fetch('/.netlify/functions/get-projects')
   .then(d=>{serverProjects=d.projects||[];console.log('Max loaded',serverProjects.length,'projects');})
   .catch(()=>{});
 
-// Fetch memories from server on load — always fresh so iPhone gets latest
+// Fetch memories from server on load - always fresh so iPhone gets latest
 fetch('/.netlify/functions/memory')
   .then(r=>r.json())
   .then(d=>{serverMemories=d.memories||[];console.log('Max loaded',serverMemories.length,'memories');})
@@ -120,7 +120,7 @@ function getServerProjectsContext(){
 function getServerMemoryContext(){
   return serverMemories.length ? "\n\nMax Memory Bank:\n"+serverMemories.map(m=>"- ["+m.tag+"] "+m.text).join("\n") : "";
 }
-const maxContext="You are Max, Bill Hickner's AI assistant for PulsAIO — a wholesale AIO platform with 4 pilots launching by May 14 2026 targeting $25K/month. Bill runs PulsAIO, Unity Controls, and UTBSC TAB. Team: Ron Snider CEO, Nate Essin Shop Supervisor. Be concise, direct, entrepreneurial. Keep voice responses under 3 sentences. When user asks for a reminder, you MUST include SCHEDULE_REMINDER:{\"message\":\"reminder text\",\"dueDate\":\"ISO8601_datetime\"} at the end of your response. This fires a REAL push notification to Bill via ntfy. You CAN do reminders. Never say you cannot. Always confirm. When asked to add a calendar event, output CREATE_EVENT followed by a JSON object with keys title, date (YYYY-MM-DD), time (HH:MM), category, location, notes at the end of your response."
+const maxContext="You are Max, Bill Hickner's AI assistant for PulsAIO - a wholesale AIO platform with 4 pilots launching by May 14 2026 targeting $25K/month. Bill runs PulsAIO, Unity Controls, and UTBSC TAB. Team: Ron Snider CEO, Nate Essin Shop Supervisor. Be concise, direct, entrepreneurial. Keep voice responses under 3 sentences. When user asks for a reminder, you MUST include SCHEDULE_REMINDER:{\"message\":\"reminder text\",\"dueDate\":\"ISO8601_datetime\"} at the end of your response. This fires a REAL push notification to Bill via ntfy. You CAN do reminders. Never say you cannot. Always confirm. When asked to add a calendar event, output CREATE_EVENT followed by a JSON object with keys title, date (YYYY-MM-DD), time (HH:MM), category, location, notes at the end of your response."
 
 // iOS requires AudioContext created/resumed on a user gesture
 function unlockAudio(){
@@ -137,7 +137,7 @@ async function sendToMax(text){
   if(isProcessing)return;
   isProcessing=true;
   if(chatMode&&/^(end chat|stop chat|goodbye max|stop listening|exit chat)/i.test(text.trim())){endChatMode();return;}
-  setStatus('Max is thinking…',true);setLoading(true);
+  setStatus('Max is thinking',true);setLoading(true);
   conversationHistory.push({role:'user',content:text});
   try{
     const res=await fetch('/.netlify/functions/claude',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:300,system:'*** TODAY IS '+new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'})+'. CURRENT YEAR: '+new Date().getFullYear()+'. Always use '+new Date().getFullYear()+' for ALL dates. ***\n\n'+maxContext+getServerProjectsContext()+getServerMemoryContext()+'\n\nTODAY IS: '+new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'})+'. CURRENT YEAR IS '+new Date().getFullYear()+'. ALWAYS USE '+new Date().getFullYear()+' FOR ALL DATES UNLESS THE USER SPECIFIES A DIFFERENT YEAR. CURRENT TIME: '+new Date().toISOString()+'.  When user asks for a reminder, include SCHEDULE_REMINDER:{"message":"text","dueDate":"ISO8601"} at end of response.',messages:conversationHistory})});
@@ -149,7 +149,7 @@ async function sendToMax(text){
 let cleanReply = reply.replace(/SCHEDULE_REMINDER:\{[^}]+\}/g,'').trim();
 if(!cleanReply) cleanReply = reply; // Safety: never show empty response
 const schedMatch = reply.match(/SCHEDULE_REMINDER:(\{[^}]+\})/);
-    const evtM=reply.match(/CREATE_EVENT:(\{[^}]+\})/);if(evtM){try{const ev=JSON.parse(evtM[1].trim());const ne={id:'p'+Date.now(),title:ev.title||'Event',date:ev.date||new Date().toISOString().split('T')[0],time:ev.time||'',category:ev.category||'general',location:ev.location||'',notes:ev.notes||'',source:'personal'};fetch('/.netlify/functions/get-events',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({events:[ne]})}).catch(()=>{});setTimeout(()=>showResponse('✅ Added to your calendar: '+ne.title+' on '+ne.date+' at '+(ne.time||'all day')),1500);}catch(e){}}
+    const evtM=reply.match(/CREATE_EVENT:(\{[^}]+\})/);if(evtM){try{const ev=JSON.parse(evtM[1].trim());const ne={id:'p'+Date.now(),title:ev.title||'Event',date:ev.date||new Date().toISOString().split('T')[0],time:ev.time||'',category:ev.category||'general',location:ev.location||'',notes:ev.notes||'',source:'personal'};fetch('/.netlify/functions/get-events',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({events:[ne]})}).catch(()=>{});setTimeout(()=>showResponse(' Added to your calendar: '+ne.title+' on '+ne.date+' at '+(ne.time||'all day')),1500);}catch(e){}}
 if (schedMatch) {
   try {
     const sched = JSON.parse(schedMatch[1]);
@@ -204,10 +204,10 @@ function startListening(){
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
   if(!SR){setStatus('Voice requires Safari on iPhone',false);return;}
   recognition=new SR();recognition.continuous=false;recognition.interimResults=true;recognition.lang='en-US';
-  recognition.onstart=()=>{isListening=true;document.getElementById('micBtn').classList.add('listening');document.getElementById('micRing').classList.add('listening');document.getElementById('micIcon').textContent='⏹';document.getElementById('micLabel').textContent='Listening…';setStatus('Listening… speak now',true);};
+  recognition.onstart=()=>{isListening=true;document.getElementById('micBtn').classList.add('listening');document.getElementById('micRing').classList.add('listening');document.getElementById('micIcon').textContent='';document.getElementById('micLabel').textContent='Listening';setStatus('Listening speak now',true);};
   recognition.onresult=e=>{const t=Array.from(e.results).map(r=>r[0].transcript).join('');document.getElementById('textInput').value=t;};
-  recognition.onend=()=>{isListening=false;document.getElementById('micBtn').classList.remove('listening');document.getElementById('micRing').classList.remove('listening');document.getElementById('micIcon').textContent='🎙️';document.getElementById('micLabel').textContent='Tap to Talk';const val=document.getElementById('textInput').value.trim();if(val){document.getElementById('textInput').value='';sendToMax(val);}else{setStatus('Tap to speak to Max',false);}};
-  recognition.onerror=()=>{isListening=false;document.getElementById('micBtn').classList.remove('listening');document.getElementById('micRing').classList.remove('listening');document.getElementById('micIcon').textContent='🎙️';document.getElementById('micLabel').textContent='Tap to Talk';setStatus('Mic error — try again',false);};
+  recognition.onend=()=>{isListening=false;document.getElementById('micBtn').classList.remove('listening');document.getElementById('micRing').classList.remove('listening');document.getElementById('micIcon').textContent='';document.getElementById('micLabel').textContent='Tap to Talk';const val=document.getElementById('textInput').value.trim();if(val){document.getElementById('textInput').value='';sendToMax(val);}else{setStatus('Tap to speak to Max',false);}};
+  recognition.onerror=()=>{isListening=false;document.getElementById('micBtn').classList.remove('listening');document.getElementById('micRing').classList.remove('listening');document.getElementById('micIcon').textContent='';document.getElementById('micLabel').textContent='Tap to Talk';setStatus('Mic error - try again',false);};
   recognition.start();
 }
 
@@ -240,7 +240,7 @@ function checkReminders() {
         // Also speak it
         speakDaniel('Reminder: ' + r.text);
         // Show on screen
-        showResponse('⏰ Reminder: ' + r.text);
+        showResponse(' Reminder: ' + r.text);
       }
     });
     localStorage.setItem('pulsaio_reminders', JSON.stringify(reminders));
@@ -270,7 +270,7 @@ function toggleChatMode(){
   const btn=document.getElementById('chatBtn');
   btn.textContent=' END CHAT';
   btn.style.cssText='margin-top:16px;background:rgba(239,68,68,0.15);border:2px solid #ef4444;border-radius:50px;padding:11px 30px;font-size:12px;font-weight:700;color:#ef4444;cursor:pointer;letter-spacing:1px;transition:all 0.25s;';
-  showResponse('Chat mode on — I'm listening! Tap  END CHAT to stop.');
+  showResponse('Chat mode on - I'm listening! Tap  END CHAT to stop.');
   setTimeout(startListening,400);
 }
 </script>
