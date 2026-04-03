@@ -1209,8 +1209,25 @@ const sendToMax = async (userText) => {
         // Show confirmation toast
         showToast('Event added: ' + newEvt.title + ' on ' + newEvt.date);
       } catch(e) { console.log('CREATE_EVENT parse error:', e); }
+    // ADD_NOTE handler
+    const noteMatch = reply.match(/ADD_NOTE:\{([^}]+)\}/);
+    if (noteMatch) {
+      try {
+        const nd = JSON.parse('{' + noteMatch[1] + '}');
+        const projs = JSON.parse(localStorage.getItem('pulsaio_projects') || '[]');
+        const pidx = projs.findIndex(pr => pr.name && pr.name.toLowerCase().includes((nd.project||'').toLowerCase().trim()));
+        const target = projs[pidx >= 0 ? pidx : 0];
+        if (target) {
+          const ts = new Date().toLocaleDateString('en-US', {month:'short', day:'numeric'});
+          target.notes = (target.notes ? target.notes + '\n' : '') + ts + ' - Max: ' + (nd.note||'').trim();
+          target.updated = new Date().toISOString();
+          localStorage.setItem('pulsaio_projects', JSON.stringify(projs));
+          if (typeof renderProjects === 'function') renderProjects();
+        }
+      } catch(e) { console.log('ADD_NOTE parse error:', e); }
     }
-    let cleanReply = reply.replace(/SCHEDULE_REMINDER:{[^}]+}/g,'').replace(/CREATE_EVENT:{[^}]+}/g,'').trim() || reply;
+    }
+    let cleanReply = reply.replace(/SCHEDULE_REMINDER:{[^}]+}/g,'').replace(/CREATE_EVENT:{[^}]+}/g,'').replace(/ADD_NOTE:\{[^}]+\}/g,'').trim() || reply;
     if (schedMatch) {
       try {
         const sched = JSON.parse(schedMatch[1]);
@@ -1620,6 +1637,7 @@ function openProject(id){
   document.getElementById('modalProjectStatus').value = p.status;
   document.getElementById('modalProjectGoal').textContent = p.goal || 'No goal defined.';
   document.getElementById('modalProjectNotes').value = '';
+  var _gi=document.getElementById('goalInput');if(_gi)_gi.value=p.goal||'';
   renderProjectUpdates(p);
   renderProjectFiles(p);
   renderFolderLink(p);
@@ -1717,6 +1735,7 @@ function saveProjectChanges(){
   const p = projects.find(x => x.id === currentProjectId);
   if (!p) return;
   p.status = document.getElementById('modalProjectStatus').value;
+  var _gi2=document.getElementById('goalInput');if(_gi2)p.goal=_gi2.value;
   const noteText = document.getElementById('modalProjectNotes').value.trim();
   if (noteText) {
     if (!p.updates) p.updates = [];
