@@ -2,8 +2,6 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PulsAIO Command Center</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1468,13 +1466,13 @@ renderReminders();
 
 // ===== PROJECTS SYSTEM =====
 const PROJECT_COLORS = {pulsaio:'#2563eb',unity:'#16a34a',utbsc:'#d97706',personal:'#7c3aed',general:'#64748b'};
-let projects = JSON.parse(localStorage.getItem('pulsaio_projects') || '[]').map(p=>({...p,id:String(p.id)}));
+let projects = JSON.parse(localStorage.getItem('pulsaio_projects') || '[]');
 
 // Load from Supabase on any device — always get latest
 fetch('/.netlify/functions/get-projects')
   .then(r=>r.json())
   .then(d=>{
-    if(d.projects && d.projects.length > 0){ d.projects = d.projects.map(p=>({...p,id:String(p.id)}));
+    if(d.projects && d.projects.length > 0){
       // Merge server projects with local (local wins for newer data)
       const serverIds = new Set(d.projects.map(p=>p.id));
       const localOnly = projects.filter(p=>!serverIds.has(String(p.id)));
@@ -1578,8 +1576,10 @@ function renderProjects(){
   }).join('');
 }
 
-function openProject(id){id=String(id);
-  const p = projects.find(x => x.id === id);
+function openProject(id){
+  id=String(id);
+  // Use loose match so number/string both work
+  const p = projects.find(x=>String(x.id)===id);
   if (!p) return;
   currentProjectId = id;
   document.getElementById('modalProjectName').textContent = p.name;
@@ -1589,13 +1589,15 @@ function openProject(id){id=String(id);
   renderProjectUpdates(p);
   renderProjectFiles(p);
   renderFolderLink(p);
-  document.getElementById('projectModal').classList.add('open');
+  const _modal=document.getElementById('projectModal');
+  _modal.classList.add('open');
+  _modal.style.display='flex';
   renderProjectEmails(p);
   syncProjectsToServer();
 }
 
 function closeProjectModal(){
-  document.getElementById('projectModal').classList.remove('open');
+  const _cm=document.getElementById('projectModal');_cm.classList.remove('open');_cm.style.display='';
   currentProjectId = null;
 }
 
