@@ -119,7 +119,7 @@ function getServerProjectsContext(){
 function getServerMemoryContext(){
   return serverMemories.length ? "\n\nMax Memory Bank:\n"+serverMemories.map(m=>"- ["+m.tag+"] "+m.text).join("\n") : "";
 }
-const maxContext="You are Max, Bill Hickner's AI assistant for PulsAIO — a wholesale AIO platform with 4 pilots launching by May 14 2026 targeting $25K/month. Bill runs PulsAIO, Unity Controls, and UTBSC TAB. Team: Ron Snider CEO, Nate Essin Shop Supervisor. Be concise, direct, entrepreneurial. Keep voice responses under 3 sentences. When user asks for a reminder, include SCHEDULE_REMINDER:{\"message\":\"brief text\",\"dueDate\":\"ISO8601\"} at the end of your response. When asked to add a calendar event, output CREATE_EVENT followed by a JSON object with keys title, date (YYYY-MM-DD), time (HH:MM), category, location, notes at the end of your response."
+const maxContext="You are Max, Bill Hickner's AI assistant for PulsAIO — a wholesale AIO platform with 4 pilots launching by May 14 2026 targeting $25K/month. Bill runs PulsAIO, Unity Controls, and UTBSC TAB. Team: Ron Snider CEO, Nate Essin Shop Supervisor. Be concise, direct, entrepreneurial. Keep voice responses under 3 sentences. When user asks for a reminder, you MUST include SCHEDULE_REMINDER:{\"message\":\"reminder text\",\"dueDate\":\"ISO8601_datetime\"} at the end of your response. This fires a REAL push notification to Bill via ntfy. You CAN do reminders. Never say you cannot. Always confirm. When asked to add a calendar event, output CREATE_EVENT followed by a JSON object with keys title, date (YYYY-MM-DD), time (HH:MM), category, location, notes at the end of your response."
 
 // iOS requires AudioContext created/resumed on a user gesture
 function unlockAudio(){
@@ -139,7 +139,7 @@ async function sendToMax(text){
   setStatus('Max is thinking…',true);setLoading(true);
   conversationHistory.push({role:'user',content:text});
   try{
-    const res=await fetch('/.netlify/functions/claude',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:300,system:maxContext+getServerProjectsContext()+getServerMemoryContext()+'\n\nTODAY IS: '+new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'})+'. CURRENT YEAR IS '+new Date().getFullYear()+'. ALWAYS USE '+new Date().getFullYear()+' FOR ALL DATES UNLESS THE USER SPECIFIES A DIFFERENT YEAR. CURRENT TIME: '+new Date().toISOString()+'.  When user asks for a reminder, include SCHEDULE_REMINDER:{"message":"text","dueDate":"ISO8601"} at end of response.',messages:conversationHistory})});
+    const res=await fetch('/.netlify/functions/claude',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:300,system:'*** TODAY IS '+new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'})+'. CURRENT YEAR: '+new Date().getFullYear()+'. Always use '+new Date().getFullYear()+' for ALL dates. ***\n\n'+maxContext+getServerProjectsContext()+getServerMemoryContext()+'\n\nTODAY IS: '+new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'})+'. CURRENT YEAR IS '+new Date().getFullYear()+'. ALWAYS USE '+new Date().getFullYear()+' FOR ALL DATES UNLESS THE USER SPECIFIES A DIFFERENT YEAR. CURRENT TIME: '+new Date().toISOString()+'.  When user asks for a reminder, include SCHEDULE_REMINDER:{"message":"text","dueDate":"ISO8601"} at end of response.',messages:conversationHistory})});
     const data=await res.json();
     const reply=data.content?.map(b=>b.text||'').join('')||'Sorry, try again.';
     conversationHistory.push({role:'assistant',content:reply});
@@ -177,7 +177,7 @@ async function speakDaniel(text){if(window.isSpeaking)return;window.isSpeaking=t
       source.connect(audioCtx.destination);
       source.start(0);
       currentAudio=source;
-      source.onended=()=>{currentAudio=null;document.getElementById('muteBtn').classList.remove('visible');};
+      source.onended=()=>{currentAudio=null;window.isSpeaking=false;document.getElementById('muteBtn').classList.remove('visible');if(chatMode&&!isListening){setTimeout(()=>{if(chatMode)startListening();},700);}};
     } else {
       const blob=new Blob([arrayBuffer],{type:'audio/mpeg'});
       const url=URL.createObjectURL(blob);
