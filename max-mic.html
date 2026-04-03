@@ -135,7 +135,7 @@ async function sendToMax(text){
   setStatus('Max is thinking…',true);setLoading(true);
   conversationHistory.push({role:'user',content:text});
   try{
-    const res=await fetch('/.netlify/functions/claude',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:300,system:maxContext+getServerProjectsContext()+getServerMemoryContext()+'\n\nCURRENT TIME: '+new Date().toISOString()+' (local: '+new Date().toLocaleString()+').  When user asks for a reminder, include SCHEDULE_REMINDER:{"message":"text","dueDate":"ISO8601"} at end of response.',messages:conversationHistory})});
+    const res=await fetch('/.netlify/functions/claude',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:300,system:maxContext+getServerProjectsContext()+getServerMemoryContext()+'\n\nTODAY IS: '+new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'})+'. CURRENT YEAR IS '+new Date().getFullYear()+'. ALWAYS USE '+new Date().getFullYear()+' FOR ALL DATES UNLESS THE USER SPECIFIES A DIFFERENT YEAR. CURRENT TIME: '+new Date().toISOString()+'.  When user asks for a reminder, include SCHEDULE_REMINDER:{"message":"text","dueDate":"ISO8601"} at end of response.',messages:conversationHistory})});
     const data=await res.json();
     const reply=data.content?.map(b=>b.text||'').join('')||'Sorry, try again.';
     conversationHistory.push({role:'assistant',content:reply});
@@ -144,7 +144,7 @@ async function sendToMax(text){
 let cleanReply = reply.replace(/SCHEDULE_REMINDER:\{[^}]+\}/g,'').trim();
 if(!cleanReply) cleanReply = reply; // Safety: never show empty response
 const schedMatch = reply.match(/SCHEDULE_REMINDER:(\{[^}]+\})/);
-    const evtM=reply.match(/CREATE_EVENT:(\{[^}]+\})/);if(evtM){try{const ev=JSON.parse(evtM[1].trim());const ne={id:'p'+Date.now(),title:ev.title||'Event',date:ev.date||new Date().toISOString().split('T')[0],time:ev.time||'',category:ev.category||'general',location:ev.location||'',notes:ev.notes||'',source:'personal'};fetch('/.netlify/functions/get-events',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({events:[ne]})}).catch(()=>{});setTimeout(()=>showResponse('Added to calendar: '+ne.title+' on '+ne.date),1500);}catch(e){}}
+    const evtM=reply.match(/CREATE_EVENT:(\{[^}]+\})/);if(evtM){try{const ev=JSON.parse(evtM[1].trim());const ne={id:'p'+Date.now(),title:ev.title||'Event',date:ev.date||new Date().toISOString().split('T')[0],time:ev.time||'',category:ev.category||'general',location:ev.location||'',notes:ev.notes||'',source:'personal'};fetch('/.netlify/functions/get-events',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({events:[ne]})}).catch(()=>{});setTimeout(()=>showResponse('✅ Added to your calendar: '+ne.title+' on '+ne.date+' at '+(ne.time||'all day')),1500);}catch(e){}}
 if (schedMatch) {
   try {
     const sched = JSON.parse(schedMatch[1]);
