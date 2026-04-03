@@ -61,10 +61,21 @@ async function speak(txt){
 if(S)stopSpeaking();S=true;
 try{var r=await fetch("/.netlify/functions/tts",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text:txt,voiceId:VID})});
 if(!r.ok)throw new Error("fail");
-var buf=await r.arrayBuffer();var blob=new Blob([buf],{type:"audio/mpeg"});var url=URL.createObjectURL(blob);
-var a=new Audio(url);A=a;
-a.onended=function(){A=null;S=false;URL.revokeObjectURL(url);if(C&&!L){T=setTimeout(function(){if(C)startL();},700);}};
-a.onerror=function(){A=null;S=false;};await a.play();}catch(e){S=false;}}
+var buf=await r.arrayBuffer();
+if(!X){try{X=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}}
+if(X&&X.state==="suspended"){await X.resume();}
+if(X){
+  var decoded=await X.decodeAudioData(buf);
+  var src2=X.createBufferSource();src2.buffer=decoded;src2.connect(X.destination);
+  A={pause:function(){try{src2.stop();}catch(e){}},src:""};
+  src2.onended=function(){A=null;S=false;if(C&&!L){T=setTimeout(function(){if(C)startL();},700);}};
+  src2.start(0);
+}else{
+  var blob=new Blob([buf],{type:"audio/mpeg"});var url=URL.createObjectURL(blob);
+  var a=new Audio(url);A=a;
+  a.onended=function(){A=null;S=false;URL.revokeObjectURL(url);if(C&&!L){T=setTimeout(function(){if(C)startL();},700);}};
+  a.onerror=function(){A=null;S=false;};await a.play();
+}}catch(e){S=false;if(C&&!L){T=setTimeout(function(){if(C)startL();},700);}}}
 async function askMax(txt){
 if(P)return;if(!txt||!txt.trim())return;
 if(C&&/^(end chat|stop chat|goodbye max)/i.test(txt.trim())){endChat();return;}
@@ -78,7 +89,9 @@ if(sm){try{var sc=JSON.parse(sm[1]);var ms=new Date(sc.dueDate).getTime()-Date.n
 var em=reply.match(/CREATE_EVENT:(\{[^}]+\})/);
 if(em){try{var ev=JSON.parse(em[1]);var ne={id:"p"+Date.now(),title:ev.title||"Event",date:ev.date||now.toISOString().split("T")[0],time:ev.time||"",category:"general",source:"personal"};fetch("/.netlify/functions/get-events",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({events:[ne]})}).catch(function(){});setTimeout(function(){sr("Added: "+ne.title+" on "+ne.date);},1500);}catch(e){}}
 var clean=reply.replace(/SCHEDULE_REMINDER:[^\n]+/g,"").replace(/CREATE_EVENT:[^\n]+/g,"").trim()||reply;
-sr(clean);ss("Tap to speak again");if(!S)speak(clean);}catch(e){P=false;ss("Connection error.");}}
+sr(clean);ss("Tap to speak again");
+if(!S){speak(clean).catch(function(){if(C&&!L){T=setTimeout(function(){if(C)startL();},800);}});}
+else{if(C&&!L){T=setTimeout(function(){if(C)startL();},800);}}}catch(e){P=false;ss("Connection error.");if(C&&!L){T=setTimeout(function(){if(C)startL();},800);}}}
 function send(){var v=document.getElementById("ti").value.trim();if(!v)return;document.getElementById("ti").value="";askMax(v);}
 function startL(){
 var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
