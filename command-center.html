@@ -1576,7 +1576,7 @@ function renderProjects(){
   }).join('');
 }
 
-function openProject(id){
+function openProject(id){id=String(id);
   const p = projects.find(x => x.id === id);
   if (!p) return;
   currentProjectId = id;
