@@ -970,6 +970,7 @@ const renderCalendar = () => {
       ev.className='cal-evt';
       ev.style.background=e.source==='utbsc'?'var(--accent)':(catColor[e.category]||'var(--green)');
       ev.textContent=(e.time&&!e.allDay?e.time+' ':'')+e.title;
+      if(e.source!=='utbsc'){ev.style.cursor='pointer';ev.onclick=()=>editEvent(e.id);}
       cell.appendChild(ev);
     });
     if(evts.length>3){
