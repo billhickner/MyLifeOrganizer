@@ -77,7 +77,7 @@ if(X){
   a.onerror=function(){A=null;S=false;};await a.play();
 }}catch(e){S=false;if(C&&!L){T=setTimeout(function(){if(C)startL();},700);}}}
 async function askMax(txt){
-if(P)return;if(!txt||!txt.trim())return;
+if(P)return;if(!txt||!txt.trim()){P=false;return;}
 if(C&&/^(end chat|stop chat|goodbye max)/i.test(txt.trim())){endChat();return;}
 P=true;ss("Max is thinking...");
 try{var now=new Date();
@@ -99,11 +99,11 @@ if(!SR){ss("Voice requires Safari");return;}if(L)return;
 var r=new SR();r.continuous=false;r.interimResults=true;r.lang="en-US";
 r.onstart=function(){L=true;document.getElementById("mb").classList.add("listening");document.getElementById("mw").classList.add("listening");document.getElementById("ml").textContent="LISTENING...";ss("Listening...");};
 r.onresult=function(e){document.getElementById("ti").value=Array.from(e.results).map(function(x){return x[0].transcript;}).join("");};
-r.onend=function(){L=false;document.getElementById("mb").classList.remove("listening");document.getElementById("mw").classList.remove("listening");document.getElementById("ml").textContent="TAP TO TALK";var v=document.getElementById("ti").value.trim();if(v){document.getElementById("ti").value="";askMax(v);}else{ss("Tap to speak again");}};
+r.onend=function(){L=false;document.getElementById("mb").classList.remove("listening");document.getElementById("mw").classList.remove("listening");document.getElementById("ml").textContent="TAP TO TALK";var v=document.getElementById("ti").value.trim();if(v&&!P){document.getElementById("ti").value="";askMax(v);}else if(!v){ss("Tap to speak");}};
 r.onerror=function(e){L=false;document.getElementById("mb").classList.remove("listening");document.getElementById("mw").classList.remove("listening");document.getElementById("ml").textContent="TAP TO TALK";if(e.error!=="aborted")ss("Mic error: "+e.error);};
 R=r;try{r.start();}catch(e){ss("Mic error: "+e.message);}}
 function stopL(){if(R){try{R.abort();}catch(e){}R=null;}L=false;document.getElementById("mb").classList.remove("listening");document.getElementById("mw").classList.remove("listening");document.getElementById("ml").textContent="TAP TO TALK";}
-function toggleMic(){ua();if(L)stopL();else startL();}
+function toggleMic(){ua();stopSpeaking();if(L){stopL();}else{setTimeout(function(){startL();},150);}}
 function endChat(){C=false;if(T){clearTimeout(T);T=null;}P=false;stopL();stopSpeaking();var b=document.getElementById("cb");if(b){b.textContent="Chat Mode";b.className="btn";}sr("Chat mode off.");}
 function toggleChat(){if(C){endChat();return;}C=true;var b=document.getElementById("cb");if(b){b.textContent="END CHAT";b.className="btn red";}sr("Chat mode on. Say end chat to stop.");ua();startL();}
 document.getElementById("ti").addEventListener("keydown",function(e){if(e.key==="Enter")send();});
