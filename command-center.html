@@ -2150,6 +2150,8 @@ function syncCalendarEvents() {
       }
     }).catch(()=>{});
 }
+// Auto-sync every 30 seconds so all devices stay current without any user action
+setInterval(syncCalendarEvents, 30000);
 </script>
 
   <!-- PROJECTS TAB -->
