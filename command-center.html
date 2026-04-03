@@ -2,6 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PulsAIO Command Center</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1466,13 +1468,13 @@ renderReminders();
 
 // ===== PROJECTS SYSTEM =====
 const PROJECT_COLORS = {pulsaio:'#2563eb',unity:'#16a34a',utbsc:'#d97706',personal:'#7c3aed',general:'#64748b'};
-let projects = JSON.parse(localStorage.getItem('pulsaio_projects') || '[]');
+let projects = JSON.parse(localStorage.getItem('pulsaio_projects') || '[]').map(p=>({...p,id:String(p.id)}));
 
 // Load from Supabase on any device — always get latest
 fetch('/.netlify/functions/get-projects')
   .then(r=>r.json())
   .then(d=>{
-    if(d.projects && d.projects.length > 0){
+    if(d.projects && d.projects.length > 0){ d.projects = d.projects.map(p=>({...p,id:String(p.id)}));
       // Merge server projects with local (local wins for newer data)
       const serverIds = new Set(d.projects.map(p=>p.id));
       const localOnly = projects.filter(p=>!serverIds.has(String(p.id)));
