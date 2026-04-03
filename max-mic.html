@@ -259,7 +259,7 @@ function endChatMode(){
   isListening=false;
   stopSpeaking();
   const btn=document.getElementById('chatBtn');
-  if(btn){btn.textContent='💬 CHAT MODE';btn.style.cssText='margin-top:16px;background:transparent;border:2px solid rgba(255,255,255,0.25);border-radius:50px;padding:11px 30px;font-size:12px;font-weight:700;color:rgba(255,255,255,0.65);cursor:pointer;letter-spacing:1px;transition:all 0.25s;';}
+  if(btn){btn.textContent=' CHAT MODE';btn.style.cssText='margin-top:16px;background:transparent;border:2px solid rgba(255,255,255,0.25);border-radius:50px;padding:11px 30px;font-size:12px;font-weight:700;color:rgba(255,255,255,0.65);cursor:pointer;letter-spacing:1px;transition:all 0.25s;';}
   document.getElementById('micBtn').classList.remove('listening');
   document.getElementById('micLabel').textContent='Tap to Talk';
   showResponse('Chat mode off. Tap the mic anytime.');
@@ -268,9 +268,9 @@ function toggleChatMode(){
   if(chatMode){endChatMode();return;}
   chatMode=true;
   const btn=document.getElementById('chatBtn');
-  btn.textContent='🔴 END CHAT';
+  btn.textContent=' END CHAT';
   btn.style.cssText='margin-top:16px;background:rgba(239,68,68,0.15);border:2px solid #ef4444;border-radius:50px;padding:11px 30px;font-size:12px;font-weight:700;color:#ef4444;cursor:pointer;letter-spacing:1px;transition:all 0.25s;';
-  showResponse('Chat mode on — I'm listening! Tap 🔴 END CHAT to stop.');
+  showResponse('Chat mode on — I'm listening! Tap  END CHAT to stop.');
   setTimeout(startListening,400);
 }
 </script>
