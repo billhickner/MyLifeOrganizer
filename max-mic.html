@@ -118,6 +118,246 @@ function getServerProjectsContext(){
 function getServerMemoryContext(){
   return serverMemories.length ? "\n\nMax Memory Bank:\n"+serverMemories.map(m=>"- ["+m.tag+"] "+m.text).join("\n") : "";
 }
+const !DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Max">
+<meta name="theme-color" content="#0a0f1e">
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/max-icon-180.png">
+<title>Max — PulsAIO</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{--blue:#0057B8;--accent:#00A3E0;--gold:#F5A623;--bg:#0a0f1e;--surface:#111827;--border:rgba(255,255,255,0.08);--text:#f0f4f8;--muted:rgba(255,255,255,0.45)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;min-height:-webkit-fill-available;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;position:relative;padding-bottom:env(safe-area-inset-bottom)}
+.bg-orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:0.15;animation:drift 8s ease-in-out infinite}
+.bg-orb.a{width:400px;height:400px;background:var(--blue);top:-100px;left:-100px}
+.bg-orb.b{width:300px;height:300px;background:var(--accent);bottom:-50px;right:-50px;animation-delay:-3s}
+.bg-orb.c{width:200px;height:200px;background:var(--gold);top:50%;left:50%;transform:translate(-50%,-50%);animation-delay:-6s}
+@keyframes drift{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(20px,-20px) scale(1.05)}66%{transform:translate(-15px,15px) scale(0.95)}}
+.container{position:relative;z-index:10;display:flex;flex-direction:column;align-items:center;gap:32px;padding:32px 24px;width:100%;max-width:360px}
+.header{text-align:center}
+.logo{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:8px}
+.logo-icon{width:36px;height:36px;background:var(--blue);border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:18px}
+.logo-text{font-family:'Syne',sans-serif;font-weight:800;font-size:22px;letter-spacing:-0.02em}
+.tagline{font-size:12px;color:var(--muted);letter-spacing:0.12em;text-transform:uppercase;font-weight:500}
+.mic-ring{position:relative;display:flex;align-items:center;justify-content:center}
+.mic-ring::before,.mic-ring::after{content:'';position:absolute;border-radius:50%;border:1px solid rgba(0,163,224,0.2);animation:ring-pulse 3s ease-out infinite}
+.mic-ring::before{width:180px;height:180px}
+.mic-ring::after{width:220px;height:220px;animation-delay:0.5s}
+.mic-ring.listening::before,.mic-ring.listening::after{border-color:rgba(232,76,76,0.4);animation:ring-pulse-active 1.2s ease-out infinite}
+@keyframes ring-pulse{0%,100%{transform:scale(0.95);opacity:0.5}50%{transform:scale(1);opacity:0.2}}
+@keyframes ring-pulse-active{0%{transform:scale(0.9);opacity:0.8}100%{transform:scale(1.1);opacity:0}}
+.mic-btn{width:140px;height:140px;border-radius:50%;border:none;background:linear-gradient(135deg,#0057B8,#00A3E0);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);box-shadow:0 20px 60px rgba(0,87,184,0.4);-webkit-tap-highlight-color:transparent;position:relative;z-index:2}
+.mic-btn:active{transform:scale(0.94)}
+.mic-btn.listening{background:linear-gradient(135deg,#c0392b,#e84c4c);box-shadow:0 20px 60px rgba(232,76,76,0.5);animation:mic-pulse 1.2s ease-in-out infinite}
+@keyframes mic-pulse{0%,100%{box-shadow:0 20px 60px rgba(232,76,76,0.5),0 0 0 0 rgba(232,76,76,0.4)}50%{box-shadow:0 20px 60px rgba(232,76,76,0.5),0 0 0 20px rgba(232,76,76,0)}}
+.mic-icon{font-size:42px;line-height:1}
+.mic-label{font-size:10px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,255,255,0.7)}
+.status{text-align:center;min-height:48px;display:flex;align-items:center;justify-content:center}
+.status-text{font-size:14px;color:var(--muted);font-weight:400;transition:all 0.3s}
+.status-text.active{color:var(--text)}
+.response-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:20px;width:100%;display:none;animation:slide-up 0.4s cubic-bezier(0.34,1.56,0.64,1)}
+.response-card.visible{display:block}
+@keyframes slide-up{from{opacity:0;transform:translateY(20px) scale(0.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+.response-header{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.max-avatar{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--accent));display:flex;align-items:center;justify-content:center;font-size:14px}
+.max-name{font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent)}
+.response-text{font-size:14px;line-height:1.75;color:rgba(255,255,255,0.85)}
+.input-row{display:flex;gap:10px;width:100%}
+.text-input{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:12px 16px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);outline:none;transition:border-color 0.2s;-webkit-appearance:none}
+.text-input:focus{border-color:var(--blue)}
+.text-input::placeholder{color:var(--muted)}
+.send-btn{width:46px;height:46px;border-radius:14px;border:none;background:var(--blue);color:white;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background 0.2s;-webkit-tap-highlight-color:transparent}
+.send-btn:active{background:#004a9e}
+.controls{display:flex;gap:12px;align-items:center}
+.mute-btn{background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:10px;padding:7px 14px;font-family:'DM Sans',sans-serif;font-size:12px;color:var(--muted);cursor:pointer;display:none;transition:all 0.2s;-webkit-tap-highlight-color:transparent}
+.mute-btn.visible{display:block}
+.open-full-btn{background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:10px;padding:7px 14px;font-family:'DM Sans',sans-serif;font-size:12px;color:var(--muted);cursor:pointer;text-decoration:none;transition:all 0.2s;-webkit-tap-highlight-color:transparent}
+.dots span{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--accent);margin:0 2px;animation:bounce 1.2s infinite}
+.dots span:nth-child(2){animation-delay:.2s}
+.dots span:nth-child(3){animation-delay:.4s}
+@keyframes bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-6px)}}
+</style>
+</head>
+<body>
+<div class="bg-orb a"></div>
+<div class="bg-orb b"></div>
+<div class="bg-orb c"></div>
+<div class="container">
+  <div class="header">
+    <div class="logo"><div class="logo-icon">M</div><div class="logo-text">Max</div></div>
+    <div class="tagline">PulsAIO Assistant</div>
+  </div>
+  <div class="mic-ring" id="micRing">
+    <button class="mic-btn" id="micBtn" onclick="toggleMic()">
+      <span class="mic-icon" id="micIcon">🎙️</span>
+      <span class="mic-label" id="micLabel">Tap to Talk</span>
+    </button>
+  </div>
+  <div class="status"><div class="status-text" id="statusText">Tap to speak to Max</div></div>
+  <div class="response-card" id="responseCard">
+    <div class="response-header"><div class="max-avatar">🤖</div><div class="max-name">Max</div></div>
+    <div class="response-text" id="responseText"></div>
+  </div>
+  <div class="input-row">
+    <input type="text" class="text-input" id="textInput" placeholder="Or type a message…" onkeydown="if(event.key==='Enter')sendText()">
+    <button class="send-btn" onclick="sendText()">➤</button>
+  </div>
+  <div class="controls">
+    <button class="mute-btn" id="muteBtn" onclick="stopSpeaking()">⏹ Stop</button>
+    <a class="open-full-btn" href="/command-center.html">Full Dashboard ↗</a>
+  </div>
+</div>
+<script>
+const DANIEL_ID='onwK4e9ZLuTAKqWW03F9';
+let isListening=false,recognition=null,currentAudio=null,audioCtx=null,conversationHistory=[],serverProjects=[],serverMemories=[];
+
+// Fetch projects from server on load
+fetch('/.netlify/functions/get-projects')
+  .then(r=>r.json())
+  .then(d=>{serverProjects=d.projects||[];console.log('Max loaded',serverProjects.length,'projects');})
+  .catch(()=>{});
+
+// Fetch memories from server on load — always fresh so iPhone gets latest
+fetch('/.netlify/functions/memory')
+  .then(r=>r.json())
+  .then(d=>{serverMemories=d.memories||[];console.log('Max loaded',serverMemories.length,'memories');})
+  .catch(()=>{});
+function getServerProjectsContext(){
+  let ctx = serverProjects.length ? "\n\nProjects: "+serverProjects.map(p=>"["+p.biz+"] "+p.name+" ("+p.status+")").join("; ") : "";
+  if(serverMemories.length) ctx += "\n\nMax Memory Bank (things Bill told you to remember):\n" + serverMemories.map(m=>"- ["+m.tag+"] "+m.text).join("\n");
+  return ctx;
+}
+function getServerMemoryContext(){
+  return serverMemories.length ? "\n\nMax Memory Bank:\n"+serverMemories.map(m=>"- ["+m.tag+"] "+m.text).join("\n") : "";
+}
+const !DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Max">
+<meta name="theme-color" content="#0a0f1e">
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/max-icon-180.png">
+<title>Max — PulsAIO</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{--blue:#0057B8;--accent:#00A3E0;--gold:#F5A623;--bg:#0a0f1e;--surface:#111827;--border:rgba(255,255,255,0.08);--text:#f0f4f8;--muted:rgba(255,255,255,0.45)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;min-height:-webkit-fill-available;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;position:relative;padding-bottom:env(safe-area-inset-bottom)}
+.bg-orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:0.15;animation:drift 8s ease-in-out infinite}
+.bg-orb.a{width:400px;height:400px;background:var(--blue);top:-100px;left:-100px}
+.bg-orb.b{width:300px;height:300px;background:var(--accent);bottom:-50px;right:-50px;animation-delay:-3s}
+.bg-orb.c{width:200px;height:200px;background:var(--gold);top:50%;left:50%;transform:translate(-50%,-50%);animation-delay:-6s}
+@keyframes drift{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(20px,-20px) scale(1.05)}66%{transform:translate(-15px,15px) scale(0.95)}}
+.container{position:relative;z-index:10;display:flex;flex-direction:column;align-items:center;gap:32px;padding:32px 24px;width:100%;max-width:360px}
+.header{text-align:center}
+.logo{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:8px}
+.logo-icon{width:36px;height:36px;background:var(--blue);border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:18px}
+.logo-text{font-family:'Syne',sans-serif;font-weight:800;font-size:22px;letter-spacing:-0.02em}
+.tagline{font-size:12px;color:var(--muted);letter-spacing:0.12em;text-transform:uppercase;font-weight:500}
+.mic-ring{position:relative;display:flex;align-items:center;justify-content:center}
+.mic-ring::before,.mic-ring::after{content:'';position:absolute;border-radius:50%;border:1px solid rgba(0,163,224,0.2);animation:ring-pulse 3s ease-out infinite}
+.mic-ring::before{width:180px;height:180px}
+.mic-ring::after{width:220px;height:220px;animation-delay:0.5s}
+.mic-ring.listening::before,.mic-ring.listening::after{border-color:rgba(232,76,76,0.4);animation:ring-pulse-active 1.2s ease-out infinite}
+@keyframes ring-pulse{0%,100%{transform:scale(0.95);opacity:0.5}50%{transform:scale(1);opacity:0.2}}
+@keyframes ring-pulse-active{0%{transform:scale(0.9);opacity:0.8}100%{transform:scale(1.1);opacity:0}}
+.mic-btn{width:140px;height:140px;border-radius:50%;border:none;background:linear-gradient(135deg,#0057B8,#00A3E0);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);box-shadow:0 20px 60px rgba(0,87,184,0.4);-webkit-tap-highlight-color:transparent;position:relative;z-index:2}
+.mic-btn:active{transform:scale(0.94)}
+.mic-btn.listening{background:linear-gradient(135deg,#c0392b,#e84c4c);box-shadow:0 20px 60px rgba(232,76,76,0.5);animation:mic-pulse 1.2s ease-in-out infinite}
+@keyframes mic-pulse{0%,100%{box-shadow:0 20px 60px rgba(232,76,76,0.5),0 0 0 0 rgba(232,76,76,0.4)}50%{box-shadow:0 20px 60px rgba(232,76,76,0.5),0 0 0 20px rgba(232,76,76,0)}}
+.mic-icon{font-size:42px;line-height:1}
+.mic-label{font-size:10px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,255,255,0.7)}
+.status{text-align:center;min-height:48px;display:flex;align-items:center;justify-content:center}
+.status-text{font-size:14px;color:var(--muted);font-weight:400;transition:all 0.3s}
+.status-text.active{color:var(--text)}
+.response-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:20px;width:100%;display:none;animation:slide-up 0.4s cubic-bezier(0.34,1.56,0.64,1)}
+.response-card.visible{display:block}
+@keyframes slide-up{from{opacity:0;transform:translateY(20px) scale(0.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+.response-header{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.max-avatar{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--accent));display:flex;align-items:center;justify-content:center;font-size:14px}
+.max-name{font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent)}
+.response-text{font-size:14px;line-height:1.75;color:rgba(255,255,255,0.85)}
+.input-row{display:flex;gap:10px;width:100%}
+.text-input{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:12px 16px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);outline:none;transition:border-color 0.2s;-webkit-appearance:none}
+.text-input:focus{border-color:var(--blue)}
+.text-input::placeholder{color:var(--muted)}
+.send-btn{width:46px;height:46px;border-radius:14px;border:none;background:var(--blue);color:white;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background 0.2s;-webkit-tap-highlight-color:transparent}
+.send-btn:active{background:#004a9e}
+.controls{display:flex;gap:12px;align-items:center}
+.mute-btn{background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:10px;padding:7px 14px;font-family:'DM Sans',sans-serif;font-size:12px;color:var(--muted);cursor:pointer;display:none;transition:all 0.2s;-webkit-tap-highlight-color:transparent}
+.mute-btn.visible{display:block}
+.open-full-btn{background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:10px;padding:7px 14px;font-family:'DM Sans',sans-serif;font-size:12px;color:var(--muted);cursor:pointer;text-decoration:none;transition:all 0.2s;-webkit-tap-highlight-color:transparent}
+.dots span{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--accent);margin:0 2px;animation:bounce 1.2s infinite}
+.dots span:nth-child(2){animation-delay:.2s}
+.dots span:nth-child(3){animation-delay:.4s}
+@keyframes bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-6px)}}
+</style>
+</head>
+<body>
+<div class="bg-orb a"></div>
+<div class="bg-orb b"></div>
+<div class="bg-orb c"></div>
+<div class="container">
+  <div class="header">
+    <div class="logo"><div class="logo-icon">M</div><div class="logo-text">Max</div></div>
+    <div class="tagline">PulsAIO Assistant</div>
+  </div>
+  <div class="mic-ring" id="micRing">
+    <button class="mic-btn" id="micBtn" onclick="toggleMic()">
+      <span class="mic-icon" id="micIcon">🎙️</span>
+      <span class="mic-label" id="micLabel">Tap to Talk</span>
+    </button>
+  </div>
+  <div class="status"><div class="status-text" id="statusText">Tap to speak to Max</div></div>
+  <div class="response-card" id="responseCard">
+    <div class="response-header"><div class="max-avatar">🤖</div><div class="max-name">Max</div></div>
+    <div class="response-text" id="responseText"></div>
+  </div>
+  <div class="input-row">
+    <input type="text" class="text-input" id="textInput" placeholder="Or type a message…" onkeydown="if(event.key==='Enter')sendText()">
+    <button class="send-btn" onclick="sendText()">➤</button>
+  </div>
+  <div class="controls">
+    <button class="mute-btn" id="muteBtn" onclick="stopSpeaking()">⏹ Stop</button>
+    <a class="open-full-btn" href="/command-center.html">Full Dashboard ↗</a>
+  </div>
+</div>
+<script>
+const DANIEL_ID='onwK4e9ZLuTAKqWW03F9';
+let isListening=false,recognition=null,currentAudio=null,audioCtx=null,conversationHistory=[],serverProjects=[],serverMemories=[];
+
+// Fetch projects from server on load
+fetch('/.netlify/functions/get-projects')
+  .then(r=>r.json())
+  .then(d=>{serverProjects=d.projects||[];console.log('Max loaded',serverProjects.length,'projects');})
+  .catch(()=>{});
+
+// Fetch memories from server on load — always fresh so iPhone gets latest
+fetch('/.netlify/functions/memory')
+  .then(r=>r.json())
+  .then(d=>{serverMemories=d.memories||[];console.log('Max loaded',serverMemories.length,'memories');})
+  .catch(()=>{});
+function getServerProjectsContext(){
+  let ctx = serverProjects.length ? "\n\nProjects: "+serverProjects.map(p=>"["+p.biz+"] "+p.name+" ("+p.status+")").join("; ") : "";
+  if(serverMemories.length) ctx += "\n\nMax Memory Bank (things Bill told you to remember):\n" + serverMemories.map(m=>"- ["+m.tag+"] "+m.text).join("\n");
+  return ctx;
+}
+function getServerMemoryContext(){
+  return serverMemories.length ? "\n\nMax Memory Bank:\n"+serverMemories.map(m=>"- ["+m.tag+"] "+m.text).join("\n") : "";
+}
 const maxContext="You are Max, Bill Hickner's AI assistant for PulsAIO — a wholesale AIO platform with 4 pilots launching by May 14 2026 targeting $25K/month. Bill runs PulsAIO, Unity Controls, and UTBSC TAB. Team: Ron Snider CEO, Nate Essin Shop Supervisor. Be concise, direct, entrepreneurial. Keep voice responses under 3 sentences. When user asks for a reminder, include SCHEDULE_REMINDER:{\"message\":\"brief text\",\"dueDate\":\"ISO8601\"} at the end of your response."
 
 // iOS requires AudioContext created/resumed on a user gesture
@@ -135,7 +375,7 @@ async function sendToMax(text){
   setStatus('Max is thinking…',true);setLoading(true);
   conversationHistory.push({role:'user',content:text});
   try{
-    const res=await fetch('/.netlify/functions/claude',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:300,system:maxContext+getServerProjectsContext()+getServerMemoryContext()+'\n\nCURRENT TIME: '+new Date().toISOString()+' (local: '+new Date().toLocaleString()+').  When user asks for a reminder, include SCHEDULE_REMINDER:{"message":"text","dueDate":"ISO8601"} at end of response.',messages:conversationHistory})});
+    const res=await fetch('/.netlify/functions/claude',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:300,system:(typeof maxContext==='function'?maxContext():maxContext)+getServerProjectsContext()+getServerMemoryContext()+'\n\nCURRENT TIME: '+new Date().toISOString()+' (local: '+new Date().toLocaleString()+').  When user asks for a reminder, include SCHEDULE_REMINDER:{"message":"text","dueDate":"ISO8601"} at end of response.',messages:conversationHistory})});
     const data=await res.json();
     const reply=data.content?.map(b=>b.text||'').join('')||'Sorry, try again.';
     conversationHistory.push({role:'assistant',content:reply});
@@ -144,6 +384,18 @@ async function sendToMax(text){
 let cleanReply = reply.replace(/SCHEDULE_REMINDER:\{[^}]+\}/g,'').trim();
 if(!cleanReply) cleanReply = reply; // Safety: never show empty response
 const schedMatch = reply.match(/SCHEDULE_REMINDER:(\{[^}]+\})/);
+    // CREATE_EVENT handler
+    const eventMatch = reply.match(/CREATE_EVENT:(\{[^}]+\})/);
+    if(eventMatch) {
+      try {
+        const ev = JSON.parse(eventMatch[1]);
+        const newEvt = {id:'p'+Date.now(),title:ev.title||'New Event',date:ev.date||new Date().toISOString().split('T')[0],time:ev.time||'',category:ev.category||'general',location:ev.location||'',notes:ev.notes||'',source:'personal'};
+        // Save to Supabase
+        const clean = (({id,title,date,time,category,location,notes,source})=>({id,title,date,time:time||'',category:category||'general',location:location||'',notes:notes||'',source:source||'personal'}))(newEvt);
+        fetch('/.netlify/functions/get-events',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({events:[clean]})}).catch(()=>{});
+        showResponse('Event added: ' + newEvt.title + ' on ' + newEvt.date);
+      } catch(e) { console.log('CREATE_EVENT err:',e); }
+    }
 if (schedMatch) {
   try {
     const sched = JSON.parse(schedMatch[1]);
