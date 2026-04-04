@@ -505,6 +505,7 @@ input[type=date],input[type=time]{width:100%}
       <button class="btn-outline" style="font-size:12px;padding:6px 12px" onclick="openAddEvent()">+ Add to this day</button>
     </div>
     <div id="selectedDayEvents"></div>
+    <div style="margin-top:16px;"><div style="font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:8px;">Upcoming Events</div><div id="events-list-container"></div></div>
   </div>
 </div>
 
@@ -805,7 +806,7 @@ const saveEntry = () => {
   if(!v) return;
   entries.unshift({id:Date.now(),date:TODAY_STR,text:v});
   document.getElementById('journalInput').value='';
-  save(); renderEntries();
+  save(); entries = JSON.parse(localStorage.getItem('pac:entries')||'[]'); renderEntries();
 };
 
 const aiReflect = async () => {
@@ -986,6 +987,7 @@ const renderCalendar = () => {
   }
 
   if(selectedDay) renderSelectedDay();
+  if(typeof renderEventsList==='function') renderEventsList();
 };
 
 const renderSelectedDay = () => {
