@@ -1653,7 +1653,7 @@ function openProject(id){
   currentProjectId = id;
   document.getElementById('modalProjectName').textContent = p.name;
   document.getElementById('modalProjectStatus').value = p.status;
-  var _goalEl=document.getElementById('goalInput')||document.getElementById('modalProjectGoal'); if(_goalEl){if(_goalEl.tagName==='INPUT')_goalEl.value=p.goal||''; else _goalEl.textContent=p.goal||'No goal defined.';}
+  document.getElementById('modalProjectGoal').textContent = p.goal || 'No goal defined.';
   document.getElementById('modalProjectNotes').value = '';
   var _gi=document.getElementById('goalInput');if(_gi)_gi.value=p.goal||'';
   renderProjectUpdates(p);
