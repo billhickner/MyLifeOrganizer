@@ -990,7 +990,15 @@ const renderCalendar = () => {
 }
 
 const renderEventsList = () => {
-  const c = document.getElementById('events-list-container');
+  let c = document.getElementById('events-list-container');
+  if(!c){
+    c = document.createElement('div');
+    c.id = 'events-list-container';
+    c.style.marginTop = '16px';
+    const sd = document.getElementById('selectedDayEvents');
+    if(sd) sd.insertAdjacentElement('afterend', c);
+    else return;
+  }
   if(!c) return;
   const today = new Date(); today.setHours(0,0,0,0);
   const all = [...myEvents,...utbscEvents].filter(e=>new Date(e.date+'T00:00:00')>=today).sort((a,b)=>new Date(a.date)-new Date(b.date));
