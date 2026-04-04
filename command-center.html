@@ -1631,7 +1631,7 @@ function openProject(id){
   currentProjectId = id;
   document.getElementById('modalProjectName').textContent = p.name;
   document.getElementById('modalProjectStatus').value = p.status;
-  document.getElementById('modalProjectGoal').textContent = p.goal || 'No goal defined.';
+  var _gi=document.getElementById('goalInput');if(_gi)_gi.value=p.goal||'';
   document.getElementById('modalProjectNotes').value = '';
   var _gi=document.getElementById('goalInput');if(_gi)_gi.value=p.goal||'';
   renderProjectUpdates(p);
@@ -2201,7 +2201,7 @@ setInterval(syncCalendarEvents, 30000);
       </div>
       <div class="project-modal-body">
         <div class="project-section-label">Project Goal</div>
-        <div class="project-goal-text" id="modalProjectGoal"></div>
+        <input type="text" id="goalInput" placeholder="Enter project goal..." style="width:100%;padding:10px 12px;border:1px solid #dde3f0;border-radius:8px;font-size:14px;font-family:inherit;color:#0d1b2a;background:#fff;box-sizing:border-box;" />
 
         <div class="project-section-label">Notes & Updates</div>
         <textarea class="project-notes-area" id="modalProjectNotes" placeholder="Add notes, thoughts, or updates about this project…" rows="3"></textarea>
