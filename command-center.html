@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
-<!-- PulsAIO Command Center - Grok Clean v12 - Final -->
+<!-- PulsAIO Command Center - Grok Clean v12 -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PulsAIO Command Center</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -218,3 +218,208 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--dark);min
         <div class="memory-bank-header">
           <div class="memory-bank-title">🧠 Max Memory Bank</div>
           <button onclick="toggleMemoryMic()" id="memoryMicBtn">🎙️ Tell Max</button>
+        </div>
+        <div class="memory-add-row">
+          <input type="text" id="memoryInput" placeholder="e.g. Bird Storm Marina gate code is 1234" onkeydown="if(event.key==='Enter')parseMemoryWithMax()">
+          <select id="memoryTag">
+            <option value="fact">Fact</option>
+            <option value="code">Code</option>
+            <option value="contact">Contact</option>
+            <option value="note">Note</option>
+            <option value="remind">Reminder</option>
+          </select>
+          <button onclick="parseMemoryWithMax()">+ Save</button>
+        </div>
+        <div id="memoryList"></div>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div>
+      <div class="card">
+        <div class="card-title"><div class="card-accent"></div>Pilot Stores</div>
+        <div id="pilotSnapshot"></div>
+        <button class="btn-outline" style="width:100%;margin-top:6px" onclick="showTab('pilots')">Manage Pilots →</button>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="card-accent"></div>AI Daily Path</div>
+        <p style="font-size:13px;color:var(--soft);line-height:1.6;margin-bottom:14px">Generate today's prioritized action plan.</p>
+        <button class="btn-primary" style="width:100%" onclick="genPath()">✦ Generate Today's Path</button>
+        <div id="pathBoxToday" style="display:none" class="ai-box">
+          <div class="ai-header"><div class="ai-dot"></div>Your Path for Today</div>
+          <div class="ai-text" id="pathTextToday"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Placeholder tabs -->
+<div id="tab-pilots" class="page hidden"><h2>Pilots Tab</h2></div>
+<div id="tab-goals" class="page hidden"><h2>Goals Tab</h2></div>
+<div id="tab-calendar" class="page hidden"><h2>Calendar Tab</h2></div>
+<div id="tab-max" class="page hidden"><h2>Max Tab</h2></div>
+<div id="tab-projects" class="page hidden"><h2>Projects Tab</h2></div>
+<div id="tab-path" class="page hidden"><h2>AI Path Tab</h2></div>
+
+<script>
+// ==================== CLEAN VERSION - NO SYNC.JS ====================
+const TODAY = new Date();
+const TODAY_STR = TODAY.toISOString().split('T')[0];
+
+let tasks = JSON.parse(localStorage.getItem('pac:tasks:' + TODAY_STR) || '[]');
+let entries = JSON.parse(localStorage.getItem('pac:entries') || '[]');
+let reminders = JSON.parse(localStorage.getItem('pulsaio_reminders') || '[]');
+let memories = JSON.parse(localStorage.getItem('max_memories') || '[]');
+
+function save() {
+  localStorage.setItem('pac:tasks:' + TODAY_STR, JSON.stringify(tasks));
+  localStorage.setItem('pac:entries', JSON.stringify(entries));
+  localStorage.setItem('pulsaio_reminders', JSON.stringify(reminders));
+  localStorage.setItem('max_memories', JSON.stringify(memories));
+  console.log('✅ Saved to localStorage');
+}
+
+function showTab(tab) {
+  document.querySelectorAll('[id^="tab-"]').forEach(el => el.classList.add('hidden'));
+  const active = document.getElementById('tab-' + tab);
+  if (active) active.classList.remove('hidden');
+
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => {
+    if (b.getAttribute('onclick') && b.getAttribute('onclick').includes(tab)) b.classList.add('active');
+  });
+
+  if (tab === 'today') renderAll();
+}
+
+function saveEntry() {
+  const input = document.getElementById('journalInput');
+  const v = input ? input.value.trim() : '';
+
+  if (!v) {
+    alert("Please type something in the journal box.");
+    return;
+  }
+
+  entries.unshift({id: Date.now(), date: TODAY_STR, text: v});
+  save();
+
+  input.value = '';
+  alert("✅ Journal entry saved successfully!");
+
+  renderAll();
+}
+
+function renderAll() {
+  renderTasks();
+  renderReminders();
+  renderMemories();
+}
+
+function renderTasks() {
+  const list = document.getElementById('taskList');
+  if (!list) return;
+  list.innerHTML = tasks.length === 0 ? '<div style="padding:16px;color:#9CA3AF;text-align:center">No tasks yet.</div>' : tasks.map(t => `
+    <div class="task-row">
+      <div class="task-check ${t.done ? 'done' : ''}" onclick="toggleTask(${t.id})">${t.done ? '✓' : ''}</div>
+      <span class="task-label ${t.done ? 'done' : ''}">${t.text}</span>
+      <button onclick="deleteTask(${t.id})" style="background:none;border:none;color:#9CA3AF;cursor:pointer">×</button>
+    </div>
+  `).join('');
+}
+
+function addTask() {
+  const text = document.getElementById('taskInput').value.trim();
+  if (!text) return;
+  tasks.push({id: Date.now(), text, done: false});
+  document.getElementById('taskInput').value = '';
+  save();
+  renderTasks();
+}
+
+function toggleTask(id) {
+  tasks = tasks.map(t => t.id === id ? {...t, done: !t.done} : t);
+  save();
+  renderTasks();
+}
+
+function deleteTask(id) {
+  tasks = tasks.filter(t => t.id !== id);
+  save();
+  renderTasks();
+}
+
+function renderReminders() {
+  const list = document.getElementById('remindersList');
+  if (!list) return;
+  list.innerHTML = reminders.length === 0 
+    ? '<div class="reminders-empty">No reminders yet — add one or tell Max!</div>'
+    : reminders.map(r => `
+      <div class="reminder-item ${r.done ? 'done' : ''}">
+        <input type="checkbox" class="reminder-check" ${r.done ? 'checked' : ''} onchange="toggleReminder(${r.id})">
+        <div class="reminder-body"><div class="reminder-text">${r.text}</div></div>
+        <button class="reminder-del" onclick="deleteReminder(${r.id})">✕</button>
+      </div>
+    `).join('');
+}
+
+function addReminder() {
+  const text = document.getElementById('reminderInput').value.trim();
+  if (!text) return;
+  reminders.unshift({id: Date.now(), text, done: false});
+  document.getElementById('reminderInput').value = '';
+  save();
+  renderReminders();
+}
+
+function toggleReminder(id) {
+  reminders = reminders.map(r => r.id === id ? {...r, done: !r.done} : r);
+  save();
+  renderReminders();
+}
+
+function deleteReminder(id) {
+  reminders = reminders.filter(r => r.id !== id);
+  save();
+  renderReminders();
+}
+
+function renderMemories() {
+  const list = document.getElementById('memoryList');
+  if (!list) return;
+  list.innerHTML = memories.length === 0 
+    ? '<div class="memory-empty">Nothing saved yet — speak or type something for Max to remember!</div>'
+    : memories.map(m => `
+      <div class="memory-item">
+        <span class="memory-tag ${m.tag || 'fact'}">${m.tag || 'fact'}</span>
+        <span class="memory-text">${m.text}</span>
+        <button class="memory-del" onclick="deleteMemory(${m.id})">✕</button>
+      </div>
+    `).join('');
+}
+
+function parseMemoryWithMax() {
+  const text = document.getElementById('memoryInput').value.trim();
+  if (!text) return;
+  memories.unshift({id: Date.now(), text, tag: 'fact'});
+  document.getElementById('memoryInput').value = '';
+  save();
+  renderMemories();
+}
+
+function deleteMemory(id) {
+  memories = memories.filter(m => m.id !== id);
+  save();
+  renderMemories();
+}
+
+// Init
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('headerDate').textContent = TODAY.toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  renderAll();
+  showTab('today');
+});
+</script>
+</body>
+</html>
