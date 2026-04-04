@@ -1240,13 +1240,6 @@ const sendToMax = async (userText) => {
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({title: 'Max Reminder', message: sched.message, priority: 5, topic: 'pulsaio-max-bill'})
           }).catch(function(e){console.log('notify error',e);});
-        }, _delay)).then(r=>r.json()).then(d=>{
-          if(d.success) {
-            const confirmDiv = document.createElement('div');
-            confirmDiv.style.cssText = 'font-size:11px;color:#16a34a;margin:4px 0 8px 0;padding:4px 10px;background:#f0fdf4;border-radius:6px;display:inline-block';
-            confirmDiv.textContent = 'Reminder scheduled for ' + new Date(sched.dueDate).toLocaleTimeString();
-            if(msgs) msgs.appendChild(confirmDiv);
-          }
         }).catch(()=>{});
       } catch(e) { cleanReply = reply; }
     }
