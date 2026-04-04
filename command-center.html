@@ -707,6 +707,9 @@ const save = () => {
 };
 
 // ── INIT ───────────────────────────────────────────────────────────────────
+let currentMonth = new Date().getMonth();
+let currentYear = new Date().getFullYear();
+
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('headerDate').textContent = TODAY.toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
   document.getElementById('maxDeadline').textContent = DAYS_LEFT;
@@ -2286,4 +2289,5 @@ setInterval(syncCalendarEvents, 30000);
 
 </body>
 </html>
+ 
  
