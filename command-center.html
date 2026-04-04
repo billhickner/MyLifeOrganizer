@@ -996,18 +996,32 @@ const renderEventsList = () => {
     c.id = 'events-list-container';
     c.style.marginTop = '16px';
     const sd = document.getElementById('selectedDayEvents');
-    if(sd) sd.insertAdjacentElement('afterend', c);
-    else return;
+    if(sd) sd.insertAdjacentElement('afterend', c); else return;
   }
-  if(!c) return;
   const today = new Date(); today.setHours(0,0,0,0);
-  const all = [...myEvents,...utbscEvents].filter(e=>new Date(e.date+'T00:00:00')>=today).sort((a,b)=>new Date(a.date)-new Date(b.date));
-  if(!all.length){c.innerHTML='<p style="color:var(--muted);font-size:13px;padding:8px 0">No upcoming events.</p>';return;}
+  const all = [...myEvents,...utbscEvents]
+    .filter(e=>new Date(e.date+'T00:00:00')>=today)
+    .sort((a,b)=>new Date(a.date)-new Date(b.date));
+  if(!all.length){
+    c.innerHTML='<p style="color:var(--muted);font-size:13px;padding:8px 0">No upcoming events.</p>';
+    return;
+  }
   c.innerHTML=all.map(e=>{
     const dot=e.source==='utbsc'?'#00A3E0':'#00C48C';
-    const del=e.source==='personal'?`<button onclick="deleteEvent('${e.id}')" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:16px;padding:2px 6px;flex-shrink:0" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--muted)'">✕</button>`  :'';
+    const del=e.source==='personal'
+      ? `<button onclick="deleteEvent('${e.id}')" title="Delete" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:16px;padding:2px 6px;flex-shrink:0" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--muted)'">✕</button>`
+      : '';
+    const dateStr = new Date(e.date+'T00:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
     return `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;margin-bottom:6px;background:var(--white);border-radius:10px;border:1px solid var(--border)">
-<div style="display:flex;align-items:center;gap:10px;min-width:0"><div style="width:8px;height:8px;border-radius:50%;background:${dot};flex-shrink:0"></div><div style="min-width:0"><div style="font-size:13px;font-weight:600;color:var(--dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${e.title}</div><div style="font-size:11px;color:var(--muted);margin-top:2px">${new Date(e.date+'T00:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}${e.time?' · '+e.time:''}</div></div></div>${del}</div>`;
+      <div style="display:flex;align-items:center;gap:10px;min-width:0">
+        <div style="width:8px;height:8px;border-radius:50%;background:${dot};flex-shrink:0"></div>
+        <div style="min-width:0">
+          <div style="font-size:13px;font-weight:600;color:var(--dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${e.title}</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px">${dateStr}${e.time?' · '+e.time:''}</div>
+        </div>
+      </div>
+      ${del}
+    </div>`;
   }).join('');
 };;
 
