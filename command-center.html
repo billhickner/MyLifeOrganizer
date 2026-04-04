@@ -995,19 +995,17 @@ const renderCalendar = () => {
   renderEventsList();
 }
 
-const renderEventsList = () => {
-  const c = document.getElementById('events-list-container');
-  if(!c) return;
-  const today = new Date(); today.setHours(0,0,0,0);
-  const all = [...myEvents,...utbscEvents]
-    .filter(e=>new Date(e.date+'T00:00:00')>=today)
-    .sort((a,b)=>new Date(a.date)-new Date(b.date));
+const renderEventsList=()=>{
+  const c=document.getElementById('events-list-container');
+  if(!c)return;
+  const today=new Date();today.setHours(0,0,0,0);
+  const all=[...myEvents,...utbscEvents].filter(e=>new Date(e.date+'T00:00:00')>=today).sort((a,b)=>new Date(a.date)-new Date(b.date));
   if(!all.length){c.innerHTML='<p style="color:#9CA3AF;font-size:13px;padding:8px 0">No upcoming events.</p>';return;}
   c.innerHTML=all.map(e=>{
     const dot=e.source==='utbsc'?'#00A3E0':'#00C48C';
-    const d=e.source==='personal'?'<button onclick="deleteEvent(\''+e.id+'\')" style="background:none;border:none;cursor:pointer;color:#9CA3AF;font-size:16px;padding:2px 6px" onmouseover="this.style.color=\'#E84C4C\'" onmouseout="this.style.color=\'#9CA3AF\'">✕</button>':'';
+    const d=e.source==='personal'?'<button onclick="deleteEvent(\''+e.id+'\')" style="background:none;border:none;cursor:pointer;color:#9CA3AF;font-size:16px;padding:2px 6px">✕</button>':'';
     const dt=new Date(e.date+'T00:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
-    return '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;margin-bottom:6px;background:#fff;border-radius:10px;border:1px solid #dde3f0"><div style="display:flex;align-items:center;gap:10px;min-width:0"><div style="width:8px;height:8px;border-radius:50%;background:'+dot+'"></div><div><div style="font-size:13px;font-weight:600;color:#0D1B2A">'+e.title+'</div><div style="font-size:11px;color:#9CA3AF;margin-top:2px">'+dt+(e.time?' · '+e.time:'')+'</div></div></div>'+d+'</div>';
+    return '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;margin-bottom:6px;background:#fff;border-radius:10px;border:1px solid #dde3f0"><div style="display:flex;align-items:center;gap:10px;min-width:0"><div style="width:8px;height:8px;border-radius:50%;background:'+dot+'"></div><div style="min-width:0"><div style="font-size:13px;font-weight:600;color:#0D1B2A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+e.title+'</div><div style="font-size:11px;color:#9CA3AF;margin-top:2px">'+dt+(e.time?' · '+e.time:'')+'</div></div></div>'+d+'</div>';
   }).join('');
 };;
 
@@ -1654,7 +1652,7 @@ function openProject(id){
   currentProjectId = id;
   document.getElementById('modalProjectName').textContent = p.name;
   document.getElementById('modalProjectStatus').value = p.status;
-  // goal handled by goalInput
+  var _gi=document.getElementById('goalInput'); if(_gi) _gi.value=p.goal||'';
   document.getElementById('modalProjectNotes').value = '';
   var _gi=document.getElementById('goalInput');if(_gi)_gi.value=p.goal||'';
   renderProjectUpdates(p);
