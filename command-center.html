@@ -2152,6 +2152,15 @@ function showToast(msg) {
 }
 
 // ===== CALENDAR SYNC WITH SUPABASE =====
+function deleteEvent(id) {
+  if (!confirm('Delete this event?')) return;
+  let evts = JSON.parse(localStorage.getItem('cal:myevents') || '[]');
+  evts = evts.filter(function(e){ return e.id !== id; });
+  localStorage.setItem('cal:myevents', JSON.stringify(evts));
+  if (typeof buildCalendar === 'function') buildCalendar();
+  else if (typeof renderCalendar === 'function') renderCalendar();
+}
+
 function syncCalendarEvents() {
   fetch('/.netlify/functions/get-events')
     .then(r=>r.json()).then(d=>{
