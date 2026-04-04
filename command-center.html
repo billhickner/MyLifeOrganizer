@@ -306,6 +306,10 @@ input[type=date],input[type=time]{width:100%}
 <div class="header">
   <div class="logo">
     <div class="logo-icon">P</div>
+  <div style="margin-top:16px;">
+    <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:8px;">Upcoming Events</div>
+    <div id="events-list-container"></div>
+  </div>
     <div>
       <div class="logo-text">PulsAIO</div>
       <div class="logo-sub">Command Center</div>
@@ -986,7 +990,32 @@ const renderCalendar = () => {
   }
 
   if(selectedDay) renderSelectedDay();
+  renderEventsList();
+}
+
+const renderEventsList = () => {
+  const container = document.getElementById('events-list-container');
+  if (!container) return;
+  const allEvts = [...myEvents, ...utbscEvents].sort((a,b)=>new Date(a.date)-new Date(b.date));
+  if (!allEvts.length) { container.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:8px 0;">No upcoming events.</div>'; return; }
+  const today = new Date(); today.setHours(0,0,0,0);
+  const upcoming = allEvts.filter(e => new Date(e.date+'T00:00:00') >= today);
+  container.innerHTML = upcoming.map(e => {
+    const isPersonal = e.source === 'personal';
+    const dot = e.source === 'utbsc' ? '#00A3E0' : e.category === 'pulsaio' ? '#F5A623' : '#00C48C';
+    return `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;margin-bottom:6px;background:var(--white);border-radius:10px;border:1px solid var(--border);gap:8px;">
+      <div style="display:flex;align-items:center;gap:10px;min-width:0;">
+        <div style="width:8px;height:8px;border-radius:50%;background:${dot};flex-shrink:0;"></div>
+        <div style="min-width:0;">
+          <div style="font-size:13px;font-weight:600;color:var(--dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${e.title}</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px;">${new Date(e.date+'T00:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}${e.time?' · '+e.time:''}</div>
+        </div>
+      </div>
+      ${isPersonal ? `<button onclick="deleteEvent('${e.id}')" style="flex-shrink:0;background:none;border:none;cursor:pointer;color:var(--muted);font-size:16px;padding:2px 6px;border-radius:4px;" title="Delete event" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--muted)'">✕</button>` : ''}
+    </div>`;
+  }).join('') || '<div style="color:var(--muted);font-size:13px;padding:8px 0;">No upcoming events.</div>';
 };
+;
 
 const renderSelectedDay = () => {
   const panel = document.getElementById('selectedDayPanel');
