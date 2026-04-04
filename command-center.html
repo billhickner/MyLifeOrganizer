@@ -508,6 +508,11 @@ input[type=date],input[type=time]{width:100%}
   </div>
 </div>
 
+<div class="card" style="margin-top:16px;">
+  <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;color:#9CA3AF;text-transform:uppercase;margin-bottom:10px;">Upcoming Events</div>
+  <div id="events-list-container"></div>
+</div>
+
 <!-- ══ MAX TAB ══ -->
 <div id="tab-max" class="page hidden">
   <div class="max-panel">
@@ -990,38 +995,18 @@ const renderCalendar = () => {
 }
 
 const renderEventsList = () => {
-  let c = document.getElementById('events-list-container');
-  if(!c){
-    c = document.createElement('div');
-    c.id = 'events-list-container';
-    c.style.marginTop = '16px';
-    const sd = document.getElementById('selectedDayEvents');
-    if(sd) sd.insertAdjacentElement('afterend', c); else return;
-  }
+  const c = document.getElementById('events-list-container');
+  if(!c) return;
   const today = new Date(); today.setHours(0,0,0,0);
   const all = [...myEvents,...utbscEvents]
     .filter(e=>new Date(e.date+'T00:00:00')>=today)
     .sort((a,b)=>new Date(a.date)-new Date(b.date));
-  if(!all.length){
-    c.innerHTML='<p style="color:var(--muted);font-size:13px;padding:8px 0">No upcoming events.</p>';
-    return;
-  }
+  if(!all.length){c.innerHTML='<p style="color:#9CA3AF;font-size:13px;padding:8px 0">No upcoming events.</p>';return;}
   c.innerHTML=all.map(e=>{
     const dot=e.source==='utbsc'?'#00A3E0':'#00C48C';
-    const del=e.source==='personal'
-      ? `<button onclick="deleteEvent('${e.id}')" title="Delete" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:16px;padding:2px 6px;flex-shrink:0" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--muted)'">✕</button>`
-      : '';
-    const dateStr = new Date(e.date+'T00:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
-    return `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;margin-bottom:6px;background:var(--white);border-radius:10px;border:1px solid var(--border)">
-      <div style="display:flex;align-items:center;gap:10px;min-width:0">
-        <div style="width:8px;height:8px;border-radius:50%;background:${dot};flex-shrink:0"></div>
-        <div style="min-width:0">
-          <div style="font-size:13px;font-weight:600;color:var(--dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${e.title}</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:2px">${dateStr}${e.time?' · '+e.time:''}</div>
-        </div>
-      </div>
-      ${del}
-    </div>`;
+    const d=e.source==='personal'?'<button onclick="deleteEvent(\''+e.id+'\')" style="background:none;border:none;cursor:pointer;color:#9CA3AF;font-size:16px;padding:2px 6px" onmouseover="this.style.color=\'#E84C4C\'" onmouseout="this.style.color=\'#9CA3AF\'">✕</button>':'';
+    const dt=new Date(e.date+'T00:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+    return '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;margin-bottom:6px;background:#fff;border-radius:10px;border:1px solid #dde3f0"><div style="display:flex;align-items:center;gap:10px;min-width:0"><div style="width:8px;height:8px;border-radius:50%;background:'+dot+'"></div><div><div style="font-size:13px;font-weight:600;color:#0D1B2A">'+e.title+'</div><div style="font-size:11px;color:#9CA3AF;margin-top:2px">'+dt+(e.time?' · '+e.time:'')+'</div></div></div>'+d+'</div>';
   }).join('');
 };;
 
@@ -2238,7 +2223,7 @@ setInterval(syncCalendarEvents, 30000);
       </div>
       <div class="project-modal-body">
         <div class="project-section-label">Project Goal</div>
-        <div class="project-goal-text" id="modalProjectGoal"></div>
+        <input type="text" id="goalInput" placeholder="Enter project goal..." style="width:100%;padding:10px 12px;border:1px solid #dde3f0;border-radius:8px;font-size:14px;font-family:inherit;color:#0d1b2a;background:#fff;box-sizing:border-box;">
 
         <div class="project-section-label">Notes & Updates</div>
         <textarea class="project-notes-area" id="modalProjectNotes" placeholder="Add notes, thoughts, or updates about this project…" rows="3"></textarea>
