@@ -1233,11 +1233,14 @@ const sendToMax = async (userText) => {
         const sched = JSON.parse(schedMatch[1]);
         cleanReply = reply.replace(/SCHEDULE_REMINDER:{[^}]+}/, '').trim();
         // Fire the notification
-        fetch('/.netlify/functions/notify', {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({title: 'Max Reminder', message: sched.message, dueDate: sched.dueDate, priority: 5})
-        }).then(r=>r.json()).then(d=>{
+        const _delay = Math.max(0, new Date(sched.dueDate).getTime() - Date.now());
+        setTimeout(function() {
+          fetch('/.netlify/functions/notify', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({title: 'Max Reminder', message: sched.message, priority: 5, topic: 'pulsaio-max-bill'})
+          }).catch(function(e){console.log('notify error',e);});
+        }, _delay)).then(r=>r.json()).then(d=>{
           if(d.success) {
             const confirmDiv = document.createElement('div');
             confirmDiv.style.cssText = 'font-size:11px;color:#16a34a;margin:4px 0 8px 0;padding:4px 10px;background:#f0fdf4;border-radius:6px;display:inline-block';
@@ -1255,7 +1258,7 @@ const sendToMax = async (userText) => {
     if (typeof speakDaniel === 'function') {
       const sb = document.getElementById('maxStopBtn');
       if (sb) sb.style.display = 'inline-block';
-      speakDaniel(reply);
+      speakDaniel(cleanReply);
     }
   } catch(e) {
     loadDiv.remove();
