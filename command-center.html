@@ -1659,6 +1659,7 @@ function openProject(id){
   renderProjectFiles(p);
   renderFolderLink(p);
   const _modal=document.getElementById('projectModal');
+  document.body.appendChild(_modal);
   _modal.classList.add('open');
   _modal.style.display='flex';
   renderProjectEmails(p);
