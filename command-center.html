@@ -2246,8 +2246,9 @@ async function syncFromGoogleCalendar() {
 
 function mergeGcalIntoMyEvents() {
   var gcal = JSON.parse(localStorage.getItem("cal:gcalevents") || "[]");
-  myEvents = myEvents.filter(function(e) { return e.source !== "google"; });
+  myEvents = myEvents.filter(function(e) { return e.source !== "google" && e.source !== "utbsc"; });
   gcal.forEach(function(e) { myEvents.push(e); });
+  if(typeof utbscEvents!=="undefined")utbscEvents.forEach(function(e){myEvents.push(e);});
 }
 
 
@@ -2689,3 +2690,4 @@ function confirmCreatePilot2() {
  
  
   
+ 
