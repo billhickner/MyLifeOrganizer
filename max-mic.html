@@ -85,7 +85,40 @@ function getCalendarContext(){try{var e=JSON.parse(localStorage.getItem('cal:mye
 function getProjectsContext(){try{var p=JSON.parse(localStorage.getItem('pulsaio_projects')||'[]');if(!p.length)return'';return'\nProjects: '+p.map(function(x){return x.name+' ['+x.status+']'}).join('; ');}catch(x){return'';}}
 function getPilotsContext(){try{var p=JSON.parse(localStorage.getItem('pac:pilots')||'[]');if(!p.length)return'';return'\nPilot stores: '+p.map(function(x){return x.name+' ('+x.store+') ['+x.status+' '+x.progress+'%]'}).join('; ');}catch(x){return'';}}
 function getRemindersContext(){try{var r=JSON.parse(localStorage.getItem('pulsaio_reminders')||'[]').filter(function(x){return!x.done});if(!r.length)return'';return'\nReminders: '+r.map(function(x){return x.text}).join('; ');}catch(x){return'';}}
-function handleMaxTags(reply){var m=reply.match(/PROJECT_NOTE:(\{[^}]+\})/);if(m){try{var d=JSON.parse(m[1]);var p=JSON.parse(localStorage.getItem('pulsaio_projects')||'[]');var i=p.findIndex(function(x){return x.name&&x.name.toLowerCase().includes((d.project||'').toLowerCase())});if(i>=0){if(!p[i].updates)p[i].updates=[];p[i].updates.unshift({date:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'}),text:'Max: '+d.note});localStorage.setItem('pulsaio_projects',JSON.stringify(p));}}catch(e){}}var m2=reply.match(/PILOT_NOTE:(\{[^}]+\})/);if(m2){try{var d2=JSON.parse(m2[1]);var pl=JSON.parse(localStorage.getItem('pac:pilots')||'[]');var i2=pl.findIndex(function(x){return x.name&&x.name.toLowerCase().includes((d2.pilot||'').toLowerCase())});if(i2>=0){if(!pl[i2].updates)pl[i2].updates=[];pl[i2].updates.unshift({date:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'}),text:'Max: '+d2.note});localStorage.setItem('pac:pilots',JSON.stringify(pl));}}catch(e){}}return reply.replace(/PROJECT_NOTE:\{[^}]+\}/g,'').replace(/PILOT_NOTE:\{[^}]+\}/g,'').trim()||reply;}
+function handleMaxTags(reply){
+  var em=reply.match(/CREATE_EVENT:(\{[^}]+\})/);
+  if(em){try{
+    var ev=JSON.parse(em[1]);
+    var ne={id:"p"+Date.now(),title:ev.title||"Event",date:ev.date||new Date().toISOString().split("T")[0],time:ev.time||"",category:ev.category||"general",location:ev.location||"",notes:ev.notes||"",source:"personal"};
+    var evts=JSON.parse(localStorage.getItem("cal:myevents")||"[]");
+    evts.push(ne);
+    localStorage.setItem("cal:myevents",JSON.stringify(evts));
+    fetch("/.netlify/functions/get-events",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({events:[ne]})}).catch(function(){});
+    ss("Event added: "+ne.title+" on "+ne.date);
+  }catch(e){}}
+  var sm=reply.match(/SCHEDULE_REMINDER:(\{[^}]+\})/);
+  if(sm){try{
+    var sd=JSON.parse(sm[1]);
+    var dl=Math.max(0,new Date(sd.dueDate).getTime()-Date.now());
+    setTimeout(function(){fetch("/.netlify/functions/notify",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({title:"Max Reminder",message:sd.message,priority:5,topic:"pulsaio-max-bill"})}).catch(function(){});},dl);
+    ss("Reminder set: "+sd.message);
+  }catch(e){}}
+  var pm=reply.match(/PROJECT_NOTE:(\{[^}]+\})/);
+  if(pm){try{
+    var pd=JSON.parse(pm[1]);
+    var pj=JSON.parse(localStorage.getItem("pulsaio_projects")||"[]");
+    var pi=pj.findIndex(function(x){return x.name&&x.name.toLowerCase().includes((pd.project||"").toLowerCase())});
+    if(pi>=0){if(!pj[pi].updates)pj[pi].updates=[];pj[pi].updates.unshift({date:new Date().toLocaleDateString("en-US",{month:"short",day:"numeric"}),text:"Max: "+pd.note});localStorage.setItem("pulsaio_projects",JSON.stringify(pj));ss("Note added to "+pj[pi].name);}
+  }catch(e){}}
+  var plm=reply.match(/PILOT_NOTE:(\{[^}]+\})/);
+  if(plm){try{
+    var pld=JSON.parse(plm[1]);
+    var pls=JSON.parse(localStorage.getItem("pac:pilots")||"[]");
+    var pli=pls.findIndex(function(x){return x.name&&x.name.toLowerCase().includes((pld.pilot||"").toLowerCase())});
+    if(pli>=0){if(!pls[pli].updates)pls[pli].updates=[];pls[pli].updates.unshift({date:new Date().toLocaleDateString("en-US",{month:"short",day:"numeric"}),text:"Max: "+pld.note});localStorage.setItem("pac:pilots",JSON.stringify(pls));ss("Note added to "+pls[pli].name);}
+  }catch(e){}}
+  return reply.replace(/CREATE_EVENT:\{[^}]+\}/g,"").replace(/SCHEDULE_REMINDER:\{[^}]+\}/g,"").replace(/PROJECT_NOTE:\{[^}]+\}/g,"").replace(/PILOT_NOTE:\{[^}]+\}/g,"").trim()||reply;
+})/);if(m){try{var d=JSON.parse(m[1]);var p=JSON.parse(localStorage.getItem('pulsaio_projects')||'[]');var i=p.findIndex(function(x){return x.name&&x.name.toLowerCase().includes((d.project||'').toLowerCase())});if(i>=0){if(!p[i].updates)p[i].updates=[];p[i].updates.unshift({date:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'}),text:'Max: '+d.note});localStorage.setItem('pulsaio_projects',JSON.stringify(p));}}catch(e){}}var m2=reply.match(/PILOT_NOTE:(\{[^}]+\})/);if(m2){try{var d2=JSON.parse(m2[1]);var pl=JSON.parse(localStorage.getItem('pac:pilots')||'[]');var i2=pl.findIndex(function(x){return x.name&&x.name.toLowerCase().includes((d2.pilot||'').toLowerCase())});if(i2>=0){if(!pl[i2].updates)pl[i2].updates=[];pl[i2].updates.unshift({date:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'}),text:'Max: '+d2.note});localStorage.setItem('pac:pilots',JSON.stringify(pl));}}catch(e){}}return reply.replace(/PROJECT_NOTE:\{[^}]+\}/g,'').replace(/PILOT_NOTE:\{[^}]+\}/g,'').trim()||reply;}
 
 async function askMax(txt){
 if(P)return;if(!txt||!txt.trim()){P=false;return;}
@@ -122,5 +155,6 @@ document.getElementById("ti").addEventListener("keydown",function(e){if(e.key===
 </script>
 </body>
 </html>
+ 
  
  
