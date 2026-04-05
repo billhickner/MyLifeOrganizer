@@ -2193,7 +2193,7 @@ async function syncFromGoogleCalendar() {
     var now = new Date();
     var past = new Date(); past.setFullYear(now.getFullYear() - 1);
     var future = new Date(); future.setDate(now.getDate() + 90);
-    var timeParams = "?timeMin=" + past.toISOString() + "&timeMax=" + future.toISOString() + "&singleEvents=true&orderBy=startTime&maxResults=200";
+    var timeParams = "?timeMin=" + past.toISOString() + "&timeMax=" + future.toISOString() + "&singleEvents=true&orderBy=startTime&maxResults=2500";
     var calendars = [
       {id: "primary", source: "google", label: "Personal"},
       {id: "aakus6fs5ogpjk6e1c8emec078kkuhlf@import.calendar.google.com", source: "utbsc", label: "UTBSC Schedule"}
@@ -2698,3 +2698,4 @@ setTimeout(function(){try{mergeGcalIntoMyEvents();renderCalendar();}catch(e){}},
  
  
   
+ 
