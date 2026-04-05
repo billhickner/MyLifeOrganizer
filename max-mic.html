@@ -55,59 +55,84 @@ var VID="pNInz6obpgDQGcFmaJgB";
 var CTX="You are Max, Bill Hickner's AI assistant. Bill runs PulsAIO (wholesale AIO platform), Unity Controls, and UTBSC TAB. Key team: Ron Snider (CEO), Nate Essin (Shop Supervisor). Be concise, direct, entrepreneurial. Keep voice responses under 3 sentences.\n\nWhen the user asks you to add a calendar event, include CREATE_EVENT:{\"title\":\"event name\",\"date\":\"YYYY-MM-DD\",\"time\":\"HH:MM\",\"category\":\"general\",\"location\":\"\",\"notes\":\"\"} at the end of your response.\nWhen the user asks to be reminded of something, include SCHEDULE_REMINDER:{\"message\":\"text\",\"dueDate\":\"ISO8601\"} at the end.\nWhen the user wants to add a note to a PROJECT, include PROJECT_NOTE:{\"project\":\"project name\",\"note\":\"the note text\"} at the end.\nWhen the user wants to add a note to a PILOT, include PILOT_NOTE:{\"pilot\":\"pilot name\",\"note\":\"the note text\"} at the end.\nAlways calculate dates from the current time.";
 var H=[];
 
-var SP=false;
-var IS_IOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(/Macintosh/.test(navigator.userAgent)&&'ontouchend' in document);
+var AU=null, SP=false, AUDIO_EL=null;
 
-function ss(t){var el=document.getElementById('st');if(el)el.textContent=t;}
-function sr(t){var el=document.getElementById('rt');if(el)el.textContent=t;var rb=document.getElementById('rb');if(rb)rb.style.display=t?'block':'none';}
-function ua(){}
+// iOS requires AudioContext created from user gesture
+function ua(){
+  if(AU&&AU.state==='running')return;
+  try{
+    var ctx=new (window.AudioContext||window.webkitAudioContext)();
+    if(ctx.state==='suspended')ctx.resume();
+    var buf=ctx.createBuffer(1,1,22050);
+    var src=ctx.createBufferSource();
+    src.buffer=buf;src.connect(ctx.destination);
+    if(src.start)src.start(0);else if(src.noteOn)src.noteOn(0);
+    AU=ctx;
+  }catch(e){console.log('AudioContext error:',e);}
+  // Pre-create reusable Audio element (critical for iOS)
+  if(!AUDIO_EL){
+    AUDIO_EL=new Audio();
+    AUDIO_EL.setAttribute('playsinline','');
+    // Unlock with silent play from user gesture
+    AUDIO_EL.src='data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA//tQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAABhgC7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7//////////////////////////////////////////////////////////////////8AAAAATGF2YzU4LjEzAAAAAAAAAAAAAAAAJAAAAAAAAAAAAYYNAAAAAAAAAAAAAAAAAAAA//tQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAABhgC7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7//////////////////////////////////////////////////////////////////8AAAAATGF2YzU4LjEzAAAAAAAAAAAAAAAAJAAAAAAAAAAAAYYNAAAAAAAAAAAAAAAAAAAA';
+    AUDIO_EL.load();
+    AUDIO_EL.play().then(function(){AUDIO_EL.pause();}).catch(function(){});
+  }
+}
 
-function speakReply(text){
+async function speakReply(text){
   if(SP)stopSpeaking();
   SP=true;
   ss('Speaking...');
-  if(IS_IOS){
-    iosSpeechSpeak(text);
-  } else {
-    elevenLabsSpeak(text);
+  try{
+    var r=await fetch('/.netlify/functions/tts',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:text,voiceId:'pNInz6obpgDQGcFmaJgB',model_id:'eleven_turbo_v2',voice_settings:{stability:0.5,similarity_boost:0.75,style:0.3,use_speaker_boost:true}})});
+    if(!r.ok)throw new Error('TTS '+r.status);
+    var blob=await r.blob();
+    var url=URL.createObjectURL(blob);
+    // Use pre-created Audio element for iOS compatibility
+    if(AUDIO_EL){
+      AUDIO_EL.src=url;
+      AUDIO_EL.onended=function(){SP=false;URL.revokeObjectURL(url);ss('Tap to speak again');};
+      AUDIO_EL.onerror=function(){SP=false;URL.revokeObjectURL(url);fallbackSpeak(text);};
+      AUDIO_EL.play().catch(function(e){
+        console.log('Audio play failed, trying fallback:',e);
+        SP=false;URL.revokeObjectURL(url);
+        fallbackSpeak(text);
+      });
+    } else {
+      // Fallback: create new Audio (works on desktop)
+      var audio=new Audio(url);
+      audio.onended=function(){SP=false;URL.revokeObjectURL(url);ss('Tap to speak again');};
+      audio.onerror=function(){SP=false;fallbackSpeak(text);};
+      audio.play().catch(function(){fallbackSpeak(text);});
+    }
+  }catch(e){
+    console.log('TTS error, fallback:',e);
+    SP=false;
+    fallbackSpeak(text);
   }
 }
 
-function iosSpeechSpeak(text){
+function fallbackSpeak(text){
   try{
     window.speechSynthesis.cancel();
     var utt=new SpeechSynthesisUtterance(text);
-    utt.rate=1.0;
-    utt.pitch=1.0;
+    utt.rate=1.05;
     utt.onend=function(){SP=false;ss('Tap to speak again');};
-    utt.onerror=function(){SP=false;ss('Tap to speak again');};
+    utt.onerror=function(){SP=false;};
     window.speechSynthesis.speak(utt);
+    ss('Speaking (browser voice)...');
   }catch(e){SP=false;ss('Audio unavailable');}
 }
 
-async function elevenLabsSpeak(text){
-  try{
-    var r=await fetch('/.netlify/functions/tts',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:text,voiceId:'pNInz6obpgDQGcFmaJgB',model_id:'eleven_turbo_v2',voice_settings:{stability:0.5,similarity_boost:0.75,style:0.3,use_speaker_boost:true}})});
-    if(!r.ok)throw new Error('TTS error');
-    var blob=await r.blob();
-    var url=URL.createObjectURL(blob);
-    var audio=new Audio(url);
-    audio.onended=function(){SP=false;URL.revokeObjectURL(url);ss('Tap to speak again');};
-    audio.onerror=function(){SP=false;URL.revokeObjectURL(url);iosSpeechSpeak(text);};
-    audio.play().catch(function(){iosSpeechSpeak(text);});
-  }catch(e){
-    SP=false;
-    iosSpeechSpeak(text);
-  }
-}
-
 function stopSpeaking(){
+  if(AUDIO_EL){try{AUDIO_EL.pause();AUDIO_EL.currentTime=0;}catch(e){}}
   try{window.speechSynthesis.cancel();}catch(e){}
-  var audios=document.querySelectorAll('audio');
-  audios.forEach(function(a){try{a.pause();}catch(e){}});
   SP=false;
   ss('Stopped');
 }
+
+
 
 function getCalendarContext() {
   try {
@@ -220,7 +245,7 @@ if(!P)speakReply(cleanReply);
 }catch(e){sr("Connection error. Try again.");}
 }
 
-function send(){ua();ua();var v=document.getElementById("ti").value.trim();if(!v)return;document.getElementById("ti").value="";askMax(v);}
+function send(){ua();var v=document.getElementById("ti").value.trim();if(!v)return;document.getElementById("ti").value="";askMax(v);}
 function startL(){
 var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
 if(!SR){ss("Voice requires Safari");return;}if(L)return;
@@ -238,9 +263,6 @@ document.getElementById("ti").addEventListener("keydown",function(e){if(e.key===
 </script>
 </body>
 </html>
- 
- 
- 
  
  
  
