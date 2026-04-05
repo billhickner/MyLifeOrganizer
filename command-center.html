@@ -816,8 +816,7 @@ document.addEventListener('DOMContentLoaded', () => {
     sc.appendChild(b);
   });
 
-  fetchCalendar();
-  renderAll();
+    renderAll();
   mergeGcalIntoMyEvents();
   // Wait for Google Identity Services to load (async script)
   setTimeout(function(){initGoogleCalSync();}, 2000);
@@ -2697,3 +2696,4 @@ setTimeout(function(){try{mergeGcalIntoMyEvents();renderCalendar();}catch(e){}},
   
  
    
+ 
