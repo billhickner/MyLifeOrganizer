@@ -998,28 +998,7 @@ const deleteGoal = id => {
 // ── CALENDAR ───────────────────────────────────────────────────────────────
 const allEvents = () => [...utbscEvents, ...myEvents];
 
-const eventsForDate = d => allEvents().filter(e=>e.date===d);
-
-const fetchCalendar = async () => {
-  try {
-    const now = new Date();
-    const ahead = new Date(); ahead.setDate(now.getDate()+45);
-    const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(GCAL_CAL)}/events?key=${GCAL_KEY}&timeMin=${now.toISOString()}&timeMax=${ahead.toISOString()}&singleEvents=true&orderBy=startTime&maxResults=50`;
-    const res = await fetch(url);
-    if(!res.ok) return;
-    const data = await res.json();
-    utbscEvents = (data.items||[]).map(e=>({
-      id:'u'+e.id,
-      date:(e.start.dateTime||e.start.date).split('T')[0],
-      title:e.summary||'(No title)',
-      location:e.location||'',
-      time:e.start.dateTime?new Date(e.start.dateTime).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}):'',
-      allDay:!e.start.dateTime,
-      source:'utbsc'
-    }));
-    renderCalendar();
-  } catch(e){ console.log('Calendar fetch error:',e); }
-};
+const eventsForDate = (ds) => myEvents.filter(e => e.date === ds);
 
 const renderCalendar = () => {
   const grid = document.getElementById('calGrid');
@@ -2690,4 +2669,5 @@ function confirmCreatePilot2() {
  
  
   
+ 
  
