@@ -2283,7 +2283,7 @@ function syncCalendarEvents() {
 // Auto-sync every 30 seconds so all devices stay current without any user action
 setInterval(syncCalendarEvents, 30000);
 
-// ── CROSS-DEVICE SYNC (polls Supabase every 15s) ──────────────────────────
+// ── CROSS-DEVICE SYNC (polls Supabase every 15s) ──────────────────────────────────────────
 setInterval(function(){
   fetch('/.netlify/functions/get-events')
     .then(function(r){return r.json();})
@@ -2300,10 +2300,10 @@ setInterval(function(){
       if(changed){
         myEvents=d.events;
         localStorage.setItem('cal:myevents',JSON.stringify(myEvents));
-        mergeGcalIntoMyEvents();
-        mergeGcalIntoMyEvents();
-        renderCalendar();
       }
+      // Always merge Google Cal + UTBSC events and re-render
+      mergeGcalIntoMyEvents();
+      renderCalendar();
     }).catch(function(){});
 }, 15000);
 
@@ -2669,5 +2669,6 @@ function confirmCreatePilot2() {
  
  
   
+ 
  
  
