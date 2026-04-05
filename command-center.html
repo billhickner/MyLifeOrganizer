@@ -729,19 +729,17 @@ let goals   = JSON.parse(localStorage.getItem('pac:goals') || 'null') || [
 let entries = JSON.parse(localStorage.getItem('pac:entries') || '[]');
 let myEvents = JSON.parse(localStorage.getItem('cal:myevents') || '[]');
   // Merge in Supabase events on load
-  fetch('/.netlify/functions/get-events')
-    .then(r=>r.json()).then(d=>{
-      if(d.events?.length) {
-        const ids = new Set(myEvents.map(e=>e.id));
-        const newEvts = d.events.filter(e=>!ids.has(e.id));
-        if(newEvts.length) {
-          myEvents = [...myEvents, ...newEvts];
-          localStorage.setItem('cal:myevents', JSON.stringify(myEvents));
+  // Sync from Supabase only on first visit (empty localStorage)
+  if(!myEvents.length){
+    fetch('/.netlify/functions/get-events')
+      .then(function(r){return r.json()}).then(function(d){
+        if(d.events&&d.events.length){
+          myEvents=d.events;
+          localStorage.setItem('cal:myevents',JSON.stringify(myEvents));
+          renderCalendar();
         }
-        // Always re-render so iPad/iPhone pick up events even if tab not active yet
-        renderCalendar();
-      }
-    }).catch(()=>{});
+      }).catch(function(){});
+  }
 let utbscEvents = [
   {id:'u1',date:'2026-03-30',title:'UTJC2069 NSN 41216 — Unity BAS',location:'2040 Aldine Mail Route Rd, Houston TX 77039',time:'',allDay:true,source:'utbsc'},
   {id:'u2',date:'2026-03-30',title:'UTJC2068 NSN 41216 — TAB / Startup',location:'2040 Aldine Mail Route Rd, Houston TX 77039',time:'',allDay:true,source:'utbsc'},
@@ -2599,6 +2597,7 @@ function confirmCreatePilot2() {
 
 </body>
 </html>
+ 
  
  
  
