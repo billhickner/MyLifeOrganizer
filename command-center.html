@@ -491,6 +491,7 @@ input[type=date],input[type=time]{width:100%}
         </div>
         <button class="btn-primary" onclick="openAddEvent()">+ Add Event</button>
         <button class="btn-outline" onclick="openEventManager()" style="margin-left:6px">⚙ Manage Events</button>
+        <button class="btn-outline" id="gcalConnectBtn" onclick="connectGoogleCalendar()" style="margin-left:6px;color:var(--green);border-color:var(--green)">🔄 Sync Google Cal</button>
       </div>
     </div>
     <div class="cal-month-nav">
@@ -822,6 +823,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   fetchCalendar();
   renderAll();
+  initGoogleCalSync();
 });
 
 // ── RENDER ALL ─────────────────────────────────────────────────────────────
@@ -2154,98 +2156,149 @@ function acknowledgeReminder(id) {
 
 // ===== GOOGLE CALENDAR WRITE =====
 const GCAL_OAUTH_CLIENT = '558830694197-00hvjl61s76tfv52l028omedp8gnb6uk.apps.googleusercontent.com';
-const GCAL_WRITE_SCOPE = 'https://www.googleapis.com/auth/calendar.events';
+// ── GOOGLE CALENDAR TWO-WAY SYNC ──────────────────────────────────────────
+const GCAL_WRITE_SCOPE = "https://www.googleapis.com/auth/calendar.events";
+const GCAL_CLIENT_ID = "558830694197-00hvjl61s76tfv52l028omedp8gnb6uk.apps.googleusercontent.com";
+let gcalToken = localStorage.getItem("gcal_access_token") || null;
 let gcalTokenClient = null;
-let gcalAccessToken = null;
-let pendingGcalEvent = null;
 
-function initGCalWrite() {
-  if (!window.google || !google.accounts) return;
+function initGoogleCalSync() {
+  if (typeof google === "undefined" || !google.accounts) return;
   gcalTokenClient = google.accounts.oauth2.initTokenClient({
-    client_id: GCAL_OAUTH_CLIENT,
+    client_id: GCAL_CLIENT_ID,
     scope: GCAL_WRITE_SCOPE,
-    callback: async (resp) => {
-      if (resp.error) { console.error('GCal auth error:', resp.error); return; }
-      gcalAccessToken = resp.access_token;
-      if (pendingGcalEvent) {
-        await postToGoogleCalendar(pendingGcalEvent);
-        pendingGcalEvent = null;
+    callback: function(response) {
+      if (response.access_token) {
+        gcalToken = response.access_token;
+        localStorage.setItem("gcal_access_token", gcalToken);
+        updateGcalButton(true);
+        syncFromGoogleCalendar();
       }
     }
   });
+  if (gcalToken) updateGcalButton(true);
+}
+
+function connectGoogleCalendar() {
+  if (gcalToken) {
+    syncFromGoogleCalendar();
+    return;
+  }
+  if (!gcalTokenClient) initGoogleCalSync();
+  if (gcalTokenClient) gcalTokenClient.requestAccessToken();
+}
+
+function updateGcalButton(connected) {
+  var btn = document.getElementById("gcalConnectBtn");
+  if (!btn) return;
+  if (connected) {
+    btn.textContent = "\u2705 Google Cal Synced";
+    btn.style.color = "var(--green)";
+    btn.style.borderColor = "var(--green)";
+  } else {
+    btn.textContent = "\uD83D\uDD04 Sync Google Cal";
+    btn.style.color = "var(--gold)";
+    btn.style.borderColor = "var(--gold)";
+  }
+}
+
+async function syncFromGoogleCalendar() {
+  if (!gcalToken) return;
+  try {
+    var now = new Date();
+    var past = new Date(); past.setDate(now.getDate() - 7);
+    var future = new Date(); future.setDate(now.getDate() + 90);
+    var url = "https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=" + past.toISOString() + "&timeMax=" + future.toISOString() + "&singleEvents=true&orderBy=startTime&maxResults=200";
+    var r = await fetch(url, {headers: {"Authorization": "Bearer " + gcalToken}});
+    if (r.status === 401) {
+      gcalToken = null;
+      localStorage.removeItem("gcal_access_token");
+      updateGcalButton(false);
+      return;
+    }
+    if (!r.ok) return;
+    var data = await r.json();
+    var gcalEvents = (data.items || []).map(function(e) {
+      var startDate = e.start.dateTime ? e.start.dateTime.split("T")[0] : e.start.date;
+      var startTime = e.start.dateTime ? new Date(e.start.dateTime).toLocaleTimeString("en-US", {hour: "numeric", minute: "2-digit", hour12: false}) : "";
+      return {
+        id: "gcal_" + e.id,
+        gcalId: e.id,
+        title: e.summary || "(No title)",
+        date: startDate,
+        time: startTime,
+        location: e.location || "",
+        notes: e.description || "",
+        category: "general",
+        source: "google",
+        allDay: !e.start.dateTime
+      };
+    });
+    var local = JSON.parse(localStorage.getItem("cal:myevents") || "[]");
+    var localIds = {};
+    local.forEach(function(e) { localIds[e.id] = true; });
+    var added = 0;
+    gcalEvents.forEach(function(e) {
+      if (!localIds[e.id]) { local.push(e); added++; }
+    });
+    if (added > 0) {
+      myEvents = local;
+      localStorage.setItem("cal:myevents", JSON.stringify(myEvents));
+      renderCalendar();
+    }
+    updateGcalButton(true);
+  } catch(e) { console.log("GCal sync error:", e); }
 }
 
 async function postToGoogleCalendar(evt) {
-  if (!gcalAccessToken) {
-    pendingGcalEvent = evt;
-    if (!gcalTokenClient) initGCalWrite();
-    if (gcalTokenClient) gcalTokenClient.requestAccessToken({prompt:''});
-    return;
-  }
-
-  // Build event body
-  const TZ = Intl.DateTimeFormat().resolvedOptions().timeZone || 'America/New_York';
-  const dateStr = evt.date; // e.g. "2026-04-10"
-  const timeStr = evt.time || '09:00';
-  const startISO = dateStr + 'T' + timeStr + ':00';
-  // Add 1 hour for end time
-  const endDate = new Date(startISO);
-  endDate.setHours(endDate.getHours() + 1);
-  const endISO = endDate.toISOString().substring(0,19);
-
-  const body = {
-    summary: evt.title,
-    location: evt.location || '',
-    description: evt.notes || '',
-    start: { dateTime: startISO, timeZone: TZ },
-    end:   { dateTime: endISO,   timeZone: TZ }
-  };
-
+  if (!gcalToken) return;
   try {
-    const res = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events', {
-      method: 'POST',
-      headers: {
-        'Authorization': 'Bearer ' + gcalAccessToken,
-        'Content-Type': 'application/json'
-      },
+    var startDateTime, endDateTime;
+    if (evt.time && evt.time.length >= 5) {
+      var dateStr = evt.date + "T" + evt.time + ":00";
+      var start = new Date(dateStr);
+      var end = new Date(start.getTime() + 60*60*1000);
+      startDateTime = start.toISOString();
+      endDateTime = end.toISOString();
+    }
+    var body = {
+      summary: evt.title,
+      location: evt.location || "",
+      description: evt.notes || "",
+      start: startDateTime ? {dateTime: startDateTime} : {date: evt.date},
+      end: endDateTime ? {dateTime: endDateTime} : {date: evt.date}
+    };
+    var r = await fetch("https://www.googleapis.com/calendar/v3/calendars/primary/events", {
+      method: "POST",
+      headers: {"Authorization": "Bearer " + gcalToken, "Content-Type": "application/json"},
       body: JSON.stringify(body)
     });
-
-    if (res.status === 401) {
-      // Token expired - refresh
-      gcalAccessToken = null;
-      pendingGcalEvent = evt;
-      if (gcalTokenClient) gcalTokenClient.requestAccessToken({prompt:''});
-      return;
+    if (r.status === 401) {
+      gcalToken = null;
+      localStorage.removeItem("gcal_access_token");
+      updateGcalButton(false);
     }
-
-    const data = await res.json();
-    if (data.id) {
-      console.log('Max: Event created in Google Calendar:', data.id);
-      showToast('Event synced to Google Calendar!');
-    } else {
-      console.error('GCal error:', data);
+    if (r.ok) {
+      var created = await r.json();
+      console.log("Posted to GCal:", created.id);
     }
-  } catch(e) {
-    console.error('GCal post error:', e);
-  }
+  } catch(e) { console.log("GCal post error:", e); }
 }
 
-// Init when GIS loads
-window.addEventListener('load', () => setTimeout(initGCalWrite, 1000));
-
-function showToast(msg) {
-  const t = document.createElement('div');
-  t.style.cssText = 'position:fixed;bottom:20px;right:20px;background:#16a34a;color:white;padding:10px 18px;border-radius:10px;font-size:13px;font-weight:600;z-index:99999;box-shadow:0 4px 12px rgba(0,0,0,.2)';
-  t.textContent = msg;
-  document.body.appendChild(t);
-  setTimeout(() => t.remove(), 3000);
+async function deleteFromGoogleCalendar(evt) {
+  if (!gcalToken || !evt.gcalId) return;
+  try {
+    await fetch("https://www.googleapis.com/calendar/v3/calendars/primary/events/" + evt.gcalId, {
+      method: "DELETE",
+      headers: {"Authorization": "Bearer " + gcalToken}
+    });
+  } catch(e) {}
 }
 
-// ===== CALENDAR SYNC WITH SUPABASE =====
 function syncCalendarEvents() {
-
+  if (gcalToken) syncFromGoogleCalendar();
 }
+
 // Auto-sync every 30 seconds so all devices stay current without any user action
 setInterval(syncCalendarEvents, 30000);
 
@@ -2615,6 +2668,7 @@ function confirmCreatePilot2() {
 
 </body>
 </html>
+ 
  
  
  
