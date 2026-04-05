@@ -2249,6 +2249,28 @@ function syncCalendarEvents() {
 // Auto-sync every 30 seconds so all devices stay current without any user action
 setInterval(syncCalendarEvents, 30000);
 
+// ── CROSS-DEVICE SYNC (polls Supabase every 15s) ──────────────────────────
+setInterval(function(){
+  fetch('/.netlify/functions/get-events')
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if(!d.events||!d.events.length)return;
+      var local=JSON.parse(localStorage.getItem('cal:myevents')||'[]');
+      var localIds={};
+      local.forEach(function(e){localIds[e.id]=true;});
+      var added=0;
+      d.events.forEach(function(e){
+        if(!localIds[e.id]){local.push(e);added++;}
+      });
+      if(added>0){
+        myEvents=local;
+        localStorage.setItem('cal:myevents',JSON.stringify(myEvents));
+        renderCalendar();
+        console.log('Synced '+added+' new events from other device');
+      }
+    }).catch(function(){});
+}, 15000);
+
 // ── EVENT MANAGER ──────────────────────────────────────────────────────────
 let eventManagerFilter = 'all';
 
@@ -2593,6 +2615,7 @@ function confirmCreatePilot2() {
 
 </body>
 </html>
+ 
  
  
  
