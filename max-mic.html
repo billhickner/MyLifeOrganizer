@@ -53,7 +53,6 @@ input::placeholder{color:rgba(255,255,255,0.3)}
 var L=false,P=false,C=false,T=null,R=null,A=null,S=false,X=null;
 var VID="onwK4e9ZLuTAKqWW03F9";
 var CTX="You are Max, Bill Hickner assistant for PulsAIO. 4 pilots launching May 14 2026 targeting 25K/mo. Bill runs Unity Controls and UTBSC TAB. Be concise. You CAN set real push notifications. For reminder output SCHEDULE_REMINDER:{message:text,dueDate:ISO8601} at end. For calendar event output CREATE_EVENT:{title:name,date:YYYY-MM-DD,time:HH:MM,category:general} at end.";
-var H=[];
 function ss(t){var e=document.getElementById("st");if(e)e.textContent=t;}
 function sr(t){var b=document.getElementById("rb"),x=document.getElementById("rt");if(x)x.textContent=t;if(b)b.className="rb on";}
 function ua(){if(!X){try{X=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}}if(X&&X.state==="suspended")X.resume();}
@@ -80,11 +79,13 @@ a.onerror=function(){A=null;S=false;};await a.play();
 }
 }catch(e){S=false;if(C&&!L){T=setTimeout(function(){if(C)startL();},700);}}}
 
-// ── CONTEXT & TAG HANDLERS ─────────────────────────────────────────────
-function getCalendarContext(){try{var e=JSON.parse(localStorage.getItem('cal:myevents')||'[]');if(!e.length)return'';return'\nUpcoming events: '+e.sort(function(a,b){return new Date(a.date)-new Date(b.date)}).slice(0,10).map(function(x){return x.title+' ('+x.date+(x.time?' '+x.time:'')+(x.location?' @ '+x.location:'')+ ')'}).join(', ');}catch(x){return'';}}
-function getProjectsContext(){try{var p=JSON.parse(localStorage.getItem('pulsaio_projects')||'[]');if(!p.length)return'';return'\nProjects: '+p.map(function(x){return x.name+' ['+x.status+']'}).join('; ');}catch(x){return'';}}
-function getPilotsContext(){try{var p=JSON.parse(localStorage.getItem('pac:pilots')||'[]');if(!p.length)return'';return'\nPilot stores: '+p.map(function(x){return x.name+' ('+x.store+') ['+x.status+' '+x.progress+'%]'}).join('; ');}catch(x){return'';}}
-function getRemindersContext(){try{var r=JSON.parse(localStorage.getItem('pulsaio_reminders')||'[]').filter(function(x){return!x.done});if(!r.length)return'';return'\nReminders: '+r.map(function(x){return x.text}).join('; ');}catch(x){return'';}}
+var H=[];
+
+function getCalendarContext(){try{var e=JSON.parse(localStorage.getItem("cal:myevents")||"[]");if(!e.length)return"";return"\nUpcoming events: "+e.sort(function(a,b){return new Date(a.date)-new Date(b.date)}).slice(0,10).map(function(x){return x.title+" ("+x.date+(x.time?" "+x.time:"")+")"}).join(", ");}catch(x){return"";}}
+function getProjectsContext(){try{var p=JSON.parse(localStorage.getItem("pulsaio_projects")||"[]");if(!p.length)return"";return"\nProjects: "+p.map(function(x){return x.name+" ["+x.status+"]"}).join("; ");}catch(x){return"";}}
+function getPilotsContext(){try{var p=JSON.parse(localStorage.getItem("pac:pilots")||"[]");if(!p.length)return"";return"\nPilot stores: "+p.map(function(x){return x.name+" ("+x.store+") ["+x.status+" "+x.progress+"%]"}).join("; ");}catch(x){return"";}}
+function getRemindersContext(){try{var r=JSON.parse(localStorage.getItem("pulsaio_reminders")||"[]").filter(function(x){return!x.done});if(!r.length)return"";return"\nReminders: "+r.map(function(x){return x.text}).join("; ");}catch(x){return"";}}
+
 function handleMaxTags(reply){
   var em=reply.match(/CREATE_EVENT:(\{[^}]+\})/);
   if(em){try{
@@ -118,7 +119,7 @@ function handleMaxTags(reply){
     if(pli>=0){if(!pls[pli].updates)pls[pli].updates=[];pls[pli].updates.unshift({date:new Date().toLocaleDateString("en-US",{month:"short",day:"numeric"}),text:"Max: "+pld.note});localStorage.setItem("pac:pilots",JSON.stringify(pls));ss("Note added to "+pls[pli].name);}
   }catch(e){}}
   return reply.replace(/CREATE_EVENT:\{[^}]+\}/g,"").replace(/SCHEDULE_REMINDER:\{[^}]+\}/g,"").replace(/PROJECT_NOTE:\{[^}]+\}/g,"").replace(/PILOT_NOTE:\{[^}]+\}/g,"").trim()||reply;
-})/);if(m){try{var d=JSON.parse(m[1]);var p=JSON.parse(localStorage.getItem('pulsaio_projects')||'[]');var i=p.findIndex(function(x){return x.name&&x.name.toLowerCase().includes((d.project||'').toLowerCase())});if(i>=0){if(!p[i].updates)p[i].updates=[];p[i].updates.unshift({date:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'}),text:'Max: '+d.note});localStorage.setItem('pulsaio_projects',JSON.stringify(p));}}catch(e){}}var m2=reply.match(/PILOT_NOTE:(\{[^}]+\})/);if(m2){try{var d2=JSON.parse(m2[1]);var pl=JSON.parse(localStorage.getItem('pac:pilots')||'[]');var i2=pl.findIndex(function(x){return x.name&&x.name.toLowerCase().includes((d2.pilot||'').toLowerCase())});if(i2>=0){if(!pl[i2].updates)pl[i2].updates=[];pl[i2].updates.unshift({date:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'}),text:'Max: '+d2.note});localStorage.setItem('pac:pilots',JSON.stringify(pl));}}catch(e){}}return reply.replace(/PROJECT_NOTE:\{[^}]+\}/g,'').replace(/PILOT_NOTE:\{[^}]+\}/g,'').trim()||reply;}
+}
 
 async function askMax(txt){
 if(P)return;if(!txt||!txt.trim()){P=false;return;}
@@ -155,6 +156,4 @@ document.getElementById("ti").addEventListener("keydown",function(e){if(e.key===
 </script>
 </body>
 </html>
- 
- 
  
