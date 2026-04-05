@@ -51,201 +51,59 @@ input::placeholder{color:rgba(255,255,255,0.3)}
 <div class="foot"><a href="/command-center.html">Full Dashboard</a></div>
 <script>
 var L=false,P=false,C=false,T=null,R=null,A=null,S=false,X=null;
-var VID="pNInz6obpgDQGcFmaJgB";
-var CTX="You are Max, Bill Hickner's AI assistant. Bill runs PulsAIO (wholesale AIO platform), Unity Controls, and UTBSC TAB. Key team: Ron Snider (CEO), Nate Essin (Shop Supervisor). Be concise, direct, entrepreneurial. Keep voice responses under 3 sentences.\n\nWhen the user asks you to add a calendar event, include CREATE_EVENT:{\"title\":\"event name\",\"date\":\"YYYY-MM-DD\",\"time\":\"HH:MM\",\"category\":\"general\",\"location\":\"\",\"notes\":\"\"} at the end of your response.\nWhen the user asks to be reminded of something, include SCHEDULE_REMINDER:{\"message\":\"text\",\"dueDate\":\"ISO8601\"} at the end.\nWhen the user wants to add a note to a PROJECT, include PROJECT_NOTE:{\"project\":\"project name\",\"note\":\"the note text\"} at the end.\nWhen the user wants to add a note to a PILOT, include PILOT_NOTE:{\"pilot\":\"pilot name\",\"note\":\"the note text\"} at the end.\nAlways calculate dates from the current time.";
-var H=[];
-
-var AU=null, SP=false, AUDIO_EL=null;
-
-// iOS requires AudioContext created from user gesture
-function ua(){
-  if(AU&&AU.state==='running')return;
-  try{
-    var ctx=new (window.AudioContext||window.webkitAudioContext)();
-    if(ctx.state==='suspended')ctx.resume();
-    var buf=ctx.createBuffer(1,1,22050);
-    var src=ctx.createBufferSource();
-    src.buffer=buf;src.connect(ctx.destination);
-    if(src.start)src.start(0);else if(src.noteOn)src.noteOn(0);
-    AU=ctx;
-  }catch(e){console.log('AudioContext error:',e);}
-  // Pre-create reusable Audio element (critical for iOS)
-  if(!AUDIO_EL){
-    AUDIO_EL=new Audio();
-    AUDIO_EL.setAttribute('playsinline','');
-    // Unlock with silent play from user gesture
-    AUDIO_EL.src='data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA//tQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAABhgC7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7//////////////////////////////////////////////////////////////////8AAAAATGF2YzU4LjEzAAAAAAAAAAAAAAAAJAAAAAAAAAAAAYYNAAAAAAAAAAAAAAAAAAAA//tQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAABhgC7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7//////////////////////////////////////////////////////////////////8AAAAATGF2YzU4LjEzAAAAAAAAAAAAAAAAJAAAAAAAAAAAAYYNAAAAAAAAAAAAAAAAAAAA';
-    AUDIO_EL.load();
-    AUDIO_EL.play().then(function(){AUDIO_EL.pause();}).catch(function(){});
-  }
-}
-
-async function speakReply(text){
-  if(SP)stopSpeaking();
-  SP=true;
-  ss('Speaking...');
-  try{
-    var r=await fetch('/.netlify/functions/tts',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:text,voiceId:'pNInz6obpgDQGcFmaJgB',model_id:'eleven_turbo_v2',voice_settings:{stability:0.5,similarity_boost:0.75,style:0.3,use_speaker_boost:true}})});
-    if(!r.ok)throw new Error('TTS '+r.status);
-    var blob=await r.blob();
-    var url=URL.createObjectURL(blob);
-    // Use pre-created Audio element for iOS compatibility
-    if(AUDIO_EL){
-      AUDIO_EL.src=url;
-      AUDIO_EL.onended=function(){SP=false;URL.revokeObjectURL(url);ss('Tap to speak again');};
-      AUDIO_EL.onerror=function(){SP=false;URL.revokeObjectURL(url);fallbackSpeak(text);};
-      AUDIO_EL.play().catch(function(e){
-        console.log('Audio play failed, trying fallback:',e);
-        SP=false;URL.revokeObjectURL(url);
-        fallbackSpeak(text);
-      });
-    } else {
-      // Fallback: create new Audio (works on desktop)
-      var audio=new Audio(url);
-      audio.onended=function(){SP=false;URL.revokeObjectURL(url);ss('Tap to speak again');};
-      audio.onerror=function(){SP=false;fallbackSpeak(text);};
-      audio.play().catch(function(){fallbackSpeak(text);});
-    }
-  }catch(e){
-    console.log('TTS error, fallback:',e);
-    SP=false;
-    fallbackSpeak(text);
-  }
-}
-
-function fallbackSpeak(text){
-  try{
-    window.speechSynthesis.cancel();
-    var utt=new SpeechSynthesisUtterance(text);
-    utt.rate=1.05;
-    utt.onend=function(){SP=false;ss('Tap to speak again');};
-    utt.onerror=function(){SP=false;};
-    window.speechSynthesis.speak(utt);
-    ss('Speaking (browser voice)...');
-  }catch(e){SP=false;ss('Audio unavailable');}
-}
-
-function stopSpeaking(){
-  if(AUDIO_EL){try{AUDIO_EL.pause();AUDIO_EL.currentTime=0;}catch(e){}}
-  try{window.speechSynthesis.cancel();}catch(e){}
-  SP=false;
-  ss('Stopped');
-}
-
-
-
-function getCalendarContext() {
-  try {
-    var evts = JSON.parse(localStorage.getItem('cal:myevents') || '[]');
-    if (!evts.length) return '';
-    var upcoming = evts.sort(function(a,b){return new Date(a.date)-new Date(b.date);}).slice(0,10);
-    return '\nUpcoming events: ' + upcoming.map(function(e){return e.title+' ('+e.date+(e.time?' '+e.time:'')+')';}).join(', ');
-  } catch(e) { return ''; }
-}
-
-function getProjectsContext() {
-  try {
-    var p = JSON.parse(localStorage.getItem('pulsaio_projects') || '[]');
-    if (!p.length) return '';
-    return '\nProjects: ' + p.map(function(x){return x.name+' ['+x.status+']'+(x.goal?' - '+x.goal:'');}).join('; ');
-  } catch(e) { return ''; }
-}
-
-function getPilotsContext() {
-  try {
-    var p = JSON.parse(localStorage.getItem('pac:pilots') || '[]');
-    if (!p.length) return '';
-    return '\nPilot stores: ' + p.map(function(x){return x.name+' ('+x.store+') ['+x.status+' '+x.progress+'%]'+(x.goal?' - '+x.goal:'');}).join('; ');
-  } catch(e) { return ''; }
-}
-
-function getRemindersContext() {
-  try {
-    var r = JSON.parse(localStorage.getItem('pulsaio_reminders') || '[]');
-    var active = r.filter(function(x){return !x.done;});
-    if (!active.length) return '';
-    return '\nActive reminders: ' + active.map(function(x){return x.text+(x.date?' (due: '+x.date+')':'');}).join('; ');
-  } catch(e) { return ''; }
-}
-
-function handleMaxTags(reply) {
-  // CREATE_EVENT
-  var evtMatch = reply.match(/CREATE_EVENT:(\{[^}]+\})/);
-  if (evtMatch) {
-    try {
-      var ev = JSON.parse(evtMatch[1]);
-      var newEvt = {id:'p'+Date.now(), title:ev.title||'New Event', date:ev.date||new Date().toISOString().split('T')[0], time:ev.time||'', category:ev.category||'general', location:ev.location||'', notes:ev.notes||'', source:'personal'};
-      var events = JSON.parse(localStorage.getItem('cal:myevents') || '[]');
-      events.push(newEvt);
-      localStorage.setItem('cal:myevents', JSON.stringify(events));
-      fetch('/.netlify/functions/get-events',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({events:[newEvt]})}).catch(function(){});
-      ss('Event added: ' + newEvt.title + ' on ' + newEvt.date);
-    } catch(e) { console.log('CREATE_EVENT error:', e); }
-  }
-  // SCHEDULE_REMINDER
-  var schedMatch = reply.match(/SCHEDULE_REMINDER:(\{[^}]+\})/);
-  if (schedMatch) {
-    try {
-      var sched = JSON.parse(schedMatch[1]);
-      var delay = Math.max(0, new Date(sched.dueDate).getTime() - Date.now());
-      setTimeout(function() {
-        fetch('/.netlify/functions/notify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title:'Max Reminder',message:sched.message,priority:5,topic:'pulsaio-max-bill'})}).catch(function(){});
-      }, delay);
-    } catch(e) { console.log('SCHEDULE_REMINDER error:', e); }
-  }
-  // PROJECT_NOTE
-  var projMatch = reply.match(/PROJECT_NOTE:(\{[^}]+\})/);
-  if (projMatch) {
-    try {
-      var nd = JSON.parse(projMatch[1]);
-      var projs = JSON.parse(localStorage.getItem('pulsaio_projects') || '[]');
-      var pidx = projs.findIndex(function(pr){return pr.name && pr.name.toLowerCase().includes((nd.project||'').toLowerCase().trim());});
-      if (pidx >= 0) {
-        var ts = new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'});
-        if (!projs[pidx].updates) projs[pidx].updates = [];
-        projs[pidx].updates.unshift({date:ts, text:'Max: '+(nd.note||'').trim()});
-        projs[pidx].updated = new Date().toISOString();
-        localStorage.setItem('pulsaio_projects', JSON.stringify(projs));
-        ss('Note added to ' + projs[pidx].name);
-      } else { ss('Project not found: ' + nd.project); }
-    } catch(e) { console.log('PROJECT_NOTE error:', e); }
-  }
-  // PILOT_NOTE
-  var pilotMatch = reply.match(/PILOT_NOTE:(\{[^}]+\})/);
-  if (pilotMatch) {
-    try {
-      var pn = JSON.parse(pilotMatch[1]);
-      var pilots = JSON.parse(localStorage.getItem('pac:pilots') || '[]');
-      var pidx2 = pilots.findIndex(function(x){return x.name && x.name.toLowerCase().includes((pn.pilot||'').toLowerCase().trim());});
-      if (pidx2 >= 0) {
-        var ts2 = new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'});
-        if (!pilots[pidx2].updates) pilots[pidx2].updates = [];
-        pilots[pidx2].updates.unshift({date:ts2, text:'Max: '+(pn.note||'').trim()});
-        localStorage.setItem('pac:pilots', JSON.stringify(pilots));
-        ss('Note added to ' + pilots[pidx2].name);
-      } else { ss('Pilot not found: ' + pn.pilot); }
-    } catch(e) { console.log('PILOT_NOTE error:', e); }
-  }
-  // Clean tags from reply
-  return reply.replace(/CREATE_EVENT:\{[^}]+\}/g,'').replace(/SCHEDULE_REMINDER:\{[^}]+\}/g,'').replace(/PROJECT_NOTE:\{[^}]+\}/g,'').replace(/PILOT_NOTE:\{[^}]+\}/g,'').trim();
-}
-
-async function askMax(q){
-ss("Max is thinking...");
-var sys = CTX + getCalendarContext() + getProjectsContext() + getPilotsContext() + getRemindersContext() + '\nCURRENT TIME: ' + new Date().toISOString() + ' (local: ' + new Date().toLocaleString() + ')';
-H.push({role:"user",content:q});
+var VID="onwK4e9ZLuTAKqWW03F9";
+var CTX="You are Max, Bill Hickner assistant for PulsAIO. 4 pilots launching May 14 2026 targeting 25K/mo. Bill runs Unity Controls and UTBSC TAB. Be concise. You CAN set real push notifications. For reminder output SCHEDULE_REMINDER:{message:text,dueDate:ISO8601} at end. For calendar event output CREATE_EVENT:{title:name,date:YYYY-MM-DD,time:HH:MM,category:general} at end.";
+function ss(t){var e=document.getElementById("st");if(e)e.textContent=t;}
+function sr(t){var b=document.getElementById("rb"),x=document.getElementById("rt");if(x)x.textContent=t;if(b)b.className="rb on";}
+function ua(){if(!X){try{X=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}}if(X&&X.state==="suspended")X.resume();}
+function stopSpeaking(){if(A){try{A.pause();A.src="";}catch(e){}A=null;}S=false;}
+async function speak(txt){
+if(S)stopSpeaking();S=true;
 try{
-var r=await fetch("/.netlify/functions/claude",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:500,system:sys,messages:H})});
-var d=await r.json();
-var reply=d.content?d.content.map(function(b){return b.text||"";}).join(""):"Sorry, try again.";
-H.push({role:"assistant",content:reply});
-var cleanReply = handleMaxTags(reply);
-sr(cleanReply);
-if(!P)speakReply(cleanReply);
-}catch(e){sr("Connection error. Try again.");}
+var r=await fetch("/.netlify/functions/tts",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text:txt,voiceId:VID})});
+if(!r.ok)throw new Error("fail");
+var buf=await r.arrayBuffer();
+if(!X){try{X=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}}
+if(X&&X.state==="suspended"){await X.resume();}
+if(X){
+var dec=await X.decodeAudioData(buf.slice(0));
+var src2=X.createBufferSource();src2.buffer=dec;src2.connect(X.destination);
+A={pause:function(){try{src2.stop();}catch(e){}},src:""};
+src2.onended=function(){A=null;S=false;if(C&&!L){T=setTimeout(function(){if(C)startL();},700);}};
+src2.start(0);
+}else{
+var blob=new Blob([buf],{type:"audio/mpeg"});var url=URL.createObjectURL(blob);
+var a=new Audio(url);A=a;
+a.onended=function(){A=null;S=false;URL.revokeObjectURL(url);if(C&&!L){T=setTimeout(function(){if(C)startL();},700);}};
+a.onerror=function(){A=null;S=false;};await a.play();
 }
+}catch(e){S=false;if(C&&!L){T=setTimeout(function(){if(C)startL();},700);}}}
 
-function send(){ua();var v=document.getElementById("ti").value.trim();if(!v)return;document.getElementById("ti").value="";askMax(v);}
+// ── CONTEXT & TAG HANDLERS ─────────────────────────────────────────────
+function getCalendarContext(){try{var e=JSON.parse(localStorage.getItem('cal:myevents')||'[]');if(!e.length)return'';return'\nUpcoming events: '+e.sort(function(a,b){return new Date(a.date)-new Date(b.date)}).slice(0,10).map(function(x){return x.title+' ('+x.date+(x.time?' '+x.time:'')+(x.location?' @ '+x.location:'')+ ')'}).join(', ');}catch(x){return'';}}
+function getProjectsContext(){try{var p=JSON.parse(localStorage.getItem('pulsaio_projects')||'[]');if(!p.length)return'';return'\nProjects: '+p.map(function(x){return x.name+' ['+x.status+']'}).join('; ');}catch(x){return'';}}
+function getPilotsContext(){try{var p=JSON.parse(localStorage.getItem('pac:pilots')||'[]');if(!p.length)return'';return'\nPilot stores: '+p.map(function(x){return x.name+' ('+x.store+') ['+x.status+' '+x.progress+'%]'}).join('; ');}catch(x){return'';}}
+function getRemindersContext(){try{var r=JSON.parse(localStorage.getItem('pulsaio_reminders')||'[]').filter(function(x){return!x.done});if(!r.length)return'';return'\nReminders: '+r.map(function(x){return x.text}).join('; ');}catch(x){return'';}}
+function handleMaxTags(reply){var m=reply.match(/PROJECT_NOTE:(\{[^}]+\})/);if(m){try{var d=JSON.parse(m[1]);var p=JSON.parse(localStorage.getItem('pulsaio_projects')||'[]');var i=p.findIndex(function(x){return x.name&&x.name.toLowerCase().includes((d.project||'').toLowerCase())});if(i>=0){if(!p[i].updates)p[i].updates=[];p[i].updates.unshift({date:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'}),text:'Max: '+d.note});localStorage.setItem('pulsaio_projects',JSON.stringify(p));}}catch(e){}}var m2=reply.match(/PILOT_NOTE:(\{[^}]+\})/);if(m2){try{var d2=JSON.parse(m2[1]);var pl=JSON.parse(localStorage.getItem('pac:pilots')||'[]');var i2=pl.findIndex(function(x){return x.name&&x.name.toLowerCase().includes((d2.pilot||'').toLowerCase())});if(i2>=0){if(!pl[i2].updates)pl[i2].updates=[];pl[i2].updates.unshift({date:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'}),text:'Max: '+d2.note});localStorage.setItem('pac:pilots',JSON.stringify(pl));}}catch(e){}}return reply.replace(/PROJECT_NOTE:\{[^}]+\}/g,'').replace(/PILOT_NOTE:\{[^}]+\}/g,'').trim()||reply;}
+
+async function askMax(txt){
+if(P)return;if(!txt||!txt.trim()){P=false;return;}
+if(C&&/^(end chat|stop chat|goodbye max)/i.test(txt.trim())){endChat();return;}
+P=true;ss("Max is thinking...");
+try{
+var now=new Date();
+var sys="TODAY: "+now.toLocaleDateString("en-US",{weekday:"long",year:"numeric",month:"long",day:"numeric"})+". YEAR: "+now.getFullYear()+".\n\n"+CTX+"\n\nTIME: "+now.toISOString();
+var res=await fetch("/.netlify/functions/claude",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:300,system:sys,messages:[{role:"user",content:txt}]})});
+var d=await res.json();var reply=(d.content&&d.content[0]&&d.content[0].text)?d.content[0].text:"Sorry.";P=false;
+var sm=reply.match(/SCHEDULE_REMINDER:(\{[^}]+\})/);
+if(sm){try{var sc=JSON.parse(sm[1]);var ms=new Date(sc.dueDate).getTime()-Date.now();if(ms>0){setTimeout(function(){fetch("/.netlify/functions/notify",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({topic:"pulsaio-max-bill",title:"Max Reminder",message:sc.message})}).catch(function(){});},ms);}}catch(e){}}
+var em=reply.match(/CREATE_EVENT:(\{[^}]+\})/);
+if(em){try{var ev=JSON.parse(em[1]);var ne={id:"p"+Date.now(),title:ev.title||"Event",date:ev.date||now.toISOString().split("T")[0],time:ev.time||"",category:"general",source:"personal"};fetch("/.netlify/functions/get-events",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({events:[ne]})}).catch(function(){});setTimeout(function(){sr("Added: "+ne.title+" on "+ne.date);},1500);}catch(e){}}
+var clean=reply.replace(/SCHEDULE_REMINDER:[^\n]+/g,"").replace(/CREATE_EVENT:[^\n]+/g,"").trim()||reply;
+sr(clean);ss("Tap to speak again");
+clean=handleMaxTags(clean);speak(clean).catch(function(){if(C&&!L){T=setTimeout(function(){if(C)startL();},800);}});
+}catch(e){P=false;ss("Connection error.");if(C&&!L){T=setTimeout(function(){if(C)startL();},800);}}}
+function send(){var v=document.getElementById("ti").value.trim();if(!v)return;document.getElementById("ti").value="";askMax(v);}
 function startL(){
 var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
 if(!SR){ss("Voice requires Safari");return;}if(L)return;
@@ -263,7 +121,4 @@ document.getElementById("ti").addEventListener("keydown",function(e){if(e.key===
 </script>
 </body>
 </html>
- 
- 
- 
  
