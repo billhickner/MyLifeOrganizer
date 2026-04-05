@@ -2202,30 +2202,39 @@ async function syncFromGoogleCalendar() {
     var now = new Date();
     var past = new Date(); past.setDate(now.getDate() - 7);
     var future = new Date(); future.setDate(now.getDate() + 90);
-    var url = "https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=" + past.toISOString() + "&timeMax=" + future.toISOString() + "&singleEvents=true&orderBy=startTime&maxResults=200";
-    var r = await fetch(url, {headers: {"Authorization": "Bearer " + gcalToken}});
-    if (r.status === 401) {
-      gcalToken = null;
-      localStorage.removeItem("gcal_access_token");
-      updateGcalButton(false);
-      return;
-    }
-    if (!r.ok) return;
-    var data = await r.json();
-    var gcalEvents = (data.items || []).map(function(e) {
-      var startDate = e.start.dateTime ? e.start.dateTime.split("T")[0] : e.start.date;
-      var startTime = "";
-      if (e.start.dateTime) {
-        var dt = new Date(e.start.dateTime);
-        startTime = ("0"+dt.getHours()).slice(-2)+":"+("0"+dt.getMinutes()).slice(-2);
+    var timeParams = "?timeMin=" + past.toISOString() + "&timeMax=" + future.toISOString() + "&singleEvents=true&orderBy=startTime&maxResults=200";
+    var calendars = [
+      {id: "primary", source: "google", label: "Personal"},
+      {id: "aakus6fs5ogpjk6e1c8emec078kkuhlf@import.calendar.google.com", source: "utbsc", label: "UTBSC Schedule"}
+    ];
+    var allGcalEvents = [];
+    for (var c = 0; c < calendars.length; c++) {
+      var cal = calendars[c];
+      var url = "https://www.googleapis.com/calendar/v3/calendars/" + encodeURIComponent(cal.id) + "/events" + timeParams;
+      var r = await fetch(url, {headers: {"Authorization": "Bearer " + gcalToken}});
+      if (r.status === 401) {
+        gcalToken = null;
+        localStorage.removeItem("gcal_access_token");
+        updateGcalButton(false);
+        return;
       }
-      return {
-        id: "gcal_" + e.id, gcalId: e.id, title: e.summary || "(No title)",
-        date: startDate, time: startTime, location: e.location || "",
-        notes: e.description || "", category: "google", source: "google"
-      };
-    });
-    localStorage.setItem("cal:gcalevents", JSON.stringify(gcalEvents));
+      if (!r.ok) continue;
+      var data = await r.json();
+      (data.items || []).forEach(function(e) {
+        var startDate = e.start.dateTime ? e.start.dateTime.split("T")[0] : e.start.date;
+        var startTime = "";
+        if (e.start.dateTime) {
+          var dt = new Date(e.start.dateTime);
+          startTime = ("0"+dt.getHours()).slice(-2)+":"+("0"+dt.getMinutes()).slice(-2);
+        }
+        allGcalEvents.push({
+          id: "gcal_" + cal.source + "_" + e.id, gcalId: e.id, title: e.summary || "(No title)",
+          date: startDate, time: startTime, location: e.location || "",
+          notes: e.description || "", category: cal.source, source: cal.source
+        });
+      });
+    }
+    localStorage.setItem("cal:gcalevents", JSON.stringify(allGcalEvents));
     mergeGcalIntoMyEvents();
     renderCalendar();
     updateGcalButton(true);
@@ -2678,6 +2687,7 @@ function confirmCreatePilot2() {
  
  
   
+ 
  
  
  
