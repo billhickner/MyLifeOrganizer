@@ -460,6 +460,7 @@ input[type=date],input[type=time]{width:100%}
   <div class="card">
     <div class="card-title"><div class="card-accent"></div>PulsAIO Pilot Store Tracker</div>
     <p style="font-size:13px;color:var(--soft);margin-bottom:20px;line-height:1.6">Goal: Wholesale AIO <strong>actively running on all 4 stores</strong> by May 14, 2026 · $25K/month target</p>
+    <div style="display:flex;justify-content:flex-end;margin-bottom:14px"><button class="btn-primary" onclick="openCreatePilot()">+ New Pilot</button></div>
     <div class="pilot-grid" id="pilotCards"></div>
   </div>
 </div>
@@ -566,6 +567,19 @@ input[type=date],input[type=time]{width:100%}
 </div>
 
 <!-- Event Modal -->
+<!-- Create Pilot Modal -->
+<div id="createPilotModal" class="create-modal" onclick="if(event.target===this)closeCreatePilot()">
+  <div class="create-modal-inner">
+    <div class="create-modal-title">New Pilot Store</div>
+    <div class="create-field"><label class="create-label">Pilot Name</label><input class="create-input" id="newPilotName" placeholder="e.g. John Smith"></div>
+    <div class="create-field"><label class="create-label">Store Name</label><input class="create-input" id="newPilotStore" placeholder="e.g. Smith Family Store"></div>
+    <div class="create-field"><label class="create-label">Contact</label><input class="create-input" id="newPilotContact" placeholder="Phone or email (optional)"></div>
+    <div class="create-field"><label class="create-label">Status</label><select class="create-input" id="newPilotStatus" style="cursor:pointer"><option value="planning">Planning</option><option value="active">Active</option><option value="live">Live</option></select></div>
+    <div class="create-field"><label class="create-label">Goal</label><input class="create-input" id="newPilotGoal" placeholder="Deployment goal (optional)"></div>
+    <div class="create-actions"><button class="btn-cancel" onclick="closeCreatePilot()">Cancel</button><button class="btn-create-confirm" onclick="confirmCreatePilot2()">Create Pilot</button></div>
+  </div>
+</div>
+
 <!-- Pilot Detail Modal -->
 <div id="pilotDetailModal" class="project-modal" onclick="if(event.target===this)closePilotModal()">
   <div class="project-modal-inner">
@@ -2450,6 +2464,44 @@ function deletePilot() {
   save();
   closePilotModal();
 }
+
+function openCreatePilot() {
+  document.getElementById('newPilotName').value = '';
+  document.getElementById('newPilotStore').value = '';
+  document.getElementById('newPilotContact').value = '';
+  document.getElementById('newPilotStatus').value = 'planning';
+  document.getElementById('newPilotGoal').value = '';
+  document.getElementById('createPilotModal').classList.add('open');
+}
+
+function closeCreatePilot() {
+  document.getElementById('createPilotModal').classList.remove('open');
+}
+
+function confirmCreatePilot2() {
+  const name = document.getElementById('newPilotName').value.trim();
+  const store = document.getElementById('newPilotStore').value.trim();
+  if (!name) { alert('Pilot name is required.'); return; }
+  const newPilot = {
+    id: 'p' + Date.now(),
+    name: name,
+    store: store || name + ' Store',
+    status: document.getElementById('newPilotStatus').value,
+    progress: 0,
+    notes: '',
+    goal: document.getElementById('newPilotGoal').value.trim(),
+    contact: document.getElementById('newPilotContact').value.trim(),
+    updates: [],
+    files: [],
+    folder: ''
+  };
+  pilots.push(newPilot);
+  save();
+  closeCreatePilot();
+  renderPilotCards();
+  renderPilotSnapshot();
+  renderStats();
+}
 </script>
 
   <!-- PROJECTS TAB -->
@@ -2547,6 +2599,7 @@ function deletePilot() {
 
 </body>
 </html>
+ 
  
  
  
