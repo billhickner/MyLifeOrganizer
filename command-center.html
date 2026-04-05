@@ -2238,17 +2238,7 @@ function showToast(msg) {
 
 // ===== CALENDAR SYNC WITH SUPABASE =====
 function syncCalendarEvents() {
-  fetch('/.netlify/functions/get-events')
-    .then(r=>r.json()).then(d=>{
-      if(!d.events||!d.events.length) return;
-      const ids = new Set(myEvents.map(e=>String(e.id)));
-      const newEvts = d.events.filter(e=>!ids.has(String(e.id)));
-      if(newEvts.length) {
-        myEvents = [...myEvents, ...newEvts];
-        localStorage.setItem('cal:myevents', JSON.stringify(myEvents));
-        renderCalendar();
-      }
-    }).catch(()=>{});
+
 }
 // Auto-sync every 30 seconds so all devices stay current without any user action
 setInterval(syncCalendarEvents, 30000);
@@ -2597,6 +2587,7 @@ function confirmCreatePilot2() {
 
 </body>
 </html>
+ 
  
  
  
