@@ -57,6 +57,10 @@ var H=[];
 
 var AU=null, SP=false, AUDIO_EL=null;
 
+function ss(t){var el=document.getElementById('st');if(el)el.textContent=t;}
+function sr(t){var el=document.getElementById('rt');if(el)el.textContent=t;var rb=document.getElementById('rb');if(rb)rb.style.display=t?'block':'none';}
+
+
 function ua(){
   if(AU&&AU.state==='running')return;
   try{
@@ -256,6 +260,7 @@ document.getElementById("ti").addEventListener("keydown",function(e){if(e.key===
 </script>
 </body>
 </html>
+ 
  
  
  
