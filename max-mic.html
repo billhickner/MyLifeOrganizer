@@ -94,7 +94,7 @@ function handleMaxTags(reply){
     var evts=JSON.parse(localStorage.getItem("cal:myevents")||"[]");
     evts.push(ne);
     localStorage.setItem("cal:myevents",JSON.stringify(evts));
-    fetch("/.netlify/functions/get-events",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({events:[ne]})}).catch(function(){});
+    fetch("/.netlify/functions/get-events",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({sync:true,events:JSON.parse(localStorage.getItem("cal:myevents")||"[]")})}).catch(function(){});
     ss("Event added: "+ne.title+" on "+ne.date);
   }catch(e){}}
   var sm=reply.match(/SCHEDULE_REMINDER:(\{[^}]+\})/);
@@ -161,6 +161,7 @@ document.getElementById("ti").addEventListener("keydown",function(e){if(e.key===
 </script>
 </body>
 </html>
+ 
  
  
  
