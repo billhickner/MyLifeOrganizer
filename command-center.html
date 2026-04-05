@@ -1673,7 +1673,7 @@ function openProject(id){
   currentProjectId = id;
   document.getElementById('modalProjectName').textContent = p.name;
   document.getElementById('modalProjectStatus').value = p.status;
-  document.getElementById('modalProjectGoal').textContent = p.goal || 'No goal defined.';
+  document.getElementById('goalInput').textContent = p.goal || 'No goal defined.';
   document.getElementById('modalProjectNotes').value = '';
   var _gi=document.getElementById('goalInput');if(_gi)_gi.value=p.goal||'';
   renderProjectUpdates(p);
@@ -2367,6 +2367,7 @@ const deleteSelectedEvents = () => {
 
 </body>
 </html>
+ 
  
  
  
