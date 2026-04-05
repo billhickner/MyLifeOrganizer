@@ -121,23 +121,26 @@ function handleMaxTags(reply){
   return reply.replace(/CREATE_EVENT:\{[^}]+\}/g,"").replace(/SCHEDULE_REMINDER:\{[^}]+\}/g,"").replace(/PROJECT_NOTE:\{[^}]+\}/g,"").replace(/PILOT_NOTE:\{[^}]+\}/g,"").trim()||reply;
 }
 
-async function askMax(txt){
-if(P)return;if(!txt||!txt.trim()){P=false;return;}
-if(C&&/^(end chat|stop chat|goodbye max)/i.test(txt.trim())){endChat();return;}
-P=true;ss("Max is thinking...");
-try{
-var now=new Date();
-var sys="TODAY: "+now.toLocaleDateString("en-US",{weekday:"long",year:"numeric",month:"long",day:"numeric"})+". YEAR: "+now.getFullYear()+".\n\n"+CTX+"\n\nTIME: "+now.toISOString();
-var res=await fetch("/.netlify/functions/claude",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:300,system:sys,messages:[{role:"user",content:txt}]})});
-var d=await res.json();var reply=(d.content&&d.content[0]&&d.content[0].text)?d.content[0].text:"Sorry.";P=false;
-var sm=reply.match(/SCHEDULE_REMINDER:(\{[^}]+\})/);
-if(sm){try{var sc=JSON.parse(sm[1]);var ms=new Date(sc.dueDate).getTime()-Date.now();if(ms>0){setTimeout(function(){fetch("/.netlify/functions/notify",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({topic:"pulsaio-max-bill",title:"Max Reminder",message:sc.message})}).catch(function(){});},ms);}}catch(e){}}
-var em=reply.match(/CREATE_EVENT:(\{[^}]+\})/);
-if(em){try{var ev=JSON.parse(em[1]);var ne={id:"p"+Date.now(),title:ev.title||"Event",date:ev.date||now.toISOString().split("T")[0],time:ev.time||"",category:"general",source:"personal"};fetch("/.netlify/functions/get-events",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({events:[ne]})}).catch(function(){});setTimeout(function(){sr("Added: "+ne.title+" on "+ne.date);},1500);}catch(e){}}
-var clean=reply.replace(/SCHEDULE_REMINDER:[^\n]+/g,"").replace(/CREATE_EVENT:[^\n]+/g,"").trim()||reply;
-sr(clean);ss("Tap to speak again");
-clean=handleMaxTags(clean);speak(clean).catch(function(){if(C&&!L){T=setTimeout(function(){if(C)startL();},800);}});
-}catch(e){P=false;ss("Connection error.");if(C&&!L){T=setTimeout(function(){if(C)startL();},800);}}}
+async function askMax(q){
+  ss("Max is thinking...");
+  H.push({role:"user",content:q});
+  var now=new Date();
+  var sys="TODAY: "+now.toLocaleDateString("en-US",{weekday:"long",year:"numeric",month:"long",day:"numeric"})+". YEAR: "+now.getFullYear()+".\n\n"+CTX;
+  sys+=getCalendarContext()+getProjectsContext()+getPilotsContext()+getRemindersContext();
+  sys+="\n\nCRITICAL: When the user asks to schedule/add/create a calendar event or appointment, you MUST include this EXACT tag at the END of your response: CREATE_EVENT:{\"title\":\"event name\",\"date\":\"YYYY-MM-DD\",\"time\":\"HH:MM\",\"category\":\"general\",\"location\":\"\",\"notes\":\"\"}";
+  sys+="\nFor project notes include PROJECT_NOTE:{\"project\":\"name\",\"note\":\"text\"} at end.";
+  sys+="\nFor pilot notes include PILOT_NOTE:{\"pilot\":\"name\",\"note\":\"text\"} at end.";
+  sys+="\nTime: "+now.toISOString();
+  try{
+    var r=await fetch("/.netlify/functions/claude",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:500,system:sys,messages:[{role:"user",content:q}]})});
+    var d=await r.json();
+    var reply=d.content?d.content.map(function(b){return b.text||""}).join(""):"Sorry, try again.";
+    H.push({role:"assistant",content:reply});
+    var clean=handleMaxTags(reply);
+    sr(clean);
+    speak(clean);
+  }catch(e){sr("Connection error. Try again.");}
+}
 function send(){var v=document.getElementById("ti").value.trim();if(!v)return;document.getElementById("ti").value="";askMax(v);}
 function startL(){
 var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
@@ -156,4 +159,5 @@ document.getElementById("ti").addEventListener("keydown",function(e){if(e.key===
 </script>
 </body>
 </html>
+ 
  
