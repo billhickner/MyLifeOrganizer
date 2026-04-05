@@ -488,10 +488,7 @@ input[type=date],input[type=time]{width:100%}
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
       <div class="card-title" style="margin-bottom:0"><div class="card-accent"></div>My Command Center Calendar</div>
       <div style="display:flex;align-items:center;gap:10px">
-        <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted)">
-          <div style="width:10px;height:10px;border-radius:2px;background:var(--accent)"></div>UTBSC
-          <div style="width:10px;height:10px;border-radius:2px;background:var(--green);margin-left:6px"></div>Personal
-        </div>
+        <div style="display:flex;align-items:centepx;font-size:11px;color:var(--muted)">
         <button class="btn-primary" onclick="openAddEvent()">+ Add Event</button>
         <button class="btn-outline" onclick="openEventManager()" style="margin-left:6px">⚙ Manage Events</button>
         <button class="btn-outline" id="gcalConnectBtn" onclick="connectGoogleCalendar()" style="margin-left:6px;color:var(--green);border-color:var(--green)">🔄 Sync Google Cal</button>
@@ -2348,7 +2345,7 @@ const renderEventManager = () => {
     const badge = e._src==='utbsc' ? '<span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px;background:#E0F7FF;color:#00A3E0">UTBSC</span>' : '<span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px;background:#E6F9F0;color:#00C48C">Personal</span>';
     const isDel = e._src === 'personal';
     return '<div style="display:flex;align-items:center;gap:12px;padding:10px 12px;border-bottom:1px solid var(--bg)">' +
-      (isDel ? '<input type="checkbox" class="evt-mgr-check" data-id="'+e.id+'" style="width:16px;height:16px;accent-color:var(--primary);cursor:pointer">' : '<div style="width:16px"></div>') +
+      (isDel ? '<input type="checkbox" class="evt-mgr-check" data-id="'+e.id+'" style="width:16px;height:16px;accent-color:var(--primary);cursor:pointer">' : '<div style="width:16px"><span style="display:flex;align-items:center;gap:3px"><span style="width:10px;height:10px;border-radius:50%;background:#27ae60;display:inline-block"></span>Google</span></div>') +
       '<div style="width:8px;height:8px;border-radius:50%;background:'+dot+';flex-shrink:0"></div>' +
       '<div style="flex:1;min-width:0">' +
         '<div style="font-size:13px;font-weight:600;color:var(--dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+e.title+'</div>' +
@@ -2699,3 +2696,4 @@ setTimeout(function(){try{mergeGcalIntoMyEvents();renderCalendar();}catch(e){}},
  
   
  
+   
