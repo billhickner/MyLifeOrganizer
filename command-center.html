@@ -752,16 +752,7 @@ let myEvents = JSON.parse(localStorage.getItem('cal:myevents') || '[]');
         }
       }
     }).catch(function(){});
-let utbscEvents = [
-  {id:'u1',date:'2026-03-30',title:'UTJC2069 NSN 41216 — Unity BAS',location:'2040 Aldine Mail Route Rd, Houston TX 77039',time:'',allDay:true,source:'utbsc'},
-  {id:'u2',date:'2026-03-30',title:'UTJC2068 NSN 41216 — TAB / Startup',location:'2040 Aldine Mail Route Rd, Houston TX 77039',time:'',allDay:true,source:'utbsc'},
-  {id:'u3',date:'2026-04-01',title:'UTJC2631 MCD 042-3182 — TAB & StartUp Zone(A) 2nd Visit',location:'2727 School Street, Needville TX 77461',time:'',allDay:true,source:'utbsc'},
-  {id:'u4',date:'2026-04-02',title:'✈️ Flight: TPA → SEA',location:'Tampa International Airport',time:'7:30 AM',allDay:false,source:'utbsc'},
-  {id:'u5',date:'2026-04-08',title:'Ready to Install Erqos Test',location:'',time:'',allDay:true,source:'utbsc'},
-  {id:'u6',date:'2026-04-16',title:'Bill Snider Phone Bill $99',location:'',time:'',allDay:true,source:'utbsc'},
-  {id:'u7',date:'2026-04-26',title:'Keith Internet Payment',location:'',time:'',allDay:true,source:'utbsc'},
-  {id:'u8',date:'2026-04-30',title:"Keith's Medical Debt Paid off",location:'',time:'',allDay:true,source:'utbsc'},
-];
+let utbscEvents = []
 
 
 
@@ -2200,7 +2191,7 @@ async function syncFromGoogleCalendar() {
   if (!gcalToken) return;
   try {
     var now = new Date();
-    var past = new Date(); past.setDate(now.getDate() - 7);
+    var past = new Date(); past.setFullYear(now.getFullYear() - 1);
     var future = new Date(); future.setDate(now.getDate() + 90);
     var timeParams = "?timeMin=" + past.toISOString() + "&timeMax=" + future.toISOString() + "&singleEvents=true&orderBy=startTime&maxResults=200";
     var calendars = [
@@ -2691,6 +2682,7 @@ setTimeout(function(){try{mergeGcalIntoMyEvents();renderCalendar();}catch(e){}},
  
  
   
+ 
  
  
  
