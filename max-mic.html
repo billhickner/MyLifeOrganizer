@@ -126,6 +126,8 @@ async function askMax(q){
   H.push({role:"user",content:q});
   var now=new Date();
   var sys="TODAY: "+now.toLocaleDateString("en-US",{weekday:"long",year:"numeric",month:"long",day:"numeric"})+". YEAR: "+now.getFullYear()+".\n\n"+CTX;
+sys+=getCalendarContext()+getProjectsContext()+getPilotsContext()+getRemindersContext();
+sys+="\nCRITICAL: When user asks to schedule/add/create a calendar event, you MUST include CREATE_EVENT tag at END of response. Example: CREATE_EVENT:{\"title\":\"Meeting\",\"date\":\"2026-04-25\",\"time\":\"14:00\",\"category\":\"general\",\"location\":\"\",\"notes\":\"\"}\nFor project notes: PROJECT_NOTE:{\"project\":\"name\",\"note\":\"text\"}\nFor pilot notes: PILOT_NOTE:{\"pilot\":\"name\",\"note\":\"text\"}";
   sys+=getCalendarContext()+getProjectsContext()+getPilotsContext()+getRemindersContext();
   sys+="\n\nCRITICAL: When the user asks to schedule/add/create a calendar event or appointment, you MUST include this EXACT tag at the END of your response: CREATE_EVENT:{\"title\":\"event name\",\"date\":\"YYYY-MM-DD\",\"time\":\"HH:MM\",\"category\":\"general\",\"location\":\"\",\"notes\":\"\"}";
   sys+="\nFor project notes include PROJECT_NOTE:{\"project\":\"name\",\"note\":\"text\"} at end.";
@@ -159,5 +161,6 @@ document.getElementById("ti").addEventListener("keydown",function(e){if(e.key===
 </script>
 </body>
 </html>
+ 
  
  
