@@ -823,7 +823,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   fetchCalendar();
   renderAll();
-  initGoogleCalSync();
+  // Wait for Google Identity Services to load (async script)
+  setTimeout(function(){initGoogleCalSync();}, 2000);
+  // Also retry if not loaded yet
+  setTimeout(function(){if(!gcalTokenClient)initGoogleCalSync();}, 5000);
 });
 
 // ── RENDER ALL ─────────────────────────────────────────────────────────────
@@ -2180,6 +2183,7 @@ function initGoogleCalSync() {
 }
 
 function connectGoogleCalendar() {
+  if (!gcalTokenClient) initGoogleCalSync();
   if (gcalToken) {
     syncFromGoogleCalendar();
     return;
@@ -2668,6 +2672,7 @@ function confirmCreatePilot2() {
 
 </body>
 </html>
+ 
  
  
  
