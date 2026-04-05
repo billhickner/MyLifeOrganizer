@@ -729,16 +729,24 @@ let goals   = JSON.parse(localStorage.getItem('pac:goals') || 'null') || [
 let entries = JSON.parse(localStorage.getItem('pac:entries') || '[]');
 let myEvents = JSON.parse(localStorage.getItem('cal:myevents') || '[]');
   // Merge in Supabase events on load
-  // Sync from Supabase only on first visit (empty localStorage)
-  if(!myEvents.length){
-    fetch('/.netlify/functions/get-events')
-      .then(function(r){return r.json()}).then(function(d){
-        if(d.events&&d.events.length){
-          myEvents=d.events;
+  // Sync: merge Supabase events into localStorage (adds new events from other devices)
+  fetch('/.netlify/functions/get-events')
+    .then(function(r){return r.json()}).then(function(d){
+      if(d.events&&d.events.length){
+        var local=JSON.parse(localStorage.getItem('cal:myevents')||'[]');
+        var localIds={};
+        local.forEach(function(e){localIds[e.id]=true;});
+        var added=0;
+        d.events.forEach(function(e){
+          if(!localIds[e.id]){local.push(e);added++;}
+        });
+        if(added>0){
+          myEvents=local;
           localStorage.setItem('cal:myevents',JSON.stringify(myEvents));
           renderCalendar();
         }
-      }).catch(function(){});
+      }
+    }).catch(function(){});
   }
 let utbscEvents = [
   {id:'u1',date:'2026-03-30',title:'UTJC2069 NSN 41216 — Unity BAS',location:'2040 Aldine Mail Route Rd, Houston TX 77039',time:'',allDay:true,source:'utbsc'},
@@ -775,7 +783,7 @@ const save = () => {
     const eventsClean = myEvents.map(({id,title,date,time,category,location,notes,source})=>({id,title,date,time:time||'',category:category||'general',location:location||'',notes:notes||'',source:source||'personal'}));
     fetch('/.netlify/functions/get-events', {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({events: eventsClean})
+      body:JSON.stringify({sync:true,events: eventsClean})
     }).catch(e=>console.log('event sync err:',e));
   }
 };
@@ -2587,6 +2595,7 @@ function confirmCreatePilot2() {
 
 </body>
 </html>
+ 
  
  
  
