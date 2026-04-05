@@ -2572,6 +2572,10 @@ function confirmCreatePilot2() {
   renderPilotSnapshot();
   renderStats();
 }
+
+// Immediate merge on page load (after all const declarations)
+setTimeout(function(){try{mergeGcalIntoMyEvents();renderCalendar();}catch(e){}},500);
+setTimeout(function(){try{mergeGcalIntoMyEvents();renderCalendar();}catch(e){}},2000);
 </script>
 
   <!-- PROJECTS TAB -->
