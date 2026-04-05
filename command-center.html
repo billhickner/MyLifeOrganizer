@@ -743,6 +743,7 @@ let myEvents = JSON.parse(localStorage.getItem('cal:myevents') || '[]');
         if(added>0){
           myEvents=local;
           localStorage.setItem('cal:myevents',JSON.stringify(myEvents));
+          mergeGcalIntoMyEvents();
           renderCalendar();
         }
       }
@@ -779,7 +780,7 @@ const save = () => {
   localStorage.setItem('cal:myevents', JSON.stringify(myEvents));
   // Sync to Supabase
   if (myEvents.length) {
-    const eventsClean = myEvents.map(({id,title,date,time,category,location,notes,source})=>({id,title,date,time:time||'',category:category||'general',location:location||'',notes:notes||'',source:source||'personal'}));
+    const eventsClean = myEvents.filter(function(e){return e.source!=="google";}).map(({id,title,date,time,category,location,notes,source})=>({id,title,date,time:time||'',category:category||'general',location:location||'',notes:notes||'',source:source||'personal'}));
     fetch('/.netlify/functions/get-events', {
       method:'POST', headers:{'Content-Type':'application/json'},
       body:JSON.stringify({sync:true,events: eventsClean})
@@ -823,6 +824,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   fetchCalendar();
   renderAll();
+  mergeGcalIntoMyEvents();
   // Wait for Google Identity Services to load (async script)
   setTimeout(function(){initGoogleCalSync();}, 2000);
   // Also retry if not loaded yet
@@ -2224,35 +2226,30 @@ async function syncFromGoogleCalendar() {
     var data = await r.json();
     var gcalEvents = (data.items || []).map(function(e) {
       var startDate = e.start.dateTime ? e.start.dateTime.split("T")[0] : e.start.date;
-      var startTime = e.start.dateTime ? new Date(e.start.dateTime).toLocaleTimeString("en-US", {hour: "numeric", minute: "2-digit", hour12: false}) : "";
+      var startTime = "";
+      if (e.start.dateTime) {
+        var dt = new Date(e.start.dateTime);
+        startTime = ("0"+dt.getHours()).slice(-2)+":"+("0"+dt.getMinutes()).slice(-2);
+      }
       return {
-        id: "gcal_" + e.id,
-        gcalId: e.id,
-        title: e.summary || "(No title)",
-        date: startDate,
-        time: startTime,
-        location: e.location || "",
-        notes: e.description || "",
-        category: "general",
-        source: "google",
-        allDay: !e.start.dateTime
+        id: "gcal_" + e.id, gcalId: e.id, title: e.summary || "(No title)",
+        date: startDate, time: startTime, location: e.location || "",
+        notes: e.description || "", category: "google", source: "google"
       };
     });
-    var local = JSON.parse(localStorage.getItem("cal:myevents") || "[]");
-    var localIds = {};
-    local.forEach(function(e) { localIds[e.id] = true; });
-    var added = 0;
-    gcalEvents.forEach(function(e) {
-      if (!localIds[e.id]) { local.push(e); added++; }
-    });
-    if (added > 0) {
-      myEvents = local;
-      localStorage.setItem("cal:myevents", JSON.stringify(myEvents));
-      renderCalendar();
-    }
+    localStorage.setItem("cal:gcalevents", JSON.stringify(gcalEvents));
+    mergeGcalIntoMyEvents();
+    renderCalendar();
     updateGcalButton(true);
   } catch(e) { console.log("GCal sync error:", e); }
 }
+
+function mergeGcalIntoMyEvents() {
+  var gcal = JSON.parse(localStorage.getItem("cal:gcalevents") || "[]");
+  myEvents = myEvents.filter(function(e) { return e.source !== "google"; });
+  gcal.forEach(function(e) { myEvents.push(e); });
+}
+
 
 async function postToGoogleCalendar(evt) {
   if (!gcalToken) return;
@@ -2323,6 +2320,8 @@ setInterval(function(){
       if(changed){
         myEvents=d.events;
         localStorage.setItem('cal:myevents',JSON.stringify(myEvents));
+        mergeGcalIntoMyEvents();
+        mergeGcalIntoMyEvents();
         renderCalendar();
       }
     }).catch(function(){});
@@ -2672,6 +2671,7 @@ function confirmCreatePilot2() {
 
 </body>
 </html>
+ 
  
  
  
