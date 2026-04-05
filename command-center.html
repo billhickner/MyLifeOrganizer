@@ -829,6 +829,9 @@ document.addEventListener('DOMContentLoaded', () => {
   setTimeout(function(){initGoogleCalSync();}, 2000);
   // Also retry if not loaded yet
   setTimeout(function(){if(!gcalTokenClient)initGoogleCalSync();}, 5000);
+  // Delayed merge to catch async UTBSC and Google Calendar fetches
+  setTimeout(function(){mergeGcalIntoMyEvents();renderCalendar();},2000);
+  setTimeout(function(){mergeGcalIntoMyEvents();renderCalendar();},5000);
 });
 
 // ── RENDER ALL ─────────────────────────────────────────────────────────────
@@ -2669,6 +2672,7 @@ function confirmCreatePilot2() {
  
  
   
+ 
  
  
  
