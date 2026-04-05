@@ -762,6 +762,8 @@ let utbscEvents = [
   {id:'u7',date:'2026-04-26',title:'Keith Internet Payment',location:'',time:'',allDay:true,source:'utbsc'},
   {id:'u8',date:'2026-04-30',title:"Keith's Medical Debt Paid off",location:'',time:'',allDay:true,source:'utbsc'},
 ];
+setTimeout(function(){mergeGcalIntoMyEvents();renderCalendar();},100);
+
 
 let calYear = TODAY.getFullYear();
 let calMonth = TODAY.getMonth();
@@ -2676,6 +2678,7 @@ function confirmCreatePilot2() {
  
  
   
+ 
  
  
  
