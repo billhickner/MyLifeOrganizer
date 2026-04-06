@@ -311,7 +311,7 @@ input[type=date],input[type=time]{width:100%}
     <div class="logo-icon">P</div>
     <div>
       <div class="logo-text">PulsAIO</div>
-      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.3.4</span></div>
+      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.3.5</span></div>
     </div>
   </div>
   <nav class="nav">
@@ -1821,6 +1821,9 @@ function saveProjectChanges(){
   saveProjects();
   renderProjects();
   closeProjectModal();
+
+  localStorage.setItem("pac:projects", JSON.stringify(projects));
+  save();
 }
 
 function deleteCurrentProject(){
@@ -2731,6 +2734,7 @@ function loadDeletedFromSupabase(callback){
   
  
    
+ 
  
  
  
