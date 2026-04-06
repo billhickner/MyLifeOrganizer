@@ -311,7 +311,7 @@ input[type=date],input[type=time]{width:100%}
     <div class="logo-icon">P</div>
     <div>
       <div class="logo-text">PulsAIO</div>
-      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.3.2</span></div>
+      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.3.3</span></div>
     </div>
   </div>
   <nav class="nav">
@@ -2227,8 +2227,7 @@ async function syncFromGoogleCalendar() {
       });
     }
     localStorage.setItem("cal:gcalevents", JSON.stringify(allGcalEvents));
-    mergeGcalIntoMyEvents();
-    renderCalendar();
+    loadDeletedFromSupabase(function(){mergeGcalIntoMyEvents();renderCalendar();});
     updateGcalButton(true);
   } catch(e) { console.log("GCal sync error:", e); }
 }
@@ -2571,7 +2570,7 @@ function confirmCreatePilot2() {
 }
 
 // Immediate merge on page load (after all const declarations)
-setTimeout(function(){try{loadDeletedFromSupabase();setTimeout(function(){try{mergeGcalIntoMyEvents();renderCalendar();}catch(x){}},200);}catch(e){}},500);
+setTimeout(function(){try{loadDeletedFromSupabase(function(){try{mergeGcalIntoMyEvents();renderCalendar();}catch(x){}});}catch(e){}},500);
 setTimeout(function(){try{mergeGcalIntoMyEvents();renderCalendar();}catch(e){}},2000);
 
 function toggleCalendar(s,v){var o=JSON.parse(localStorage.getItem("cal:visibility")||'{"personal":true,"utbsc":true,"google":true}');o[s]=v;localStorage.setItem("cal:visibility",JSON.stringify(o));applyCalendarVisibility();}
@@ -2581,12 +2580,22 @@ function openAddCalendarModal(){alert("Add PulsAIO Calendar - coming soon!");}
 function syncDeletedToSupabase(ids){
   fetch("/.netlify/functions/get-events",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({events:[{id:"_deleted_tracker",title:"_DELETED",date:"2099-01-01",time:"",category:"_system",location:"",notes:JSON.stringify(ids),source:"_system"}]})}).catch(function(){});
 }
-function loadDeletedFromSupabase(){
+function loadDeletedFromSupabase(callback){
   fetch("/.netlify/functions/get-events").then(function(r){return r.json();}).then(function(d){
-    if(!d.events)return;
-    var t=d.events.find(function(e){return e.id==="_deleted_tracker";});
-    if(t&&t.notes){try{var remote=JSON.parse(t.notes);var local=JSON.parse(localStorage.getItem("cal:deletedEvents")||"[]");var merged=local.slice();remote.forEach(function(id){if(merged.indexOf(id)===-1)merged.push(id);});localStorage.setItem("cal:deletedEvents",JSON.stringify(merged));}catch(e){}}
-  }).catch(function(){});
+    if(d.events){
+      var t=d.events.find(function(e){return e.id==="_deleted_tracker";});
+      if(t&&t.notes){
+        try{
+          var remote=JSON.parse(t.notes);
+          var local=JSON.parse(localStorage.getItem("cal:deletedEvents")||"[]");
+          var merged=local.slice();
+          remote.forEach(function(id){if(merged.indexOf(id)===-1)merged.push(id);});
+          localStorage.setItem("cal:deletedEvents",JSON.stringify(merged));
+        }catch(e){}
+      }
+    }
+    if(callback)callback();
+  }).catch(function(){if(callback)callback();});
 }
 </script>
 
@@ -2721,6 +2730,7 @@ function loadDeletedFromSupabase(){
   
  
    
+ 
  
  
  
