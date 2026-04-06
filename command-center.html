@@ -311,7 +311,7 @@ input[type=date],input[type=time]{width:100%}
     <div class="logo-icon">P</div>
     <div>
       <div class="logo-text">PulsAIO</div>
-      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.3.9</span></div>
+      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.4.0</span></div>
     </div>
   </div>
   <nav class="nav">
@@ -820,6 +820,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
     loadMemoriesFromSupabase();
+  loadPilotsFromSupabase();
   renderAll();
   mergeGcalIntoMyEvents();
   // Wait for Google Identity Services to load (async script)
@@ -2334,6 +2335,24 @@ setInterval(function(){
     }).catch(function(){});
 }, 15000);
 
+  // === Bug #1 Fix: Re-sync when page becomes visible (iOS Safari kills setInterval in background) ===
+  document.addEventListener('visibilitychange', function() {
+    if (document.visibilityState === 'visible') {
+      loadMemoriesFromSupabase();
+      loadPilotsFromSupabase();
+    }
+  });
+  window.addEventListener('pageshow', function(e) {
+    if (e.persisted) {
+      loadMemoriesFromSupabase();
+      loadPilotsFromSupabase();
+    }
+  });
+  window.addEventListener('focus', function() {
+    loadMemoriesFromSupabase();
+    loadPilotsFromSupabase();
+  });
+
 // ── EVENT MANAGER ──────────────────────────────────────────────────────────
 let eventManagerFilter = 'all';
 
@@ -2408,7 +2427,7 @@ function openPilot(id) {
   if (!p.files) p.files = [];
   if (!p.folder) p.folder = '';
   if (!p.contact) p.contact = '';
-  document.getElementById('pilotModalName').textContent = p.name;
+  document.getElementById('pilotModalName').innerHTML = '<span id="pilotNameText">' + p.name + '</span> <button onclick="editPilotName()" style="background:none;border:none;cursor:pointer;font-size:14px;opacity:0.6" title="Edit name">✏️</button>';
   document.getElementById('pilotModalStatus').value = p.status;
   document.getElementById('pilotProgressSlider').value = p.progress;
   document.getElementById('pilotProgressVal').textContent = p.progress + '%';
@@ -2430,6 +2449,102 @@ function closePilotModal() {
   renderStats();
 }
 
+// === Bug #2 Fix: Pilot Supabase sync ===
+function syncPilotsToSupabase() {
+  var p = JSON.parse(localStorage.getItem('pac:pilots') || '[]');
+  if (p.length === 0) return;
+  fetch('/.netlify/functions/get-projects', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({
+      projects: [{
+        id: '_pilots_data',
+        name: 'Pilots Sync Store',
+        biz: '_pilot',
+        status: 'active',
+        notes: JSON.stringify(p)
+      }],
+      sync: false
+    })
+  }).catch(function(){});
+}
+
+function loadPilotsFromSupabase() {
+  fetch('/.netlify/functions/get-projects')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var projects = data.projects || data || [];
+      var pilotRow = projects.find(function(p) { return p.id === '_pilots_data'; });
+      if (pilotRow && pilotRow.notes) {
+        try {
+          var remotePilots = JSON.parse(pilotRow.notes);
+          if (Array.isArray(remotePilots) && remotePilots.length > 0) {
+            var localPilots = JSON.parse(localStorage.getItem('pac:pilots') || '[]');
+            var remoteIds = remotePilots.map(function(p) { return p.id; });
+            var merged = remotePilots.slice();
+            localPilots.forEach(function(lp) {
+              if (remoteIds.indexOf(lp.id) === -1) merged.push(lp);
+            });
+            localStorage.setItem('pac:pilots', JSON.stringify(merged));
+            pilots = merged;
+            if (typeof renderAll === 'function') renderAll();
+          }
+        } catch(e) {}
+      }
+    })
+    .catch(function(){});
+}
+
+// === Bug #3 Fix: Edit pilot names ===
+function editPilotName() {
+  var nameEl = document.getElementById('pilotNameText');
+  if (!nameEl) return;
+  var currentName = nameEl.textContent;
+  var container = document.getElementById('pilotModalName');
+  var inp = document.createElement('input');
+  inp.id = 'pilotNameInput';
+  inp.type = 'text';
+  inp.value = currentName;
+  inp.style.cssText = 'font-size:inherit;font-weight:inherit;background:var(--bg-secondary);color:var(--text-primary);border:1px solid var(--accent);border-radius:6px;padding:4px 8px;width:60%';
+  inp.onkeydown = function(e) { if(e.key==='Enter') confirmPilotName(); };
+  var saveBtn = document.createElement('button');
+  saveBtn.textContent = 'Save';
+  saveBtn.onclick = confirmPilotName;
+  saveBtn.style.cssText = 'background:var(--accent);color:white;border:none;border-radius:6px;padding:4px 12px;cursor:pointer;font-size:13px;margin-left:6px';
+  var cancelBtn = document.createElement('button');
+  cancelBtn.textContent = 'Cancel';
+  cancelBtn.onclick = function() { cancelPilotName(currentName); };
+  cancelBtn.style.cssText = 'background:none;color:var(--text-secondary);border:1px solid var(--text-secondary);border-radius:6px;padding:4px 8px;cursor:pointer;font-size:13px;margin-left:4px';
+  container.innerHTML = '';
+  container.appendChild(inp);
+  container.appendChild(saveBtn);
+  container.appendChild(cancelBtn);
+  inp.focus();
+  inp.select();
+}
+
+function confirmPilotName() {
+  var input = document.getElementById('pilotNameInput');
+  if (!input) return;
+  var newName = input.value.trim();
+  if (!newName) return;
+  var p = pilots.find(function(x) { return x.id === currentPilotId; });
+  if (p) {
+    p.name = newName;
+    save();
+    syncPilotsToSupabase();
+    renderPilotCards();
+    renderPilotSnapshot();
+  }
+  var container = document.getElementById('pilotModalName');
+  container.innerHTML = '<span id="pilotNameText">' + newName + '</span> <button onclick="editPilotName()" style="background:none;border:none;cursor:pointer;font-size:14px;opacity:0.6" title="Edit name">\u270f\ufe0f</button>';
+}
+
+function cancelPilotName(originalName) {
+  var container = document.getElementById('pilotModalName');
+  container.innerHTML = '<span id="pilotNameText">' + originalName + '</span> <button onclick="editPilotName()" style="background:none;border:none;cursor:pointer;font-size:14px;opacity:0.6" title="Edit name">\u270f\ufe0f</button>';
+}
+
 function savePilotChanges() {
   const p = pilots.find(x => x.id === currentPilotId);
   if (!p) return;
@@ -2440,6 +2555,7 @@ function savePilotChanges() {
   p.goal = document.getElementById('pilotGoalInput').value;
   p.notes = document.getElementById('pilotModalNotes').value;
   save();
+  syncPilotsToSupabase();
   closePilotModal();
 }
 
@@ -2541,6 +2657,7 @@ function deletePilot() {
   if (!confirm('Delete this pilot? This cannot be undone.')) return;
   pilots = pilots.filter(x => x.id !== currentPilotId);
   save();
+  syncPilotsToSupabase();
   closePilotModal();
 }
 
@@ -2576,6 +2693,7 @@ function confirmCreatePilot2() {
   };
   pilots.push(newPilot);
   save();
+  syncPilotsToSupabase();
   closeCreatePilot();
   renderPilotCards();
   renderPilotSnapshot();
@@ -2770,6 +2888,7 @@ function editMemory(id) {
   
  
    
+ 
  
  
  
