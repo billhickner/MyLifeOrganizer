@@ -311,7 +311,7 @@ input[type=date],input[type=time]{width:100%}
     <div class="logo-icon">P</div>
     <div>
       <div class="logo-text">PulsAIO</div>
-      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.3.0</span></div>
+      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.3.1</span></div>
     </div>
   </div>
   <nav class="nav">
@@ -1159,6 +1159,8 @@ const saveEvent = () => {
 };
 
 const deleteEvent = id => {
+    var _evt=myEvents.find(function(e){return e.id===id;});
+    if(_evt&&(_evt.source==="google"||_evt.source==="utbsc")){var _del=JSON.parse(localStorage.getItem("cal:deletedEvents")||"[]");if(_del.indexOf(_evt.id)===-1)_del.push(_evt.id);if(_evt.gcalId&&_del.indexOf(_evt.gcalId)===-1)_del.push(_evt.gcalId);localStorage.setItem("cal:deletedEvents",JSON.stringify(_del));}
   myEvents=myEvents.filter(e=>e.id!==id);
   save(); renderCalendar();
 };
@@ -2231,10 +2233,15 @@ async function syncFromGoogleCalendar() {
 }
 
 function mergeGcalIntoMyEvents() {
-  var gcal = JSON.parse(localStorage.getItem("cal:gcalevents") || "[]");
-  myEvents = myEvents.filter(function(e) { return e.source !== "google" && e.source !== "utbsc"; });
-  gcal.forEach(function(e) { myEvents.push(e); });
-  if(typeof utbscEvents!=="undefined")utbscEvents.forEach(function(e){myEvents.push(e);});
+  var deletedIds = JSON.parse(localStorage.getItem("cal:deletedEvents")||"[]");
+  myEvents = myEvents.filter(function(e){return e.source!=="google" && e.source!=="utbsc";});
+  var gcalEvts = JSON.parse(localStorage.getItem("cal:gcalevents")||"[]");
+  gcalEvts.forEach(function(e){
+    if(deletedIds.indexOf(e.id)===-1 && deletedIds.indexOf(e.gcalId)===-1) myEvents.push(e);
+  });
+  utbscEvents.forEach(function(e){
+    if(!myEvents.find(function(m){return m.title===e.title && m.date===e.date;}) && deletedIds.indexOf(e.id)===-1) myEvents.push(e);
+  });
 }
 
 
@@ -2702,6 +2709,7 @@ function openAddCalendarModal(){alert("Add PulsAIO Calendar - coming soon!");}
   
  
    
+ 
  
  
  
