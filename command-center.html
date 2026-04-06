@@ -311,7 +311,7 @@ input[type=date],input[type=time]{width:100%}
     <div class="logo-icon">P</div>
     <div>
       <div class="logo-text">PulsAIO</div>
-      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.3.7</span></div>
+      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.3.8</span></div>
     </div>
   </div>
   <nav class="nav">
@@ -819,7 +819,8 @@ document.addEventListener('DOMContentLoaded', () => {
     sc.appendChild(b);
   });
 
-    renderAll();
+    loadMemoriesFromSupabase();
+  renderAll();
   mergeGcalIntoMyEvents();
   // Wait for Google Identity Services to load (async script)
   setTimeout(function(){initGoogleCalSync();}, 2000);
@@ -2019,12 +2020,11 @@ let memories = JSON.parse(localStorage.getItem('max_memories') || '[]');
 let memoryMicRecog = null, memoryMicListening = false;
 
 function saveMemories() {
-  localStorage.setItem('max_memories', JSON.stringify(memories));
-  fetch('/.netlify/functions/memory', {
-    method: 'POST',
-    headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({memories: memories})
-  }).catch(()=>{});
+  var memories = JSON.parse(localStorage.getItem("max_memories")||"[]");
+  var memEvents = memories.map(function(m){
+    return {id:"mem_"+m.id,title:m.text,date:m.created?m.created.split("T")[0]:"2026-01-01",time:"",category:"_memory",location:"",notes:JSON.stringify({tag:m.tag,created:m.created,originalId:m.id}),source:"_memory"};
+  });
+  fetch("/.netlify/functions/get-events",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({events:memEvents})}).catch(function(){});
 }
 
 function addMemory(text, tag) {
@@ -2053,7 +2053,7 @@ function renderMemories() {
     <span class="memory-tag ${m.tag}">${m.tag}</span>
     <span class="memory-text">${m.text}</span>
     <span class="memory-time">${new Date(m.created).toLocaleDateString()}</span>
-    <button class="memory-del" onclick="deleteMemory(${m.id})">✕</button>
+    <button onclick="editMemory(${m.id})" style="background:none;border:none;cursor:pointer;font-size:12px;color:var(--primary)">✏️</button> <button class="memory-del" onclick="deleteMemory(${m.id})">✕</button>
   </div>`).join('');
 }
 
@@ -2609,6 +2609,36 @@ function loadDeletedFromSupabase(callback){
     if(callback)callback();
   }).catch(function(){if(callback)callback();});
 }
+
+function loadMemoriesFromSupabase() {
+  fetch("/.netlify/functions/get-events").then(function(r){return r.json();}).then(function(d){
+    if(!d.events) return;
+    var memEvents = d.events.filter(function(e){return e.source==="_memory";});
+    if(memEvents.length===0) return;
+    var remoteMems = memEvents.map(function(e){
+      var meta = {}; try{meta=JSON.parse(e.notes);}catch(x){}
+      return {id:meta.originalId||Date.now(),text:e.title,tag:meta.tag||"note",created:meta.created||e.date};
+    });
+    var localMems = JSON.parse(localStorage.getItem("max_memories")||"[]");
+    var merged = localMems.slice();
+    remoteMems.forEach(function(rm){
+      if(!merged.find(function(lm){return lm.id===rm.id||lm.text===rm.text;})) merged.push(rm);
+    });
+    localStorage.setItem("max_memories",JSON.stringify(merged));
+    if(typeof renderMemories==="function") renderMemories();
+  }).catch(function(){});
+}
+function editMemory(id) {
+  var memories = JSON.parse(localStorage.getItem("max_memories")||"[]");
+  var mem = memories.find(function(m){return m.id===id;});
+  if(!mem) return;
+  var newText = prompt("Edit note:", mem.text);
+  if(newText===null) return;
+  mem.text = newText;
+  localStorage.setItem("max_memories", JSON.stringify(memories));
+  saveMemories();
+  renderMemories();
+}
 </script>
 
   <!-- PROJECTS TAB -->
@@ -2742,6 +2772,7 @@ function loadDeletedFromSupabase(callback){
   
  
    
+ 
  
  
  
