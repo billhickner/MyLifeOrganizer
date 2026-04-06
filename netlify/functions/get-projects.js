@@ -12,7 +12,7 @@ const hdrs = {
 const CORS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'Content-Type',
-  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
   'Content-Type': 'application/json'
 };
 
@@ -34,7 +34,25 @@ exports.handler = async (event) => {
     const res = await fetch(SUPA_URL + '/rest/v1/projects?select=*&order=updated.desc', { headers: hdrs });
     const projects = await res.json();
     return { statusCode: 200, headers: CORS, body: JSON.stringify({ projects: Array.isArray(projects) ? projects : [] }) };
-  } catch(e) {
+  } 
+
+  // DELETE: Remove a project by ID
+  if (event.httpMethod === "DELETE") {
+    try {
+      const { ids } = JSON.parse(event.body);
+      if (!ids || !Array.isArray(ids)) {
+        return { statusCode: 400, headers: cors, body: JSON.stringify({ error: "ids array required" }) };
+      }
+      for (const id of ids) {
+        await fetch(`${SUPA_URL}/rest/v1/projects?id=eq.${id}`, { method: "DELETE", headers: HEADERS });
+      }
+      return { statusCode: 200, headers: cors, body: JSON.stringify({ success: true, deleted: ids.length }) };
+    } catch (e) {
+      return { statusCode: 500, headers: cors, body: JSON.stringify({ error: e.message }) };
+    }
+  }
+catch(e) {
     return { statusCode: 500, headers: CORS, body: JSON.stringify({ error: e.message, projects: [] }) };
   }
 };
+ 
