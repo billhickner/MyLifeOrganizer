@@ -311,7 +311,7 @@ input[type=date],input[type=time]{width:100%}
     <div class="logo-icon">P</div>
     <div>
       <div class="logo-text">PulsAIO</div>
-      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.3.8</span></div>
+      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.3.9</span></div>
     </div>
   </div>
   <nav class="nav">
@@ -2328,6 +2328,7 @@ setInterval(function(){
         localStorage.setItem('cal:myevents',JSON.stringify(myEvents));
       }
       // Always merge Google Cal + UTBSC events and re-render
+      loadMemoriesFromSupabase();
       mergeGcalIntoMyEvents();
       renderCalendar();
     }).catch(function(){});
@@ -2610,23 +2611,20 @@ function loadDeletedFromSupabase(callback){
   }).catch(function(){if(callback)callback();});
 }
 
-function loadMemoriesFromSupabase() {
+function loadMemoriesFromSupabase(callback) {
   fetch("/.netlify/functions/get-events").then(function(r){return r.json();}).then(function(d){
-    if(!d.events) return;
+    if(!d.events){if(callback)callback();return;}
     var memEvents = d.events.filter(function(e){return e.source==="_memory";});
-    if(memEvents.length===0) return;
-    var remoteMems = memEvents.map(function(e){
-      var meta = {}; try{meta=JSON.parse(e.notes);}catch(x){}
-      return {id:meta.originalId||Date.now(),text:e.title,tag:meta.tag||"note",created:meta.created||e.date};
-    });
-    var localMems = JSON.parse(localStorage.getItem("max_memories")||"[]");
-    var merged = localMems.slice();
-    remoteMems.forEach(function(rm){
-      if(!merged.find(function(lm){return lm.id===rm.id||lm.text===rm.text;})) merged.push(rm);
-    });
-    localStorage.setItem("max_memories",JSON.stringify(merged));
-    if(typeof renderMemories==="function") renderMemories();
-  }).catch(function(){});
+    if(memEvents.length > 0) {
+      var remoteMems = memEvents.map(function(e){
+        var meta = {}; try{meta=JSON.parse(e.notes);}catch(x){}
+        return {id:meta.originalId||parseInt(e.id.replace("mem_","")),text:e.title,tag:meta.tag||"note",created:meta.created||e.date};
+      });
+      localStorage.setItem("max_memories",JSON.stringify(remoteMems));
+      if(typeof renderMemories==="function") renderMemories();
+    }
+    if(callback)callback();
+  }).catch(function(){if(callback)callback();});
 }
 function editMemory(id) {
   var memories = JSON.parse(localStorage.getItem("max_memories")||"[]");
@@ -2772,6 +2770,7 @@ function editMemory(id) {
   
  
    
+ 
  
  
  
