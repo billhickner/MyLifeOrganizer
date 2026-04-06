@@ -17,26 +17,22 @@ const CORS = {
 };
 
 exports.handler = async (event) => {
-  if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: CORS, body: '' };
+  if (event.httpMethod === "OPTIONS") {
+    return { statusCode: 200, headers: cors, body: "" };
+  }
 
-  try {
-    if (event.httpMethod === 'POST') {
-      const body = JSON.parse(event.body || '{}');
-      const projects = body.projects;
-      if (!projects) return { statusCode: 400, headers: CORS, body: JSON.stringify({ error: 'no projects' }) };
-      // Upsert all projects
-      const rows = projects.map(p => ({ id: String(p.id), name: p.name, biz: p.biz || 'general', status: p.status || 'active', notes: p.notes || '', updated: new Date().toISOString() }));
-      const res = await fetch(SUPA_URL + '/rest/v1/projects', { method: 'POST', headers: hdrs, body: JSON.stringify(rows) });
-      return { statusCode: 200, headers: CORS, body: JSON.stringify({ success: true, count: rows.length }) };
+  // GET: Fetch all projects
+  if (event.httpMethod === "GET") {
+    try {
+      const r = await fetch(`${SUPA_URL}/rest/v1/projects?order=updated.desc`, { headers: HEADERS });
+      const data = await r.json();
+      return { statusCode: 200, headers: cors, body: JSON.stringify({ projects: data }) };
+    } catch (e) {
+      return { statusCode: 500, headers: cors, body: JSON.stringify({ error: e.message }) };
     }
+  }
 
-    // GET
-    const res = await fetch(SUPA_URL + '/rest/v1/projects?select=*&order=updated.desc', { headers: hdrs });
-    const projects = await res.json();
-    return { statusCode: 200, headers: CORS, body: JSON.stringify({ projects: Array.isArray(projects) ? projects : [] }) };
-  } 
-
-  // DELETE: Remove a project by ID
+  // DELETE: Remove projects by IDs
   if (event.httpMethod === "DELETE") {
     try {
       const { ids } = JSON.parse(event.body);
@@ -51,8 +47,29 @@ exports.handler = async (event) => {
       return { statusCode: 500, headers: cors, body: JSON.stringify({ error: e.message }) };
     }
   }
-catch(e) {
-    return { statusCode: 500, headers: CORS, body: JSON.stringify({ error: e.message, projects: [] }) };
+
+  // POST: Upsert projects
+  if (event.httpMethod === "POST") {
+    try {
+      const { projects, sync } = JSON.parse(event.body);
+      if (sync) {
+        // Full replace: delete all then re-insert
+        await fetch(`${SUPA_URL}/rest/v1/projects?id=neq.impossible`, { method: "DELETE", headers: HEADERS });
+      }
+      if (projects && projects.length > 0) {
+        const r = await fetch(`${SUPA_URL}/rest/v1/projects`, {
+          method: "POST",
+          headers: { ...HEADERS, "Prefer": "resolution=merge-duplicates" },
+          body: JSON.stringify(projects)
+        });
+        const text = await r.text();
+      }
+      return { statusCode: 200, headers: cors, body: JSON.stringify({ success: true, count: projects ? projects.length : 0 }) };
+    } catch (e) {
+      return { statusCode: 500, headers: cors, body: JSON.stringify({ error: e.message }) };
+    }
   }
+
+  return { statusCode: 405, headers: cors, body: JSON.stringify({ error: "Method not allowed" }) };
 };
  
