@@ -18,17 +18,17 @@ const CORS = {
 
 exports.handler = async (event) => {
   if (event.httpMethod === "OPTIONS") {
-    return { statusCode: 200, headers: cors, body: "" };
+    return { statusCode: 200, headers: CORS, body: "" };
   }
 
   // GET: Fetch all projects
   if (event.httpMethod === "GET") {
     try {
-      const r = await fetch(`${SUPA_URL}/rest/v1/projects?order=updated.desc`, { headers: HEADERS });
+      const r = await fetch(`${SUPA_URL}/rest/v1/projects?order=updated.desc`, { headers: hdrs });
       const data = await r.json();
-      return { statusCode: 200, headers: cors, body: JSON.stringify({ projects: data }) };
+      return { statusCode: 200, headers: CORS, body: JSON.stringify({ projects: data }) };
     } catch (e) {
-      return { statusCode: 500, headers: cors, body: JSON.stringify({ error: e.message }) };
+      return { statusCode: 500, headers: CORS, body: JSON.stringify({ error: e.message }) };
     }
   }
 
@@ -37,14 +37,14 @@ exports.handler = async (event) => {
     try {
       const { ids } = JSON.parse(event.body);
       if (!ids || !Array.isArray(ids)) {
-        return { statusCode: 400, headers: cors, body: JSON.stringify({ error: "ids array required" }) };
+        return { statusCode: 400, headers: CORS, body: JSON.stringify({ error: "ids array required" }) };
       }
       for (const id of ids) {
-        await fetch(`${SUPA_URL}/rest/v1/projects?id=eq.${id}`, { method: "DELETE", headers: HEADERS });
+        await fetch(`${SUPA_URL}/rest/v1/projects?id=eq.${id}`, { method: "DELETE", headers: hdrs });
       }
-      return { statusCode: 200, headers: cors, body: JSON.stringify({ success: true, deleted: ids.length }) };
+      return { statusCode: 200, headers: CORS, body: JSON.stringify({ success: true, deleted: ids.length }) };
     } catch (e) {
-      return { statusCode: 500, headers: cors, body: JSON.stringify({ error: e.message }) };
+      return { statusCode: 500, headers: CORS, body: JSON.stringify({ error: e.message }) };
     }
   }
 
@@ -54,22 +54,23 @@ exports.handler = async (event) => {
       const { projects, sync } = JSON.parse(event.body);
       if (sync) {
         // Full replace: delete all then re-insert
-        await fetch(`${SUPA_URL}/rest/v1/projects?id=neq.impossible`, { method: "DELETE", headers: HEADERS });
+        await fetch(`${SUPA_URL}/rest/v1/projects?id=neq.impossible`, { method: "DELETE", headers: hdrs });
       }
       if (projects && projects.length > 0) {
         const r = await fetch(`${SUPA_URL}/rest/v1/projects`, {
           method: "POST",
-          headers: { ...HEADERS, "Prefer": "resolution=merge-duplicates" },
+          headers: { ...hdrs, "Prefer": "resolution=merge-duplicates" },
           body: JSON.stringify(projects)
         });
         const text = await r.text();
       }
-      return { statusCode: 200, headers: cors, body: JSON.stringify({ success: true, count: projects ? projects.length : 0 }) };
+      return { statusCode: 200, headers: CORS, body: JSON.stringify({ success: true, count: projects ? projects.length : 0 }) };
     } catch (e) {
-      return { statusCode: 500, headers: cors, body: JSON.stringify({ error: e.message }) };
+      return { statusCode: 500, headers: CORS, body: JSON.stringify({ error: e.message }) };
     }
   }
 
-  return { statusCode: 405, headers: cors, body: JSON.stringify({ error: "Method not allowed" }) };
+  return { statusCode: 405, headers: CORS, body: JSON.stringify({ error: "Method not allowed" }) };
 };
+ 
  
