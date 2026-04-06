@@ -311,7 +311,7 @@ input[type=date],input[type=time]{width:100%}
     <div class="logo-icon">P</div>
     <div>
       <div class="logo-text">PulsAIO</div>
-      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.3.5</span></div>
+      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.3.6</span></div>
     </div>
   </div>
   <nav class="nav">
@@ -1621,11 +1621,12 @@ fetch('/.netlify/functions/memory')
 let currentProjectId = null;
 let projectFolderHandle = null;
 
-function saveProjects(){
-  localStorage.setItem('pulsaio_projects', JSON.stringify(projects));
-  // Sync to Supabase for permanent cross-device storage
-  const data = projects.map(p=>({id:String(p.id),name:p.name,biz:p.biz||'general',status:p.status||'active',notes:p.notes||''}));
-  fetch('/.netlify/functions/get-projects',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({projects:data})}).catch(()=>{});
+function saveProjects() {
+  localStorage.setItem("pac:projects", JSON.stringify(projects));
+  var cleaned = projects.map(function(p){
+    return {id:p.id,name:p.name,biz:p.biz||"general",status:p.status||"active",notes:p.notes||"",emails:JSON.stringify(p.emails||[]),updates:JSON.stringify(p.updates||[]),files:JSON.stringify(p.files||[])};
+  });
+  fetch("/.netlify/functions/get-projects",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({projects:cleaned,sync:true})}).catch(function(){});
 }
 
 function openCreateProject(prefill){
@@ -2734,6 +2735,7 @@ function loadDeletedFromSupabase(callback){
   
  
    
+ 
  
  
  
