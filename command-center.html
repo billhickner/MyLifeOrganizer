@@ -1,4 +1,4 @@
-        <!DOCTYPE html>
+         <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -313,7 +313,7 @@ input[type=date],input[type=time]{width:100%}
     <div class="logo-icon">P</div>
     <div>
       <div class="logo-text">PulsAIO</div>
-      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.5.2</span></div>
+      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.5.3</span></div>
     </div>
   </div>
   <nav class="nav">
@@ -947,15 +947,38 @@ function renderGoals() {
       g.map(g=>`<div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:13px 15px;margin-bottom:10px">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
           ${pillStyle(g.category,catColor[g.category]||'#9CA3AF')}
-          <span style="flex:1;font-size:13px;font-weight:500">${g.title}</span>
+          <span style="flex:1;font-size:13px;font-weight:500">${g.title} <button onclick="editGoalTitle(${g.id})" style="background:none;border:none;cursor:pointer;font-size:11px;padding:1px;opacity:0.5" title="Edit title">✏️</button></span>
           <span style="font-family:IBM Plex Mono,monospace;font-size:12px;color:var(--soft)">${g.progress}%</span>
           <button onclick="deleteGoal(${g.id})" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:14px">×</button>
         </div>
         <div class="pbar" style="margin-bottom:6px"><div class="pbar-fill" style="width:${g.progress}%;background:${barColor(g.progress)}"></div></div>
         <input type="range" min="0" max="100" value="${g.progress}" oninput="updateGoal(${g.id},+this.value)">
+        <div style="margin-top:6px;font-size:12px;color:var(--soft);cursor:pointer" onclick="editGoalNotes(${g.id})" title="Click to edit notes">${g.notes?'📝 '+g.notes:'<span style=\'opacity:0.4\'>+ Add notes</span>'}</div>
       </div>`).join('')}
     </div>`;
   }).join('');
+}
+
+function editGoalTitle(id) {
+  var goal = goals.find(function(g){return g.id===id;});
+  if(!goal) return;
+  var newTitle = prompt('Edit goal title:', goal.title);
+  if(newTitle && newTitle.trim() && newTitle.trim() !== goal.title) {
+    goal.title = newTitle.trim();
+    save();
+    renderGoals();
+  }
+}
+
+function editGoalNotes(id) {
+  var goal = goals.find(function(g){return g.id===id;});
+  if(!goal) return;
+  var newNotes = prompt('Edit notes for: ' + goal.title, goal.notes || '');
+  if(newNotes !== null) {
+    goal.notes = newNotes.trim();
+    save();
+    renderGoals();
+  }
 };
 
 const addGoal = () => {
