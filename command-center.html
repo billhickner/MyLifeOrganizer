@@ -1,4 +1,4 @@
-  <!DOCTYPE html>
+   <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -313,7 +313,7 @@ input[type=date],input[type=time]{width:100%}
     <div class="logo-icon">P</div>
     <div>
       <div class="logo-text">PulsAIO</div>
-      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.4.7</span></div>
+      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.4.8</span></div>
     </div>
   </div>
   <nav class="nav">
@@ -2744,17 +2744,12 @@ function loadMemoriesFromSupabase(callback) {
     if(memEvents.length > 0) {
       var remoteMems = memEvents.map(function(e){
         var meta = {}; try{meta=JSON.parse(e.notes);}catch(x){}
-        return {id:meta.originalId||parseInt(e.id.replace("mem_","")),text:e.title,tag:meta.tag||"note",created:meta.created||e.date};
+        return {id:meta.originalId||parseInt(e.id.replace("mem_","")), text:e.title,
+                tag:meta.tag||"note", created:meta.created||e.date};
       });
-      var localMems = JSON.parse(localStorage.getItem("max_memories")||"[]");
-      var merged = remoteMems.slice();
-      var remoteIds = remoteMems.map(function(m){ return String(m.id); });
-      localMems.forEach(function(lm){
-        if(remoteIds.indexOf(String(lm.id)) === -1) merged.push(lm);
-      });
-      merged.sort(function(a,b){ return (b.created||'')>(a.created||'') ? 1 : -1; });
-      localStorage.setItem("max_memories",JSON.stringify(merged));
-      memories = merged;
+      localStorage.setItem("max_memories",JSON.stringify(remoteMems));
+      memories.length=0;
+      remoteMems.forEach(function(m){memories.push(m);});
       if(typeof renderMemories==="function") renderMemories();
     }
     if(callback)callback();
