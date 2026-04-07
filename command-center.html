@@ -1,4 +1,4 @@
-    <!DOCTYPE html>
+     <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -313,7 +313,7 @@ input[type=date],input[type=time]{width:100%}
     <div class="logo-icon">P</div>
     <div>
       <div class="logo-text">PulsAIO</div>
-      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.4.9</span></div>
+      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.5.0</span></div>
     </div>
   </div>
   <nav class="nav">
@@ -2024,7 +2024,7 @@ let memoryMicRecog = null, memoryMicListening = false;
 
 var _memSyncLock = false;
 function saveMemories() {
-  var memories = JSON.parse(localStorage.getItem("max_memories")||"[]");
+  localStorage.setItem("max_memories",JSON.stringify(memories));
   var memEvents = memories.map(function(m){
     return {id:"mem_"+m.id,title:m.text,date:m.created?m.created.split("T")[0]:"2026-01-01",time:"",category:"_memory",location:"",notes:JSON.stringify({tag:m.tag,created:m.created,originalId:m.id}),source:"_memory"};
   });
