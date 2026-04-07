@@ -1,4 +1,4 @@
-                    <!DOCTYPE html>
+                     <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -313,7 +313,7 @@ input[type=date],input[type=time]{width:100%}
     <div class="logo-icon">P</div>
     <div>
       <div class="logo-text">PulsAIO</div>
-      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.6.4</span></div>
+      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.6.5</span></div>
     </div>
   </div>
   <nav class="nav">
@@ -1848,6 +1848,7 @@ function openProject(id){
   const p = projects.find(x=>String(x.id)===id);
   if (!p) return;
   currentProjectId = id;
+  window._currentProjectId = id;
   document.getElementById('modalProjectName').textContent = p.name;
   document.getElementById('modalProjectStatus').value = p.status;
   document.getElementById('goalInput').textContent = p.goal || 'No goal defined.';
@@ -1948,9 +1949,9 @@ function addProjectUpdate(){
 }
 
 function saveProjectChanges(){
-  var modal = document.querySelector('.modal');
-  var projId = modal ? modal.getAttribute('data-project-id') : null;
+  var projId = window._currentProjectId;
   if (!projId) return;
+  projId = projId.toString();
   var p = projects.find(function(x){return x.id.toString() === projId;});
   if (!p) return;
   var statusEl = document.getElementById('modalProjectStatus');
@@ -1970,20 +1971,18 @@ function saveProjectChanges(){
   renderProjects();
   if(typeof renderProjectEmails==='function') renderProjectEmails(p);
   if(typeof renderProjectUpdates==='function') renderProjectUpdates(p);
-  modal.style.display = 'none';
-  modal.classList.remove('open');
+  var m = document.querySelector('.modal');if(m){m.style.display='none';m.classList.remove('open');}
 }
 
 function deleteCurrentProject() {
-  var modal = document.querySelector('.modal');
-  var delId = modal ? modal.getAttribute('data-project-id') : null;
+  var delId = window._currentProjectId;
   if (!delId) return;
   if (!confirm("Delete this project? This cannot be undone.")) return;
-  modal.style.display = 'none';
-  modal.classList.remove('open');
+  delId = delId.toString();
   projects = projects.filter(function(p){return p.id.toString() !== delId;});
   save();
   renderProjects();
+  var m = document.querySelector('.modal');if(m){m.style.display='none';m.classList.remove('open');}
 }
 
 function handleProjectFiles(e){
