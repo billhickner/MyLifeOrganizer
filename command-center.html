@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+  <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -313,7 +313,7 @@ input[type=date],input[type=time]{width:100%}
     <div class="logo-icon">P</div>
     <div>
       <div class="logo-text">PulsAIO</div>
-      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.4.6</span></div>
+      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.4.7</span></div>
     </div>
   </div>
   <nav class="nav">
@@ -798,12 +798,13 @@ function renderAll() {
 function renderStats() {
   const done = tasks.filter(t=>t.done).length;
   const live = pilots.filter(p=>p.status==='live').length;
-  const avg  = Math.round(pilots.reduce((a,p)=>a+p.progress,0)/pilots.length);
+  const avg  = Math.round(pilots.reduce((a,p)=>a+p.progress,0)/(pilots.length||1));
   const hi   = tasks.filter(t=>!t.done&&t.priority==='high').length;
-  document.getElementById('statTasks').textContent = done+'/'+tasks.length;
-  document.getElementById('statPilots').textContent = live+'/4';
-  document.getElementById('statProgress').textContent = avg+'%';
-  document.getElementById('statHigh').textContent = hi;
+  var el;
+  el=document.getElementById('statTasks');if(el)el.textContent=done+'/'+tasks.length;
+  el=document.getElementById('statPilots');if(el)el.textContent=live+'/'+pilots.length;
+  el=document.getElementById('statProgress');if(el)el.textContent=(avg||0)+'%';
+  el=document.getElementById('statHigh');if(el)el.textContent=hi;
 };
 
 // ── COLOR HELPERS ──────────────────────────────────────────────────────────
@@ -848,6 +849,7 @@ const deleteTask = id => {
 
 // ── JOURNAL ────────────────────────────────────────────────────────────────
 const saveEntry = () => {
+  if(!document.getElementById('journalInput'))return;
   const v = document.getElementById('journalInput').value.trim();
   if(!v) return;
   entries.unshift({id:Date.now(),date:TODAY_STR,text:v});
@@ -880,7 +882,7 @@ function renderEntries() {
 
 // ── PILOTS ─────────────────────────────────────────────────────────────────
 function renderPilotSnapshot() {
-  document.getElementById('pilotSnapshot').innerHTML = pilots.map(p=>`
+  var _ps=document.getElementById('pilotSnapshot');if(!_ps)return;_ps.innerHTML = pilots.map(p=>`
     <div style="margin-bottom:14px">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
         <div>
@@ -1487,6 +1489,7 @@ function deleteReminder(id) {
 }
 
 function renderReminders() {
+  var _rl=document.getElementById('remindersList');if(!_rl)return;
   const list = document.getElementById('remindersList');
   if (!list) return;
   const active = reminders.filter(r => !r.done);
