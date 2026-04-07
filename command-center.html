@@ -1,4 +1,4 @@
-     <!DOCTYPE html>
+      <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -313,7 +313,7 @@ input[type=date],input[type=time]{width:100%}
     <div class="logo-icon">P</div>
     <div>
       <div class="logo-text">PulsAIO</div>
-      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.5.0</span></div>
+      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.5.1</span></div>
     </div>
   </div>
   <nav class="nav">
@@ -1675,7 +1675,8 @@ function confirmCreateProject(){
 function renderProjects(){
   const grid = document.getElementById('projectsGrid');
   if (!grid) return;
-  if (projects.length === 0) {
+  var displayProjects = projects.filter(function(p){return p.id!=='_pilots_data'&&p.id!=='_reminders_data';});
+  if (displayProjects.length === 0) {
     grid.innerHTML = `<div class="project-empty" style="grid-column:1/-1">
       <div class="project-empty-icon">📁</div>
       <div class="project-empty-text">No projects yet</div>
@@ -1683,7 +1684,7 @@ function renderProjects(){
     </div>`;
     return;
   }
-  grid.innerHTML = projects.map(p => {
+  grid.innerHTML = displayProjects.map(p => {
     const color = PROJECT_COLORS[p.biz] || '#64748b';
     const updateCount = (p.updates||[]).length;
     const fileCount = (p.files||[]).length;
@@ -1692,7 +1693,7 @@ function renderProjects(){
       <div class="project-card-accent" style="background:${color}"></div>
       <div class="project-card-header">
         <div>
-          <div class="project-name">${p.name}</div>
+          <div class="project-name">${p.name} <button onclick="editProjectName('${p.id}')" style="background:none;border:none;cursor:pointer;font-size:12px;padding:2px;opacity:0.5" title="Edit name">✏️</button></div>
         </div>
         <span class="project-status-badge ${p.status}">${p.status}</span>
       </div>
@@ -1705,6 +1706,18 @@ function renderProjects(){
       </div>
     </div>`;
   }).join('');
+}
+
+function editProjectName(id) {
+  var proj = projects.find(function(p){return p.id===id;});
+  if(!proj) return;
+  var newName = prompt('Edit project name:', proj.name);
+  if(newName && newName.trim() && newName.trim() !== proj.name) {
+    proj.name = newName.trim();
+    localStorage.setItem('pac:projects', JSON.stringify(projects));
+    renderProjects();
+    if(typeof syncProjectsToServer==='function') syncProjectsToServer();
+  }
 }
 
 function openProject(id){
