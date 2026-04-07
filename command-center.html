@@ -313,12 +313,12 @@ input[type=date],input[type=time]{width:100%}
     <div class="logo-icon">P</div>
     <div>
       <div class="logo-text">PulsAIO</div>
-      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.4.2</span></div>
+      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.4.3</span></div>
     </div>
   </div>
   <nav class="nav">
     <button class="nav-btn active" onclick="showTab('today')">Today</button>
-    <button class="nav-btn" onclick="showTab('pilots')">Pilots</button>
+    <button class="nav-btn" onclick="showTab('pilots')">Jobs</button>
     <button class="nav-btn" onclick="showTab('goals')">Goals</button>
     <button class="nav-btn" onclick="showTab('calendar')">Calendar</button>
     <button class="nav-btn" onclick="showTab('max')">🤖 Max</button>
@@ -352,7 +352,7 @@ input[type=date],input[type=time]{width:100%}
 <div id="tab-today" class="page">
   <div class="stats-grid">
     <div class="stat-chip"><div class="stat-val" id="statTasks" style="color:var(--primary)">0/0</div><div class="stat-lbl">Tasks Done</div></div>
-    <div class="stat-chip"><div class="stat-val" id="statPilots" style="color:var(--gold)">0/4</div><div class="stat-lbl">Pilots Live</div></div>
+    <div class="stat-chip"><div class="stat-val" id="statPilots" style="color:var(--gold)">0/4</div><div class="stat-lbl">Jobs Live</div></div>
     <div class="stat-chip"><div class="stat-val" id="statProgress" style="color:var(--green)">0%</div><div class="stat-lbl">Avg Progress</div></div>
     <div class="stat-chip"><div class="stat-val" id="statHigh" style="color:var(--red)">0</div><div class="stat-lbl">High Priority Open</div></div>
   </div>
@@ -441,15 +441,8 @@ input[type=date],input[type=time]{width:100%}
       </div>
     </div>
     <!-- Sidebar -->
-    <div>
-      <div class="card">
-        <div class="card-title"><div class="card-accent"></div>Pilot Stores</div>
-        <div id="pilotSnapshot"></div>
-        <button class="btn-outline" style="width:100%;margin-top:6px" onclick="showTab('pilots')">Manage Pilots →</button>
-      </div>
-      <div class="card">
-        <div class="card-title"><div class="card-accent"></div>AI Daily Path</div>
-        <p style="font-size:13px;color:var(--soft);line-height:1.6;margin-bottom:14px">Generate today's prioritized action plan based on your tasks, pilots, and goals.</p>
+    AI Daily Path</div>
+        <p style="font-size:13px;color:var(--soft);line-height:1.6;margin-bottom:14px">Generate today's prioritized action plan based on your tasks, jobs, and goals.</p>
         <button class="btn-primary" style="width:100%" onclick="genPath()">✦ Generate Today's Path</button>
         <div id="pathBoxToday" style="display:none" class="ai-box">
           <div class="ai-header"><div class="ai-dot"></div>Your Path for Today</div>
@@ -824,6 +817,12 @@ document.addEventListener('DOMContentLoaded', () => {
     loadMemoriesFromSupabase();
   loadPilotsFromSupabase();
   loadRemindersFromSupabase();
+  // Force re-render after sync data loads (mobile fix)
+  setTimeout(function() {
+    loadMemoriesFromSupabase();
+    loadRemindersFromSupabase();
+    loadPilotsFromSupabase();
+  }, 2000);
   renderAll();
   mergeGcalIntoMyEvents();
   // Wait for Google Identity Services to load (async script)
@@ -2942,6 +2941,7 @@ function editMemory(id) {
   
  
    
+ 
  
  
  
