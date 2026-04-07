@@ -1,4 +1,4 @@
-         <!DOCTYPE html>
+          <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -313,7 +313,7 @@ input[type=date],input[type=time]{width:100%}
     <div class="logo-icon">P</div>
     <div>
       <div class="logo-text">PulsAIO</div>
-      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.5.3</span></div>
+      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.5.4</span></div>
     </div>
   </div>
   <nav class="nav">
@@ -751,6 +751,46 @@ function loadTasksFromSupabase(callback) {
           if(typeof renderStats==="function") renderStats();
         }
       } catch(e){}
+    }
+    if(callback) callback();
+  }).catch(function(){if(callback)callback();});
+}
+
+function syncGoalsToSupabase() {
+  var goalData = JSON.stringify(goals);
+  fetch("/.netlify/functions/get-projects",{method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({projects:[{id:"_goals_data",name:"Goals Sync Store",biz:"_goals",status:"active",notes:goalData}]})
+  }).catch(function(){});
+}
+
+function loadGoalsFromSupabase(callback) {
+  fetch("/.netlify/functions/get-projects").then(function(r){return r.json();}).then(function(d){
+    var projs = Array.isArray(d) ? d : (d.projects||[]);
+    var goalRow = projs.find(function(p){return p.id==="_goals_data";});
+    if(goalRow && goalRow.notes) {
+      try {
+        var remoteGoals = JSON.parse(goalRow.notes);
+        if(Array.isArray(remoteGoals)) {
+          goals.length=0;
+          remoteGoals.forEach(function(g){goals.push(g);});
+          localStorage.setItem("pac:goals",JSON.stringify(goals));
+          if(typeof renderGoals==="function") renderGoals();
+        }
+      } catch(e){}
+    }
+    if(callback) callback();
+  }).catch(function(){if(callback)callback();});
+}
+
+function loadProjectsFromSupabase(callback) {
+  fetch("/.netlify/functions/get-projects").then(function(r){return r.json();}).then(function(d){
+    var projs = Array.isArray(d) ? d : (d.projects||[]);
+    var realProjects = projs.filter(function(p){return p.id.indexOf('_')!==0;});
+    if(realProjects.length > 0) {
+      projects.length=0;
+      realProjects.forEach(function(p){projects.push(p);});
+      localStorage.setItem("pac:projects",JSON.stringify(projects));
+      if(typeof renderProjects==="function") renderProjects();
     }
     if(callback) callback();
   }).catch(function(){if(callback)callback();});
@@ -1725,7 +1765,7 @@ function confirmCreateProject(){
 function renderProjects(){
   const grid = document.getElementById('projectsGrid');
   if (!grid) return;
-  var displayProjects = projects.filter(function(p){return p.id!=='_pilots_data'&&p.id!=='_reminders_data'&&p.id!=='_tasks_data';});
+  var displayProjects = projects.filter(function(p){return p.id!=='_pilots_data'&&p.id!=='_reminders_data'&&p.id!=='_tasks_data'&&p.id!=='_goals_data';});
   if (displayProjects.length === 0) {
     grid.innerHTML = `<div class="project-empty" style="grid-column:1/-1">
       <div class="project-empty-icon">📁</div>
@@ -2399,6 +2439,8 @@ setInterval(function(){
       // Always merge Google Cal + UTBSC events and re-render
       loadMemoriesFromSupabase();
     loadTasksFromSupabase();
+    loadGoalsFromSupabase();
+    loadProjectsFromSupabase();
       mergeGcalIntoMyEvents();
       renderCalendar();
     }).catch(function(){});
@@ -2409,6 +2451,8 @@ setInterval(function(){
     if (document.visibilityState === 'visible') {
       loadMemoriesFromSupabase();
       loadTasksFromSupabase();
+      loadGoalsFromSupabase();
+      loadProjectsFromSupabase();
       loadPilotsFromSupabase();
       loadRemindersFromSupabase();
     }
@@ -2607,6 +2651,7 @@ function confirmPilotName() {
     save();
     syncPilotsToSupabase();
   syncTasksToSupabase();
+  syncGoalsToSupabase();
     renderPilotCards();
     renderPilotSnapshot();
   }
