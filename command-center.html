@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta http-equiv="Pragma" content="no-cache">
 <!-- v1775184192722 -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PulsAIO Command Center</title>
@@ -311,7 +313,7 @@ input[type=date],input[type=time]{width:100%}
     <div class="logo-icon">P</div>
     <div>
       <div class="logo-text">PulsAIO</div>
-      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.4.1</span></div>
+      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.4.2</span></div>
     </div>
   </div>
   <nav class="nav">
@@ -834,7 +836,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ── RENDER ALL ─────────────────────────────────────────────────────────────
-const renderAll = () => {
+function renderAll() {
   renderStats();
   renderTasks();
   renderPilotSnapshot();
@@ -845,7 +847,7 @@ const renderAll = () => {
 };
 
 // ── STATS ──────────────────────────────────────────────────────────────────
-const renderStats = () => {
+function renderStats() {
   const done = tasks.filter(t=>t.done).length;
   const live = pilots.filter(p=>p.status==='live').length;
   const avg  = Math.round(pilots.reduce((a,p)=>a+p.progress,0)/pilots.length);
@@ -864,7 +866,7 @@ const barColor  = p => p>=75?'#00C48C':p>=40?'#F5A623':p>0?'#00A3E0':'#e5e7eb';
 const pillStyle = (text,color) => `<span style="display:inline-flex;align-items:center;font-size:10px;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;padding:2px 7px;border-radius:20px;background:${color}22;color:${color};border:1px solid ${color}33;white-space:nowrap">${text}</span>`;
 
 // ── TASKS ──────────────────────────────────────────────────────────────────
-const renderTasks = () => {
+function renderTasks() {
   const sorted = [...tasks].sort((a,b)=>({high:0,med:1,low:2}[a.priority]-{high:0,med:1,low:2}[b.priority]));
   document.getElementById('taskList').innerHTML = sorted.length===0
     ? '<div style="text-align:center;padding:16px 0;color:var(--muted);font-size:13px;font-style:italic">No tasks yet.</div>'
@@ -916,7 +918,7 @@ const aiReflect = async () => {
   txt.textContent = r;
 };
 
-const renderEntries = () => {
+function renderEntries() {
   const p = document.getElementById('entriesPanel');
   const l = document.getElementById('entriesList');
   if(entries.length===0){p.style.display='none';return;}
@@ -929,7 +931,7 @@ const renderEntries = () => {
 };
 
 // ── PILOTS ─────────────────────────────────────────────────────────────────
-const renderPilotSnapshot = () => {
+function renderPilotSnapshot() {
   document.getElementById('pilotSnapshot').innerHTML = pilots.map(p=>`
     <div style="margin-bottom:14px">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
@@ -944,7 +946,7 @@ const renderPilotSnapshot = () => {
     </div>`).join('');
 };
 
-const renderPilotCards = () => {
+function renderPilotCards() {
   document.getElementById('pilotCards').innerHTML = pilots.map(p=>{
     const color = statColor[p.status]||'#9CA3AF';
     return '<div class="project-card" onclick="openPilot(\''+p.id+'\')">'+'<div class="project-card-accent" style="background:'+color+'"></div>'+'<div class="project-card-header">'+'<div><div class="project-name">'+p.name+'</div>'+'<div style="font-size:12px;color:var(--muted);margin-top:2px">'+p.store+'</div></div>'+'<span class="project-status-badge '+p.status+'">'+p.status+'</span>'+'</div>'+'<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:6px"><span>Deployment Progress</span><span style="font-weight:700;color:var(--dark)">'+p.progress+'%</span></div>'+'<div class="pbar" style="height:8px;margin-bottom:10px"><div class="pbar-fill" style="width:'+p.progress+'%;background:'+barColor(p.progress)+'"></div></div>'+'<div class="project-meta"><span>'+((p.updates||[]).length)+' updates</span><span>'+((p.files||[]).length)+' files</span></div>'+'</div>';
@@ -957,7 +959,7 @@ const updatePilot = (id,field,val) => {
 };
 
 // ── GOALS ──────────────────────────────────────────────────────────────────
-const renderGoals = () => {
+function renderGoals() {
   const tfs = ['daily','weekly','monthly'];
   const tfColor = {daily:'#0057B8',weekly:'#F5A623',monthly:'#00C48C'};
   document.getElementById('goalsList').innerHTML = tfs.map(tf=>{
@@ -1002,7 +1004,7 @@ const allEvents = () => [...utbscEvents, ...myEvents];
 
 const eventsForDate = (ds) => myEvents.filter(e => e.date === ds);
 
-const renderCalendar = () => {
+function renderCalendar() {
   const grid = document.getElementById('calGrid');
   const title = document.getElementById('calMonthTitle');
   grid.innerHTML = '';
@@ -1051,7 +1053,7 @@ const renderCalendar = () => {
   renderEventsList();
 }
 
-const renderEventsList = () => {
+function renderEventsList() {
   const c = document.getElementById('events-list-container');
   if(!c) return;
   const today = new Date(); today.setHours(0,0,0,0);
@@ -1067,7 +1069,7 @@ const renderEventsList = () => {
   }).join('');
 };;
 
-const renderSelectedDay = () => {
+function renderSelectedDay() {
   const panel = document.getElementById('selectedDayPanel');
   const title = document.getElementById('selectedDayTitle');
   const list  = document.getElementById('selectedDayEvents');
@@ -2424,7 +2426,7 @@ const filterEventManager = (f) => {
   renderEventManager();
 };
 
-const renderEventManager = () => {
+function renderEventManager() {
   const list = document.getElementById('eventManagerList');
   let events = [];
   if (eventManagerFilter === 'all' || eventManagerFilter === 'personal') events = events.concat(myEvents.map(e => ({...e, _src:'personal'})));
@@ -2940,6 +2942,7 @@ function editMemory(id) {
   
  
    
+ 
  
  
  
