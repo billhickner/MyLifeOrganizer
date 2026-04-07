@@ -313,7 +313,7 @@ input[type=date],input[type=time]{width:100%}
     <div class="logo-icon">P</div>
     <div>
       <div class="logo-text">PulsAIO</div>
-      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.4.3</span></div>
+      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.4.4</span></div>
     </div>
   </div>
   <nav class="nav">
@@ -2070,12 +2070,14 @@ function syncProjectsToExtension() {
 let memories = JSON.parse(localStorage.getItem('max_memories') || '[]');
 let memoryMicRecog = null, memoryMicListening = false;
 
+var _memSyncLock = false;
 function saveMemories() {
   var memories = JSON.parse(localStorage.getItem("max_memories")||"[]");
   var memEvents = memories.map(function(m){
     return {id:"mem_"+m.id,title:m.text,date:m.created?m.created.split("T")[0]:"2026-01-01",time:"",category:"_memory",location:"",notes:JSON.stringify({tag:m.tag,created:m.created,originalId:m.id}),source:"_memory"};
   });
-  fetch("/.netlify/functions/get-events",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({events:memEvents})}).catch(function(){});
+  window._memSyncLock=true;
+  fetch("/.netlify/functions/get-events",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({events:memEvents})}).then(function(){window._memSyncLock=false;}).catch(function(){window._memSyncLock=false;});
 }
 
 function addMemory(text, tag) {
@@ -2783,6 +2785,7 @@ function loadDeletedFromSupabase(callback){
 }
 
 function loadMemoriesFromSupabase(callback) {
+  if(window._memSyncLock){if(callback)callback();return;}
   fetch("/.netlify/functions/get-events").then(function(r){return r.json();}).then(function(d){
     if(!d.events){if(callback)callback();return;}
     var memEvents = d.events.filter(function(e){return e.source==="_memory";});
@@ -2791,7 +2794,15 @@ function loadMemoriesFromSupabase(callback) {
         var meta = {}; try{meta=JSON.parse(e.notes);}catch(x){}
         return {id:meta.originalId||parseInt(e.id.replace("mem_","")),text:e.title,tag:meta.tag||"note",created:meta.created||e.date};
       });
-      localStorage.setItem("max_memories",JSON.stringify(remoteMems));
+      var localMems = JSON.parse(localStorage.getItem("max_memories")||"[]");
+      var merged = remoteMems.slice();
+      var remoteIds = remoteMems.map(function(m){ return String(m.id); });
+      localMems.forEach(function(lm){
+        if(remoteIds.indexOf(String(lm.id)) === -1) merged.push(lm);
+      });
+      merged.sort(function(a,b){ return (b.created||'')>(a.created||'') ? 1 : -1; });
+      localStorage.setItem("max_memories",JSON.stringify(merged));
+      memories = merged;
       if(typeof renderMemories==="function") renderMemories();
     }
     if(callback)callback();
@@ -2941,6 +2952,7 @@ function editMemory(id) {
   
  
    
+ 
  
  
  
