@@ -1,4 +1,4 @@
-                <!DOCTYPE html>
+                 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -313,7 +313,7 @@ input[type=date],input[type=time]{width:100%}
     <div class="logo-icon">P</div>
     <div>
       <div class="logo-text">PulsAIO</div>
-      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.6.0</span></div>
+      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.6.1</span></div>
     </div>
   </div>
   <nav class="nav">
@@ -781,12 +781,17 @@ function loadProjectsFromSupabase(callback) {
   if(window._projectSyncLock){if(callback)callback();return;}
   fetch("/.netlify/functions/get-projects").then(function(r){return r.json();}).then(function(d){
     var projs = Array.isArray(d) ? d : (d.projects||[]);
-    var realProjects = projs.filter(function(p){return p.id.indexOf('_')!==0;});
-    if(realProjects.length > 0) {
-      projects.length=0;
-      realProjects.forEach(function(p){projects.push(p);});
-      localStorage.setItem("pac:projects",JSON.stringify(projects));
-      if(typeof renderProjects==="function") renderProjects();
+    var blobRow = projs.find(function(p){return p.id==="_projects_blob";});
+    if(blobRow && blobRow.notes) {
+      try {
+        var remoteProjects = JSON.parse(blobRow.notes);
+        if(Array.isArray(remoteProjects)) {
+          projects.length=0;
+          remoteProjects.forEach(function(p){projects.push(p);});
+          localStorage.setItem("pac:projects",JSON.stringify(projects));
+          if(typeof renderProjects==="function") renderProjects();
+        }
+      } catch(e){}
     }
     if(callback) callback();
   }).catch(function(){if(callback)callback();});
@@ -1792,7 +1797,7 @@ function confirmCreateProject(){
 function renderProjects(){
   const grid = document.getElementById('projectsGrid');
   if (!grid) return;
-  var displayProjects = projects.filter(function(p){return p.id!=='_pilots_data'&&p.id!=='_reminders_data'&&p.id!=='_tasks_data'&&p.id!=='_goals_data'&&p.id!=='_jobnote_data';});
+  var displayProjects = projects.filter(function(p){return p.id!=='_pilots_data'&&p.id!=='_reminders_data'&&p.id!=='_tasks_data'&&p.id!=='_goals_data'&&p.id!=='_jobnote_data'&&p.id!=='_projects_blob';});
   if (displayProjects.length === 0) {
     grid.innerHTML = `<div class="project-empty" style="grid-column:1/-1">
       <div class="project-empty-icon">📁</div>
@@ -1961,30 +1966,15 @@ function saveProjectChanges(){
   save();
 }
 
-async function deleteCurrentProject() {
+function deleteCurrentProject() {
   if (!currentProjectId) return;
   if (!confirm("Delete this project? This cannot be undone.")) return;
   var delId = currentProjectId.toString();
-  // Close modal immediately
   var modal = document.getElementById('projectModal');
   if(modal) modal.style.display = 'none';
-  // Remove locally first for instant UI feedback
   projects = projects.filter(function(p){return p.id.toString() !== delId;});
-  localStorage.setItem("pac:projects", JSON.stringify(projects));
+  save();
   renderProjects();
-  // Set lock to prevent loadProjectsFromSupabase from re-fetching
-  window._projectSyncLock = true;
-  // Delete from Supabase
-  try {
-    await fetch("/.netlify/functions/get-projects", {
-      method: "DELETE",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({ids: [delId]})
-    });
-    // Re-sync remaining projects to Supabase (overwrites old state)
-    await syncProjectsToServer();
-  } catch(e) {}
-  setTimeout(function(){window._projectSyncLock=false;},5000);
 }
 
 function handleProjectFiles(e){
@@ -2120,14 +2110,12 @@ function toggleEmailExpand(el) {
 
 // Sync projects to Netlify Blobs so Gmail extension can read them
 async function syncProjectsToServer() {
-  if (projects.length === 0) return;
+  var projectData = JSON.stringify(projects);
   try {
-    await fetch('/.netlify/functions/get-projects', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ projects: projects.map(p => ({ id: p.id, name: p.name, biz: p.biz, status: p.status })) })
+    await fetch("/.netlify/functions/get-projects",{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({projects:[{id:"_projects_blob",name:"Projects Blob",biz:"_projects",status:"active",notes:projectData}]})
     });
-  } catch {}
+  } catch(e) {}
 }
 
 
