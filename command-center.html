@@ -1,4 +1,4 @@
-            <!DOCTYPE html>
+             <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -313,7 +313,7 @@ input[type=date],input[type=time]{width:100%}
     <div class="logo-icon">P</div>
     <div>
       <div class="logo-text">PulsAIO</div>
-      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.5.6</span></div>
+      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.5.7</span></div>
     </div>
   </div>
   <nav class="nav">
@@ -1529,30 +1529,26 @@ function syncRemindersToSupabase() {
   }).catch(function(){});
 }
 
-function loadRemindersFromSupabase() {
+function loadRemindersFromSupabase(callback) {
   fetch('/.netlify/functions/get-projects')
     .then(function(r) { return r.json(); })
     .then(function(data) {
-      var projects = data.projects || data || [];
-      var reminderRow = projects.find(function(p) { return p.id === '_reminders_data'; });
-      if (reminderRow && reminderRow.notes) {
+      var projs = data.projects || data || [];
+      var remRow = projs.find(function(p) { return p.id === '_reminders_data'; });
+      if (remRow && remRow.notes) {
         try {
-          var remoteReminders = JSON.parse(reminderRow.notes);
+          var remoteReminders = JSON.parse(remRow.notes);
           if (Array.isArray(remoteReminders)) {
-            var localReminders = JSON.parse(localStorage.getItem('pulsaio_reminders') || '[]');
-            var remoteIds = remoteReminders.map(function(r) { return String(r.id); });
-            var merged = remoteReminders.slice();
-            localReminders.forEach(function(lr) {
-              if (remoteIds.indexOf(String(lr.id)) === -1) merged.push(lr);
-            });
-            localStorage.setItem('pulsaio_reminders', JSON.stringify(merged));
-            reminders = merged;
-            if (typeof renderReminders === 'function') renderReminders();
+            reminders.length = 0;
+            remoteReminders.forEach(function(r) { reminders.push(r); });
+            localStorage.setItem('pulsaio_reminders', JSON.stringify(reminders));
+            if(typeof renderReminders==='function') renderReminders();
           }
         } catch(e) {}
       }
+      if(callback) callback();
     })
-    .catch(function(){});
+    .catch(function() { if(callback) callback(); });
 }
 
 function saveReminders(){
@@ -2623,26 +2619,22 @@ function loadPilotsFromSupabase() {
   fetch('/.netlify/functions/get-projects')
     .then(function(r) { return r.json(); })
     .then(function(data) {
-      var projects = data.projects || data || [];
-      var pilotRow = projects.find(function(p) { return p.id === '_pilots_data'; });
+      var projs = data.projects || data || [];
+      var pilotRow = projs.find(function(p) { return p.id === '_pilots_data'; });
       if (pilotRow && pilotRow.notes) {
         try {
           var remotePilots = JSON.parse(pilotRow.notes);
-          if (Array.isArray(remotePilots) && remotePilots.length > 0) {
-            var localPilots = JSON.parse(localStorage.getItem('pac:pilots') || '[]');
-            var remoteIds = remotePilots.map(function(p) { return p.id; });
-            var merged = remotePilots.slice();
-            localPilots.forEach(function(lp) {
-              if (remoteIds.indexOf(lp.id) === -1) merged.push(lp);
-            });
-            localStorage.setItem('pac:pilots', JSON.stringify(merged));
-            pilots = merged;
-            if (typeof renderAll === 'function') renderAll();
+          if (Array.isArray(remotePilots)) {
+            pilots.length = 0;
+            remotePilots.forEach(function(rp) { pilots.push(rp); });
+            localStorage.setItem('pac:pilots', JSON.stringify(pilots));
+            if(typeof renderPilotCards==='function') renderPilotCards();
+            if(typeof renderStats==='function') renderStats();
           }
         } catch(e) {}
       }
     })
-    .catch(function(){});
+    .catch(function() {});
 }
 
 // === Bug #3 Fix: Edit job names ===
