@@ -1,4 +1,4 @@
-          <!DOCTYPE html>
+           <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -313,7 +313,7 @@ input[type=date],input[type=time]{width:100%}
     <div class="logo-icon">P</div>
     <div>
       <div class="logo-text">PulsAIO</div>
-      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.5.4</span></div>
+      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.5.5</span></div>
     </div>
   </div>
   <nav class="nav">
@@ -717,16 +717,11 @@ const save = () => {
   localStorage.setItem('pac:entries', JSON.stringify(tasks));
   localStorage.setItem('pac:pilots', JSON.stringify(pilots));
   localStorage.setItem('pac:goals', JSON.stringify(goals));
-  localStorage.setItem('pac:entries', JSON.stringify(entries));
-  localStorage.setItem('cal:myevents', JSON.stringify(myEvents));
-  // Sync to Supabase
-  if (myEvents.length) {
-    const eventsClean = myEvents.filter(function(e){return e.source!=="google";}).map(({id,title,date,time,category,location,notes,source})=>({id,title,date,time:time||'',category:category||'general',location:location||'',notes:notes||'',source:source||'personal'}));
-    fetch('/.netlify/functions/get-events', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({sync:true,events: eventsClean})
-    }).catch(e=>console.log('event sync err:',e));
-  }
+  localStorage.setItem('pac:projects', JSON.stringify(projects));
+  syncProjectsToServer();
+  syncPilotsToSupabase();
+  syncTasksToSupabase();
+  syncGoalsToSupabase();
 }
 
 function syncTasksToSupabase() {
