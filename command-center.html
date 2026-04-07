@@ -311,7 +311,7 @@ input[type=date],input[type=time]{width:100%}
     <div class="logo-icon">P</div>
     <div>
       <div class="logo-text">PulsAIO</div>
-      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.4.0</span></div>
+      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.4.1</span></div>
     </div>
   </div>
   <nav class="nav">
@@ -821,6 +821,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     loadMemoriesFromSupabase();
   loadPilotsFromSupabase();
+  loadRemindersFromSupabase();
   renderAll();
   mergeGcalIntoMyEvents();
   // Wait for Google Identity Services to load (async script)
@@ -1437,7 +1438,55 @@ const showTab = (tab) => {
 let reminders = JSON.parse(localStorage.getItem('pulsaio_reminders') || '[]');
 let reminderRecog = null, reminderListening = false;
 
-function saveReminders(){ localStorage.setItem('pulsaio_reminders', JSON.stringify(reminders)); }
+// === Reminder Supabase sync ===
+function syncRemindersToSupabase() {
+  var r = JSON.parse(localStorage.getItem('pulsaio_reminders') || '[]');
+  fetch('/.netlify/functions/get-projects', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({
+      projects: [{
+        id: '_reminders_data',
+        name: 'Reminders Sync Store',
+        biz: '_reminder',
+        status: 'active',
+        notes: JSON.stringify(r)
+      }],
+      sync: false
+    })
+  }).catch(function(){});
+}
+
+function loadRemindersFromSupabase() {
+  fetch('/.netlify/functions/get-projects')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var projects = data.projects || data || [];
+      var reminderRow = projects.find(function(p) { return p.id === '_reminders_data'; });
+      if (reminderRow && reminderRow.notes) {
+        try {
+          var remoteReminders = JSON.parse(reminderRow.notes);
+          if (Array.isArray(remoteReminders)) {
+            var localReminders = JSON.parse(localStorage.getItem('pulsaio_reminders') || '[]');
+            var remoteIds = remoteReminders.map(function(r) { return String(r.id); });
+            var merged = remoteReminders.slice();
+            localReminders.forEach(function(lr) {
+              if (remoteIds.indexOf(String(lr.id)) === -1) merged.push(lr);
+            });
+            localStorage.setItem('pulsaio_reminders', JSON.stringify(merged));
+            reminders = merged;
+            if (typeof renderReminders === 'function') renderReminders();
+          }
+        } catch(e) {}
+      }
+    })
+    .catch(function(){});
+}
+
+function saveReminders(){
+  localStorage.setItem('pulsaio_reminders', JSON.stringify(reminders));
+  syncRemindersToSupabase();
+}
 
 function addReminder(text, project, dateStr) {
   const inp = document.getElementById('reminderInput');
@@ -2340,17 +2389,20 @@ setInterval(function(){
     if (document.visibilityState === 'visible') {
       loadMemoriesFromSupabase();
       loadPilotsFromSupabase();
+      loadRemindersFromSupabase();
     }
   });
   window.addEventListener('pageshow', function(e) {
     if (e.persisted) {
       loadMemoriesFromSupabase();
       loadPilotsFromSupabase();
+      loadRemindersFromSupabase();
     }
   });
   window.addEventListener('focus', function() {
     loadMemoriesFromSupabase();
     loadPilotsFromSupabase();
+    loadRemindersFromSupabase();
   });
 
 // ── EVENT MANAGER ──────────────────────────────────────────────────────────
@@ -2888,6 +2940,7 @@ function editMemory(id) {
   
  
    
+ 
  
  
  
