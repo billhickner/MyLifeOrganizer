@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -313,7 +313,7 @@ input[type=date],input[type=time]{width:100%}
     <div class="logo-icon">P</div>
     <div>
       <div class="logo-text">PulsAIO</div>
-      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.4.5</span></div>
+      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.4.6</span></div>
     </div>
   </div>
   <nav class="nav">
@@ -350,12 +350,6 @@ input[type=date],input[type=time]{width:100%}
 
 <!-- ══ TODAY TAB ══ -->
 <div id="tab-today" class="page">
-  <div class="stats-grid">
-    <div class="stat-chip"><div class="stat-val" id="statTasks" style="color:var(--primary)">0/0</div><div class="stat-lbl">Tasks Done</div></div>
-    <div class="stat-chip"><div class="stat-val" id="statPilots" style="color:var(--gold)">0/4</div><div class="stat-lbl">Jobs Live</div></div>
-    <div class="stat-chip"><div class="stat-val" id="statProgress" style="color:var(--green)">0%</div><div class="stat-lbl">Avg Progress</div></div>
-    <div class="stat-chip"><div class="stat-val" id="statHigh" style="color:var(--red)">0</div><div class="stat-lbl">High Priority Open</div></div>
-  </div>
   <div class="main-grid">
     <div>
       <!-- Tasks -->
@@ -375,27 +369,8 @@ input[type=date],input[type=time]{width:100%}
       </div>
       <!-- Journal -->
       <div class="card">
-        <div class="card-title"><div class="card-accent"></div>Daily Journal Entry</div>
-        <textarea class="ta" id="journalInput" placeholder="What's driving your decisions today? Capture it here…"></textarea>
-        <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap">
-          <button class="btn-primary" onclick="saveEntry()">Save Entry</button>
-          <button class="btn-outline" onclick="aiReflect()">✦ AI Reflect</button>
-        </div>
-        <div id="reflectionBox" style="display:none" class="ai-box">
-          <div class="ai-header"><div class="ai-dot"></div>Claude's Reflection</div>
-
-      
-        <div id="remindersList"></div>
-      </div>
-
-          <div class="ai-text" id="reflectionText"></div>
-<!-- REMINDERS SECTION -->
-      <div class="reminders-section" id="remindersSection">
-        <div class="reminders-header">
-          <div class="reminders-title">Reminders</div>
-
-      <!-- MEMORY BANK -->
-      <div class="memory-bank" id="memoryBank">
+        <div class="card-accent"></div>
+        <div class="memory-bank" id="memoryBank">
         <div class="memory-bank-header">
           <div class="memory-bank-title">🧠 Max Memory Bank</div>
           <button onclick="toggleMemoryMic()" id="memoryMicBtn" style="background:#eff6ff;border:1px solid #bfdbfe;color:#2563eb;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer">🎙️ Tell Max</button>
@@ -413,35 +388,9 @@ input[type=date],input[type=time]{width:100%}
         </div>
         <div id="memoryList"></div>
       </div>
-
-          
-        </div>
-        <div class="reminders-add">
-          <input type="text" id="reminderInput" placeholder="Add a reminder… or click Tell Max" onkeydown="if(event.key==='Enter')addReminder()">
-          <select id="reminderProject">
-            <option value="general">General</option>
-            <option value="pulsaio">PulsAIO</option>
-            <option value="unity">Unity</option>
-            <option value="utbsc">UTBSC</option>
-          </select>
-          <input type="datetime-local" id="reminderDate" style="border:1px solid #e2e8f0;border-radius:8px;padding:8px 10px;font-size:12px;color:#475569;background:#f8fafc;outline:none">
-          <select id="reminderRepeat" style="border:1px solid #e2e8f0;border-radius:8px;padding:8px 10px;font-size:12px;color:#475569;background:#f8fafc;outline:none" title="Repeat until acknowledged">
-            <option value="1">Once</option>
-            <option value="3">3x</option>
-            <option value="5" selected>5x (default)</option>
-            <option value="10">10x</option>
-            <option value="15">15x</option>
-            <option value="20">20x</option>
-            <option value="30">30x max</option>
-          </select>
-          <button onclick="addReminder()">+ Add</button>
-        </div>
-
-        </div>
       </div>
     </div>
-    <!-- Sidebar -->
-    AI Daily Path</div>
+    </div>
         <p style="font-size:13px;color:var(--soft);line-height:1.6;margin-bottom:14px">Generate today's prioritized action plan based on your tasks, jobs, and goals.</p>
         <button class="btn-primary" style="width:100%" onclick="genPath()">✦ Generate Today's Path</button>
         <div id="pathBoxToday" style="display:none" class="ai-box">
