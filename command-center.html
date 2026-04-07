@@ -1,4 +1,4 @@
-                 <!DOCTYPE html>
+                  <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -313,7 +313,7 @@ input[type=date],input[type=time]{width:100%}
     <div class="logo-icon">P</div>
     <div>
       <div class="logo-text">PulsAIO</div>
-      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.6.1</span></div>
+      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.6.2</span></div>
     </div>
   </div>
   <nav class="nav">
@@ -1744,7 +1744,7 @@ fetch('/.netlify/functions/memory')
       renderMemories();
     }
   }).catch(()=>{});
-let currentProjectId = null;
+window.currentProjectId = null;
 let projectFolderHandle = null;
 
 function saveProjects() {
@@ -1858,6 +1858,7 @@ function openProject(id){
   renderFolderLink(p);
   const _modal=document.getElementById('projectModal');
   _modal.classList.add('open');
+  _modal.setAttribute('data-project-id',id.toString());
   _modal.style.display='flex';
   renderProjectEmails(p);
   syncProjectsToServer();
@@ -1967,11 +1968,11 @@ function saveProjectChanges(){
 }
 
 function deleteCurrentProject() {
-  if (!currentProjectId) return;
-  if (!confirm("Delete this project? This cannot be undone.")) return;
-  var delId = currentProjectId.toString();
   var modal = document.getElementById('projectModal');
-  if(modal) modal.style.display = 'none';
+  var delId = modal ? modal.getAttribute('data-project-id') : null;
+  if (!delId) return;
+  if (!confirm("Delete this project? This cannot be undone.")) return;
+  modal.style.display = 'none';
   projects = projects.filter(function(p){return p.id.toString() !== delId;});
   save();
   renderProjects();
