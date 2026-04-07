@@ -1,4 +1,4 @@
-                  <!DOCTYPE html>
+                   <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -313,7 +313,7 @@ input[type=date],input[type=time]{width:100%}
     <div class="logo-icon">P</div>
     <div>
       <div class="logo-text">PulsAIO</div>
-      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.6.2</span></div>
+      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.6.3</span></div>
     </div>
   </div>
   <nav class="nav">
@@ -1787,7 +1787,7 @@ function confirmCreateProject(){
     created: new Date().toISOString()
   };
   projects.unshift(project);
-  saveProjects();
+  save();
   closeCreateProject();
   renderProjects();
   // Auto-open the new project
@@ -1948,23 +1948,29 @@ function addProjectUpdate(){
 }
 
 function saveProjectChanges(){
-  const p = projects.find(x => x.id === currentProjectId);
+  var modal = document.getElementById('projectModal');
+  var projId = modal ? modal.getAttribute('data-project-id') : null;
+  if (!projId) return;
+  var p = projects.find(function(x){return x.id.toString() === projId;});
   if (!p) return;
-  p.status = document.getElementById('modalProjectStatus').value;
-  var _gi2=document.getElementById('goalInput');if(_gi2)p.goal=_gi2.value;
-  const noteText = document.getElementById('modalProjectNotes').value.trim();
-  if (noteText) {
-    if (!p.updates) p.updates = [];
-    p.updates.unshift({ date: new Date().toISOString(), text: noteText });
-    document.getElementById('modalProjectNotes').value = '';
-    renderProjectUpdates(p);
+  var statusEl = document.getElementById('modalProjectStatus');
+  if(statusEl) p.status = statusEl.value;
+  var goalEl = document.getElementById('goalInput');
+  if(goalEl) p.goal = goalEl.value;
+  var noteEl = document.getElementById('noteInput');
+  if(noteEl) {
+    var noteText = noteEl.value.trim();
+    if (noteText) {
+      if (!p.updates) p.updates = [];
+      p.updates.unshift({text: noteText, date: new Date().toISOString()});
+      noteEl.value = '';
+    }
   }
-  saveProjects();
-  renderProjects();
-  closeProjectModal();
-
-  localStorage.setItem("pac:projects", JSON.stringify(projects));
   save();
+  renderProjects();
+  if(typeof renderProjectEmails==='function') renderProjectEmails(p);
+  if(typeof renderProjectUpdates==='function') renderProjectUpdates(p);
+  modal.style.display = 'none';
 }
 
 function deleteCurrentProject() {
