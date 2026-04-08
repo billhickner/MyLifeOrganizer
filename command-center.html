@@ -313,7 +313,7 @@ input[type=date],input[type=time]{width:100%}
     <div class="logo-icon">P</div>
     <div>
       <div class="logo-text">PulsAIO</div>
-      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.7.5</span></div>
+      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.7.6</span></div>
     </div>
   </div>
   <nav class="nav">
@@ -1731,14 +1731,21 @@ let projects = JSON.parse(localStorage.getItem('pulsaio_projects') || '[]');
 fetch('/.netlify/functions/get-projects')
   .then(r=>r.json())
   .then(d=>{
-    if(d.projects && d.projects.length > 0){
-      // Merge server projects with local (local wins for newer data)
-      const serverIds = new Set(d.projects.map(p=>p.id));
-      const localOnly = projects.filter(p=>!serverIds.has(String(p.id)));
-      projects = [...d.projects, ...localOnly];
-      localStorage.setItem('pulsaio_projects', JSON.stringify(projects));
-      localStorage.setItem('pac:projects', JSON.stringify(projects));
-      renderProjects();
+    var projs = Array.isArray(d) ? d : (d.projects||[]);
+    var blobRow = projs.find(function(p){return p.id==='_projects_blob';});
+    if(blobRow && blobRow.notes) {
+      try {
+        var remoteProjects = JSON.parse(blobRow.notes);
+        if(Array.isArray(remoteProjects)) {
+          var remoteIds = {};
+          remoteProjects.forEach(function(p){remoteIds[String(p.id)]=true;});
+          var localOnly = projects.filter(function(p){return !remoteIds[String(p.id)];});
+          projects = remoteProjects.concat(localOnly);
+          localStorage.setItem('pulsaio_projects', JSON.stringify(projects));
+          localStorage.setItem('pac:projects', JSON.stringify(projects));
+          renderProjects();
+        }
+      } catch(e){}
     }
   }).catch(()=>{});
 
@@ -1758,7 +1765,7 @@ let projectFolderHandle = null;
 function saveProjects() {
   localStorage.setItem("pac:projects", JSON.stringify(projects));
   var cleaned = projects.map(function(p){
-    return {id:p.id,name:p.name,biz:p.biz||"general",status:p.status||"active",notes:p.notes||"",emails:JSON.stringify(p.emails||[]),updates:JSON.stringify(p.updates||[]),files:JSON.stringify(p.files||[])};
+    return {id:p.id,name:p.name,goal:p.goal||"",biz:p.biz||"general",status:p.status||"active",notes:p.notes||"",emails:JSON.stringify(p.emails||[]),updates:JSON.stringify(p.updates||[]),files:JSON.stringify(p.files||[])};
   });
   fetch("/.netlify/functions/get-projects",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({projects:cleaned,sync:true})}).catch(function(){});
 }
