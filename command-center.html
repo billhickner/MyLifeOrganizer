@@ -313,7 +313,7 @@ input[type=date],input[type=time]{width:100%}
     <div class="logo-icon">P</div>
     <div>
       <div class="logo-text">PulsAIO</div>
-      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.8.0</span></div>
+      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.8.1</span></div>
     </div>
   </div>
   <nav class="nav">
@@ -649,32 +649,9 @@ const TODAY_STR   = TODAY.toISOString().split('T')[0];
 const DAYS_LEFT   = Math.ceil((DEADLINE - TODAY) / 86400000);
 
 // ── STATE ──────────────────────────────────────────────────────────────────
-let tasks   = JSON.parse(localStorage.getItem('pac:tasks:'+ TODAY_STR) || 'null') || [
-  {id:1,text:'Check in on rental property — cancelled weekend trip',category:'general',priority:'med',done:false},
-  {id:2,text:'Follow up on Journal/Life Organizer integration (Netlify)',category:'product',priority:'med',done:false},
-  {id:3,text:'Talk to Claude: Modbus controllers → M1 72 integration',category:'product',priority:'high',done:false},
-  {id:4,text:'Follow up with Nate Essin — get shop status update',category:'team',priority:'high',done:false},
-  {id:5,text:'Talk to Ron Snider about Nate\'s hours going forward',category:'team',priority:'high',done:false},
-  {id:6,text:'PulsAIO Hardware List — finalize AI board spec',category:'product',priority:'high',done:false},
-  {id:7,text:'✈️ WED Apr 1 @ 9PM — Pack & prep for TPA→SEA flight. Delta F7HIIA Seat 23F.',category:'general',priority:'high',done:false},
-  {id:8,text:'✈️ THU Apr 2 @ 3:30AM — DEPART Punta Gorda NOW. Arrive TPA by 5:30AM for 7:30AM Delta.',category:'general',priority:'high',done:false},
-  {id:9,text:'✈️ THU Apr 2 @ 3:45AM — LAST CALL: Leave for Tampa Airport NOW. Delta TPA→SEA 7:30AM.',category:'general',priority:'high',done:false},
-];
-let pilots  = JSON.parse(localStorage.getItem('pac:pilots') || 'null') || [
-  {id:'dg',name:'David Glaser',store:'David Glaser Store',status:'planning',progress:0,notes:''},
-  {id:'lg',name:'Laurie Glaser',store:'Laurie Glaser Store',status:'planning',progress:0,notes:''},
-  {id:'omh',name:'One Medical Houston',store:'Houston Location',status:'planning',progress:0,notes:''},
-  {id:'km',name:'Kevin Moore',store:'Kevin Moore Store',status:'planning',progress:0,notes:''},
-];
-let goals   = JSON.parse(localStorage.getItem('pac:goals') || 'null') || [
-  {id:1,title:'All 4 pilot stores LIVE by May 14, 2026',category:'product',timeframe:'monthly',progress:0},
-  {id:2,title:'Hit $25,000/month recurring revenue',category:'revenue',timeframe:'monthly',progress:0},
-  {id:3,title:'Expand to 10+ wholesale AIO stores post-pilot',category:'acquisition',timeframe:'monthly',progress:0},
-  {id:4,title:'Follow up with all 4 pilot contacts this week',category:'acquisition',timeframe:'weekly',progress:0},
-  {id:5,title:'Confirm deployment checklist for next pilot',category:'product',timeframe:'weekly',progress:0},
-  {id:6,title:'Review pilot store onboarding checklist',category:'product',timeframe:'daily',progress:0},
-  {id:7,title:'Discuss Nate\'s hours with Ron Snider',category:'team',timeframe:'daily',progress:0},
-];
+let tasks = JSON.parse(localStorage.getItem('pac:entries') || '[]');
+let pilots = JSON.parse(localStorage.getItem('pac:pilots') || '[]');
+let goals = JSON.parse(localStorage.getItem('pac:goals') || '[]');
 let entries = JSON.parse(localStorage.getItem('pac:entries') || '[]');
 let myEvents = JSON.parse(localStorage.getItem('cal:myevents') || '[]');
   // Sync: merge Supabase events into localStorage (cross-device sync)
