@@ -313,7 +313,7 @@ input[type=date],input[type=time]{width:100%}
     <div class="logo-icon">P</div>
     <div>
       <div class="logo-text">PulsAIO</div>
-      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.7.1</span></div>
+      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.7.2</span></div>
     </div>
   </div>
   <nav class="nav">
@@ -1854,7 +1854,7 @@ function openProject(id){
   document.getElementById('modalProjectName').textContent = p.name;
   document.getElementById('modalProjectStatus').value = p.status;
   document.getElementById('goalInput').textContent = p.goal || 'No goal defined.';
-  document.getElementById('modalProjectNotes').value = '';
+  document.getElementById('modalProjectNotes').value = p.notes || '';
   var _gi=document.getElementById('goalInput');if(_gi)_gi.value=p.goal||'';
   renderProjectUpdates(p);
   renderProjectFiles(p);
@@ -1960,20 +1960,13 @@ function saveProjectChanges(){
   if(statusEl) p.status = statusEl.value;
   var goalEl = document.getElementById('goalInput');
   if(goalEl) p.goal = goalEl.value;
-  var noteEl = document.getElementById('noteInput');
-  if(noteEl) {
-    var noteText = noteEl.value.trim();
-    if (noteText) {
-      if (!p.updates) p.updates = [];
-      p.updates.unshift({text: noteText, date: new Date().toISOString()});
-      noteEl.value = '';
-    }
-  }
+  var noteEl = document.getElementById('modalProjectNotes');
+  if(noteEl) p.notes = noteEl.value;
   save();
   renderProjects();
   if(typeof renderProjectEmails==='function') renderProjectEmails(p);
   if(typeof renderProjectUpdates==='function') renderProjectUpdates(p);
-  var m = document.querySelector('.modal');if(m){m.style.display='none';m.classList.remove('open');}
+  closeProjectModal();
 }
 
 function deleteCurrentProject() {
@@ -1984,7 +1977,7 @@ function deleteCurrentProject() {
   projects = projects.filter(function(p){return p.id.toString() !== delId;});
   save();
   renderProjects();
-  var m = document.querySelector('.modal');if(m){m.style.display='none';m.classList.remove('open');}
+  closeProjectModal();
 }
 
 function handleProjectFiles(e){
@@ -2981,7 +2974,7 @@ function executeMaxActions(reply) {
   </div>
 
   <!-- PROJECT DETAIL MODAL -->
-  <div class="project-modal" id="projectModal">
+  <div class="project-modal" id="projectModal" onclick="if(event.target===this)closeProjectModal()">
     <div class="project-modal-inner">
       <div class="project-modal-header">
         <div class="project-modal-title-area">
@@ -3025,7 +3018,7 @@ function executeMaxActions(reply) {
   </div>
 
   <!-- CREATE PROJECT MODAL -->
-  <div class="create-modal" id="createProjectModal">
+  <div class="create-modal" id="createProjectModal" onclick="if(event.target===this)closeCreateProject()">
     <div class="create-modal-inner">
       <div class="create-modal-title">＋ Create New Project</div>
       <div class="create-field">
