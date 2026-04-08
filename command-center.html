@@ -1,4 +1,4 @@
-                       <!DOCTYPE html>
+                        <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -313,7 +313,7 @@ input[type=date],input[type=time]{width:100%}
     <div class="logo-icon">P</div>
     <div>
       <div class="logo-text">PulsAIO</div>
-      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.7.2</span></div>
+      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.7.3</span></div>
     </div>
   </div>
   <nav class="nav">
@@ -1853,9 +1853,9 @@ function openProject(id){
   window._currentProjectId = id;
   document.getElementById('modalProjectName').textContent = p.name;
   document.getElementById('modalProjectStatus').value = p.status;
-  document.getElementById('goalInput').textContent = p.goal || 'No goal defined.';
+  document.getElementById('projectGoalInput').value = p.goal || '';
   document.getElementById('modalProjectNotes').value = p.notes || '';
-  var _gi=document.getElementById('goalInput');if(_gi)_gi.value=p.goal||'';
+  var _gi=document.getElementById('projectGoalInput');if(_gi)_gi.value=p.goal||'';
   renderProjectUpdates(p);
   renderProjectFiles(p);
   renderFolderLink(p);
@@ -1958,11 +1958,13 @@ function saveProjectChanges(){
   if (!p) return;
   var statusEl = document.getElementById('modalProjectStatus');
   if(statusEl) p.status = statusEl.value;
-  var goalEl = document.getElementById('goalInput');
+  var goalEl = document.getElementById('projectGoalInput');
   if(goalEl) p.goal = goalEl.value;
   var noteEl = document.getElementById('modalProjectNotes');
   if(noteEl) p.notes = noteEl.value;
+  localStorage.setItem('pulsaio_projects', JSON.stringify(projects));
   save();
+  saveProjects();
   renderProjects();
   if(typeof renderProjectEmails==='function') renderProjectEmails(p);
   if(typeof renderProjectUpdates==='function') renderProjectUpdates(p);
@@ -2992,7 +2994,7 @@ function executeMaxActions(reply) {
       </div>
       <div class="project-modal-body">
         <div class="project-section-label">Project Goal</div>
-        <input type="text" id="goalInput" placeholder="Enter project goal..." style="width:100%;padding:10px 12px;border:1px solid #dde3f0;border-radius:8px;font-size:14px;font-family:inherit;color:#0d1b2a;background:#fff;box-sizing:border-box;">
+        <input type="text" id="projectGoalInput" placeholder="Enter project goal..." style="width:100%;padding:10px 12px;border:1px solid #dde3f0;border-radius:8px;font-size:14px;font-family:inherit;color:#0d1b2a;background:#fff;box-sizing:border-box;">
 
         <div class="project-section-label">Notes & Updates</div>
         <textarea class="project-notes-area" id="modalProjectNotes" placeholder="Add notes, thoughts, or updates about this project…" rows="3"></textarea>
