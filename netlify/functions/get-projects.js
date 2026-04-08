@@ -25,7 +25,10 @@ exports.handler = async (event) => {
   if (event.httpMethod === "GET") {
     try {
       const r = await fetch(`${SUPA_URL}/rest/v1/projects?order=updated.desc`, { headers: hdrs });
-      const data = await r.json();
+      let data = await r.json();
+      if (event.queryStringParameters && event.queryStringParameters.userOnly === 'true') {
+        data = (Array.isArray(data) ? data : []).filter(function(p) { return !String(p.id).startsWith('_'); });
+      }
       return { statusCode: 200, headers: CORS, body: JSON.stringify({ projects: data }) };
     } catch (e) {
       return { statusCode: 500, headers: CORS, body: JSON.stringify({ error: e.message }) };
@@ -51,11 +54,8 @@ exports.handler = async (event) => {
   // POST: Upsert projects
   if (event.httpMethod === "POST") {
     try {
-      const { projects, sync } = JSON.parse(event.body);
-      if (sync) {
-        // Full replace: delete all then re-insert
-        await fetch(`${SUPA_URL}/rest/v1/projects?id=neq.impossible`, { method: "DELETE", headers: hdrs });
-      }
+      const { projects } = JSON.parse(event.body);
+      // NOTE: sync:true REMOVED - it deleted ALL rows (V2.7.8 root cause)
       if (projects && projects.length > 0) {
         const r = await fetch(`${SUPA_URL}/rest/v1/projects`, {
           method: "POST",
