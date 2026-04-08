@@ -313,7 +313,7 @@ input[type=date],input[type=time]{width:100%}
     <div class="logo-icon">P</div>
     <div>
       <div class="logo-text">PulsAIO</div>
-      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.8.1</span></div>
+      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.8.2</span></div>
     </div>
   </div>
   <nav class="nav">
@@ -2070,46 +2070,32 @@ renderProjects();
 
 // ===== PROJECT EMAILS =====
 async function renderProjectEmails(p) {
-  const el = document.getElementById('modalProjectEmails');
+  const el = document.getElementById("modalProjectEmails");
   if (!el) return;
-  el.innerHTML = '<div class="project-emails-loading">Loading emails…</div>';
+  el.innerHTML = '<div class="project-emails-loading">Loading emails\u2026</div>';
   try {
-    // Read from localStorage (synced by Gmail extension)
-    // Fetch emails from Supabase
-    let emails = [];
-    try {
-      const er = await fetch('/.netlify/functions/get-emails?projectId=' + p.id);
-      const ed = await er.json();
-      emails = ed.emails || [];
-      // Also merge any local emails not yet synced
-      const localEmails = JSON.parse(localStorage.getItem('pulsaio_emails') || '[]');
-      const localFiltered = localEmails.filter(e => String(e.projectId) === String(p.id));
-      // Combine, deduplicate by id
-      const ids = new Set(emails.map(e => String(e.id)));
-      localFiltered.forEach(e => { if (!ids.has(String(e.id))) emails.push(e); });
-    } catch {
-      const allEmails = JSON.parse(localStorage.getItem('pulsaio_emails') || '[]');
-      emails = allEmails.filter(e => String(e.projectId) === String(p.id));
-    }
+    const er = await fetch("/.netlify/functions/get-emails?projectId=" + p.id);
+    const ed = await er.json();
+    var emails = ed.emails || [];
     if (emails.length === 0) {
-      el.innerHTML = '<div class="project-emails-empty">No emails saved yet — use the Gmail extension to save emails to this project.</div>';
+      el.innerHTML = '<div class="project-emails-empty">No emails saved yet \u2014 use the Gmail extension to save emails to this project.</div>';
       return;
     }
-    el.innerHTML = '<div class="project-emails-list">' + emails.map((e,i) => `
-      <div class="project-email-item" onclick="toggleEmailExpand(this)">
-        <div class="project-email-subject">${e.subject || '(No subject)'}</div>
-        <div class="project-email-meta">
-          <span>👤 ${e.senderName || e.sender || 'Unknown'}</span>
-          ${e.date ? '<span>📅 ' + e.date + '</span>' : ''}
-          <span>🕐 ${new Date(e.savedAt).toLocaleDateString()}</span>
-          ${e.url ? '<a href="'+e.url+'" target="_blank" onclick="event.stopPropagation()" style="color:#2563eb;text-decoration:none">Open in Gmail ↗</a>' : ''}
-        </div>
-        ${e.note ? '<div class="project-email-note">📝 ' + e.note + '</div>' : ''}
-        ${e.body ? '<div class="project-email-body">' + e.body.replace(/</g,'&lt;') + '</div>' : ''}
-      </div>
-    `).join('') + '</div>';
-  } catch {
-    el.innerHTML = '<div class="project-emails-empty">Could not load emails. Install the Gmail extension and save emails to this project.</div>';
+    el.innerHTML = '<div class="project-emails-list">' + emails.map(function(e,i) {
+      return '<div class="project-email-item" onclick="toggleEmailExpand(this)">' +
+        '<div class="project-email-subject">' + (e.subject || "(No subject)") + '</div>' +
+        '<div class="project-email-meta">' +
+          '<span>\ud83d\udc64 ' + (e.sender_name || e.senderName || e.sender || "Unknown") + '</span>' +
+          (e.date ? '<span>\ud83d\udcc5 ' + e.date + '</span>' : '') +
+          (e.savedAt ? '<span>\ud83d\udd50 ' + new Date(e.savedAt).toLocaleDateString() + '</span>' : '') +
+          (e.url ? '<a href="' + e.url + '" target="_blank" onclick="event.stopPropagation()" style="color:#2563eb;text-decoration:none">Open in Gmail \u2197</a>' : '') +
+        '</div>' +
+        (e.note ? '<div class="project-email-note">\ud83d\udcdd ' + e.note + '</div>' : '') +
+        (e.body ? '<div class="project-email-body">' + e.body.replace(/</g,"&lt;") + '</div>' : '') +
+      '</div>';
+    }).join("") + '</div>';
+  } catch(err) {
+    el.innerHTML = '<div class="project-emails-empty">Could not load emails.</div>';
   }
 }
 
@@ -2120,7 +2106,17 @@ function toggleEmailExpand(el) {
 // Sync projects to Netlify Blobs so Gmail extension can read them
 async function syncProjectsToServer() {
   window._projectSyncLock = true;
-  var projectData = JSON.stringify(projects);
+  // Strip large file data before syncing to keep blob size manageable
+  var cleanProjects = projects.map(function(p) {
+    var cp = Object.assign({}, p);
+    if (cp.files && Array.isArray(cp.files)) {
+      cp.files = cp.files.map(function(f) {
+        return {name: f.name, size: f.size, type: f.type, added: f.added};
+      });
+    }
+    return cp;
+  });
+  var projectData = JSON.stringify(cleanProjects);
   try {
     await fetch("/.netlify/functions/get-projects",{method:"POST",headers:{"Content-Type":"application/json"},
       body:JSON.stringify({projects:[{id:"_projects_blob",name:"Projects Blob",biz:"_projects",status:"active",notes:projectData}]})
@@ -3074,7 +3070,7 @@ function executeMaxActions(reply) {
  
  
  
- 
+  
  
  
  
