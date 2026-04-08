@@ -314,7 +314,7 @@ input[type=date],input[type=time]{width:100%}
     <div class="logo-icon">P</div>
     <div>
       <div class="logo-text">PulsAIO</div>
-      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.8.3</span></div>
+      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.8.4</span></div>
     </div>
   </div>
   <nav class="nav">
@@ -717,7 +717,7 @@ function syncTasksToSupabase() {
 
 function loadTasksFromSupabase(callback) {
   if(window._taskSyncLock){if(callback)callback();return;}
-  fetch("/.netlify/functions/get-projects").then(function(r){return r.json();}).then(function(d){
+  fetch("/.netlify/functions/get-projects?all=true").then(function(r){return r.json();}).then(function(d){
     var projects = Array.isArray(d) ? d : (d.projects||[]);
     var taskRow = projects.find(function(p){return p.id==="_tasks_data";});
     if(taskRow && taskRow.notes) {
@@ -747,7 +747,7 @@ function syncGoalsToSupabase() {
 
 function loadGoalsFromSupabase(callback) {
   if(window._goalSyncLock){if(callback)callback();return;}
-  fetch("/.netlify/functions/get-projects").then(function(r){return r.json();}).then(function(d){
+  fetch("/.netlify/functions/get-projects?all=true").then(function(r){return r.json();}).then(function(d){
     var projs = Array.isArray(d) ? d : (d.projects||[]);
     var goalRow = projs.find(function(p){return p.id==="_goals_data";});
     if(goalRow && goalRow.notes) {
@@ -767,7 +767,7 @@ function loadGoalsFromSupabase(callback) {
 
 function loadProjectsFromSupabase(callback) {
   if(window._projectSyncLock){if(callback)callback();return;}
-  fetch("/.netlify/functions/get-projects").then(function(r){return r.json();}).then(function(d){
+  fetch("/.netlify/functions/get-projects?all=true").then(function(r){return r.json();}).then(function(d){
     var projs = Array.isArray(d) ? d : (d.projects||[]);
     var blobRow = projs.find(function(p){return p.id==="_projects_blob";});
     if(blobRow && blobRow.notes && blobRow.notes.length > 2) {
@@ -1049,7 +1049,7 @@ function syncJobTrackerNote() {
 }
 
 function loadJobTrackerNoteFromSupabase() {
-  fetch("/.netlify/functions/get-projects").then(function(r){return r.json();}).then(function(d){
+  fetch("/.netlify/functions/get-projects?all=true").then(function(r){return r.json();}).then(function(d){
     var projs = Array.isArray(d) ? d : (d.projects||[]);
     var noteRow = projs.find(function(p){return p.id==="_jobnote_data";});
     if(noteRow && noteRow.notes) {
@@ -1540,7 +1540,7 @@ function syncRemindersToSupabase() {
 }
 
 function loadRemindersFromSupabase(callback) {
-  fetch('/.netlify/functions/get-projects')
+  fetch('/.netlify/functions/get-projects?all=true')
     .then(function(r) { return r.json(); })
     .then(function(data) {
       var projs = data.projects || data || [];
@@ -1725,7 +1725,7 @@ const PROJECT_COLORS = {pulsaio:'#2563eb',unity:'#16a34a',utbsc:'#d97706',person
 let projects = JSON.parse(localStorage.getItem('pulsaio_projects') || '[]');
 
 // Load from Supabase on any device — blob is source of truth
-fetch('/.netlify/functions/get-projects')
+fetch('/.netlify/functions/get-projects?all=true')
   .then(r=>r.json())
   .then(d=>{
     var projs = Array.isArray(d) ? d : (d.projects||[]);
@@ -2635,7 +2635,7 @@ function syncPilotsToSupabase() {
 }
 
 function loadPilotsFromSupabase() {
-  fetch('/.netlify/functions/get-projects')
+  fetch('/.netlify/functions/get-projects?all=true')
     .then(function(r) { return r.json(); })
     .then(function(data) {
       var projs = data.projects || data || [];
