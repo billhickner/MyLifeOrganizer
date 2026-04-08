@@ -158,6 +158,7 @@ input[type=range]{width:100%;accent-color:var(--primary);margin-top:8px}
 input[type=date],input[type=time]{width:100%}
 
 @media(max-width:900px){.main-grid,.stats-grid,.pilot-grid{grid-template-columns:1fr}}
+@media(max-width:600px){.project-modal{padding:8px}.project-modal-inner{max-height:95vh;border-radius:14px}.project-modal-header{padding:16px 18px 12px}.project-modal-body{padding:14px 18px}.modal-actions{padding:12px 18px}.project-modal-name{font-size:17px}}
 
 /* ===== REMINDERS ===== */
 .reminders-section{background:#fff;border:1px solid #e5e9f0;border-radius:12px;padding:20px;margin-top:20px}
@@ -226,7 +227,7 @@ input[type=date],input[type=time]{width:100%}
 .project-modal-title-area{flex:1}
 .project-modal-name{font-size:20px;font-weight:700;color:#1e293b;margin-bottom:4px}
 .project-modal-status{display:flex;gap:8px;align-items:center}
-.project-modal-body{flex:1;overflow-y:auto;padding:20px 28px}
+.project-modal-body{flex:1;overflow-y:auto;padding:20px 28px;-webkit-overflow-scrolling:touch}
 .project-modal-close{background:none;border:none;font-size:22px;color:#94a3b8;cursor:pointer;padding:4px;line-height:1;flex-shrink:0}
 .project-modal-close:hover{color:#1e293b}
 .project-section-label{font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#94a3b8;margin-bottom:8px;margin-top:20px}
@@ -313,7 +314,7 @@ input[type=date],input[type=time]{width:100%}
     <div class="logo-icon">P</div>
     <div>
       <div class="logo-text">PulsAIO</div>
-      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.8.2</span></div>
+      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.8.3</span></div>
     </div>
   </div>
   <nav class="nav">
@@ -566,11 +567,14 @@ input[type=date],input[type=time]{width:100%}
       <div id="pilotModalFiles" class="project-files-area"></div>
       <input type="file" id="pilotFileInput" multiple style="display:none" onchange="handlePilotFiles(event)">
       <button class="btn-add-update" onclick="document.getElementById('pilotFileInput').click()" style="margin-top:8px">＋ Attach File</button>
-    </div>
-    <div class="modal-actions">
-      <button class="btn-delete-project" onclick="deletePilot()">Delete Job</button>
-      <button class="btn-save-project" onclick="savePilotChanges()">Save Changes</button>
-    </div>
+
+        <div class="project-section-label" style="margin-top:20px">📧 Emails</div>
+        <div id="modalProjectEmails"><div class="project-emails-loading"><span>Loading…</span></div></div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-delete-project" onclick="deleteCurrentProject()">Delete Project</button>
+        <button class="btn-save-project" onclick="saveProjectChanges()">Save Changes</button>
+      </div>
   </div>
 </div>
 
@@ -1817,7 +1821,7 @@ function renderProjects(){
     const updateCount = (p.updates||[]).length;
     const fileCount = (p.files||[]).length;
     const lastUpdate = updateCount > 0 ? new Date(p.updates[0].date).toLocaleDateString() : 'No updates';
-    return `<div class="project-card" onclick="openProject(${p.id})">
+    return `<div class="project-card" onclick="openProject('${p.id}')">
       <div class="project-card-accent" style="background:${color}"></div>
       <div class="project-card-header">
         <div>
@@ -1874,6 +1878,7 @@ function openProject(id){
 function closeProjectModal(){
   const _cm=document.getElementById('projectModal');_cm.classList.remove('open');_cm.style.display='';
   currentProjectId = null;
+  window._currentProjectId = null;
 }
 
 function renderProjectUpdates(p){
@@ -1902,13 +1907,20 @@ function renderProjectFiles(p){
 }
 
 function openProjectFile(index){
-  const p = projects.find(x => String(x.id) === String(currentProjectId));
+  var p = projects.find(function(x){return String(x.id) === String(currentProjectId);});
   if (!p || !p.files[index] || !p.files[index].data) return;
-  const f = p.files[index];
-  const link = document.createElement('a');
+  var f = p.files[index];
+  var viewable = f.type && (f.type.startsWith("image/") || f.type === "application/pdf");
+  if (viewable) {
+    try { var w = window.open(f.data, "_blank"); if (w) return; } catch(e) {}
+  }
+  var link = document.createElement("a");
   link.href = f.data;
   link.download = f.name;
+  link.style.display = "none";
+  document.body.appendChild(link);
   link.click();
+  setTimeout(function(){ document.body.removeChild(link); }, 500);
 }
 
 function renderFolderLink(p){
