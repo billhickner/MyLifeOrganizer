@@ -313,7 +313,7 @@ input[type=date],input[type=time]{width:100%}
     <div class="logo-icon">P</div>
     <div>
       <div class="logo-text">PulsAIO</div>
-      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.7.9</span></div>
+      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.8.0</span></div>
     </div>
   </div>
   <nav class="nav">
@@ -726,6 +726,8 @@ const save = () => {
 }
 
 function syncTasksToSupabase() {
+  window._taskSyncLock = true;
+  setTimeout(function(){ window._taskSyncLock = false; }, 3000);
   var taskData = JSON.stringify(tasks);
   fetch("/.netlify/functions/get-projects",{method:"POST",headers:{"Content-Type":"application/json"},
     body:JSON.stringify({projects:[{id:"_tasks_data",name:"Tasks Sync Store",biz:"_tasks",status:"active",notes:taskData}]})
@@ -733,6 +735,7 @@ function syncTasksToSupabase() {
 }
 
 function loadTasksFromSupabase(callback) {
+  if(window._taskSyncLock){if(callback)callback();return;}
   fetch("/.netlify/functions/get-projects").then(function(r){return r.json();}).then(function(d){
     var projects = Array.isArray(d) ? d : (d.projects||[]);
     var taskRow = projects.find(function(p){return p.id==="_tasks_data";});
@@ -753,6 +756,8 @@ function loadTasksFromSupabase(callback) {
 }
 
 function syncGoalsToSupabase() {
+  window._goalSyncLock = true;
+  setTimeout(function(){ window._goalSyncLock = false; }, 3000);
   var goalData = JSON.stringify(goals);
   fetch("/.netlify/functions/get-projects",{method:"POST",headers:{"Content-Type":"application/json"},
     body:JSON.stringify({projects:[{id:"_goals_data",name:"Goals Sync Store",biz:"_goals",status:"active",notes:goalData}]})
@@ -760,6 +765,7 @@ function syncGoalsToSupabase() {
 }
 
 function loadGoalsFromSupabase(callback) {
+  if(window._goalSyncLock){if(callback)callback();return;}
   fetch("/.netlify/functions/get-projects").then(function(r){return r.json();}).then(function(d){
     var projs = Array.isArray(d) ? d : (d.projects||[]);
     var goalRow = projs.find(function(p){return p.id==="_goals_data";});
