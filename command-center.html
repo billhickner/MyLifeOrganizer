@@ -1,4 +1,4 @@
-                     <!DOCTYPE html>
+                      <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -313,7 +313,7 @@ input[type=date],input[type=time]{width:100%}
     <div class="logo-icon">P</div>
     <div>
       <div class="logo-text">PulsAIO</div>
-      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.6.5</span></div>
+      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.7.0</span></div>
     </div>
   </div>
   <nav class="nav">
@@ -1321,26 +1321,28 @@ const sendToMax = async (userText) => {
       (typeof getRemindersContext === 'function' ? getRemindersContext() : '') +
       (typeof getProjectsContext === 'function' ? getProjectsContext() : '') +
       (typeof getMemoryContext === 'function' ? getMemoryContext() : '') +
-      '\n\nCURRENT TIME: ' + new Date().toISOString() + ' (local: ' + new Date().toLocaleString() + '). Use this exact time when calculating reminder and calendar event dates.';
+      '\n\nCURRENT TIME: ' + new Date().toISOString() + ' (local: ' + new Date().toLocaleString() + '). Use this exact time when calculating reminder and calendar event dates.\n\nACTION SYSTEM: When the user asks you to add a task, save a memory, create a project, set a goal, or add a reminder, you MUST include an [ACTION] block in your response with valid JSON. Format:\n[ACTION]{"type":"add_task","text":"task description","priority":"high"}[/ACTION]\nSupported types: add_task (with text, category, priority), add_memory (with text, tag), add_goal (with text, category, timeframe), add_project (with name, goal, biz), add_reminder (with text).\nYou can include multiple actions as an array: [ACTION][{"type":"add_task","text":"..."},{"type":"add_memory","text":"..."}][/ACTION]\nAlways include a friendly confirmation message along with the action block.';
 
     const res = await fetch('/.netlify/functions/claude', {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
-        max_tokens: 500,
+        max_tokens: 1000,
         system: sys,
         messages: window.maxChatHistory
       })
     });
     const data = await res.json();
     const reply = data.content?.map(b=>b.text||'').join('') || 'Sorry, try again.';
+    var displayReply = reply.replace(/\[ACTION\][\s\S]*?\[\/ACTION\]/g, '').trim();
     window.maxChatHistory.push({role:'assistant', content:reply});
 
     loadDiv.remove();
+    if(typeof executeMaxActions==="function") executeMaxActions(reply);
     const replyDiv = document.createElement('div');
     replyDiv.style.cssText = 'text-align:left;margin:8px 0';
-    replyDiv.innerHTML = '<span style="background:#f1f5f9;color:#1e293b;padding:8px 14px;border-radius:16px;display:inline-block;max-width:80%;font-size:14px;line-height:1.6">' + reply.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</span>';
+    replyDiv.innerHTML = '<span style="background:#f1f5f9;color:#1e293b;padding:8px 14px;border-radius:16px;display:inline-block;max-width:80%;font-size:14px;line-height:1.6">' + displayReply.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</span>';
     // Check for SCHEDULE_REMINDER tag in reply
     const schedMatch = reply.match(/SCHEDULE_REMINDER:({[^}]+})/);
     // Also detect CREATE_EVENT tag
@@ -2911,6 +2913,39 @@ function editMemory(id) {
   saveMemories();
   renderMemories();
 }
+
+function executeMaxActions(reply) {
+  // Look for JSON action block in Max's response
+  var actionMatch = reply.match(/\[ACTION\](.*?)\[\/ACTION\]/s);
+  if (!actionMatch) return;
+  try {
+    var actions = JSON.parse(actionMatch[1]);
+    if (!Array.isArray(actions)) actions = [actions];
+    actions.forEach(function(a) {
+      switch(a.type) {
+        case 'add_task':
+          tasks.push({id:Date.now()+Math.random(),text:a.text,category:a.category||'general',priority:a.priority||'medium',done:false});
+          save(); renderTasks();
+          break;
+        case 'add_memory':
+          if(typeof addMemory==='function') addMemory(a.text, a.tag||'fact');
+          break;
+        case 'add_goal':
+          goals.push({id:Date.now()+Math.random(),title:a.text,category:a.category||'business',timeframe:a.timeframe||'weekly',progress:0,notes:a.notes||''});
+          save(); renderGoals();
+          break;
+        case 'add_project':
+          projects.unshift({id:Date.now(),name:a.name||a.text,goal:a.goal||'',biz:a.biz||'general',status:a.status||'planning',notes:'',updates:[],files:[],folderPath:null,created:new Date().toISOString()});
+          save(); renderProjects();
+          break;
+        case 'add_reminder':
+          if(typeof reminders!=='undefined'){reminders.push({id:Date.now(),text:a.text,done:false});if(typeof saveReminders==='function')saveReminders();if(typeof renderReminders==='function')renderReminders();}
+          break;
+      }
+    });
+  } catch(e) { console.log('Max action parse error:', e); }
+}
+
 </script>
 
   <!-- PROJECTS TAB -->
