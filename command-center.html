@@ -313,7 +313,7 @@ input[type=date],input[type=time]{width:100%}
     <div class="logo-icon">P</div>
     <div>
       <div class="logo-text">PulsAIO</div>
-      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.7.7</span></div>
+      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.7.8</span></div>
     </div>
   </div>
   <nav class="nav">
@@ -718,6 +718,7 @@ const save = () => {
   localStorage.setItem('pac:pilots', JSON.stringify(pilots));
   localStorage.setItem('pac:goals', JSON.stringify(goals));
   localStorage.setItem('pac:projects', JSON.stringify(projects));
+  localStorage.setItem('pulsaio_projects', JSON.stringify(projects));
   syncProjectsToServer();
   syncPilotsToSupabase();
   syncTasksToSupabase();
@@ -1770,10 +1771,8 @@ let projectFolderHandle = null;
 
 function saveProjects() {
   localStorage.setItem("pac:projects", JSON.stringify(projects));
-  var cleaned = projects.map(function(p){
-    return {id:p.id,name:p.name,goal:p.goal||"",biz:p.biz||"general",status:p.status||"active",notes:p.notes||"",emails:JSON.stringify(p.emails||[]),updates:JSON.stringify(p.updates||[]),files:JSON.stringify(p.files||[])};
-  });
-  fetch("/.netlify/functions/get-projects",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({projects:cleaned,sync:true})}).catch(function(){});
+  localStorage.setItem("pulsaio_projects", JSON.stringify(projects));
+  syncProjectsToServer();
 }
 
 function openCreateProject(prefill){
