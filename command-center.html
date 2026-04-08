@@ -313,7 +313,7 @@ input[type=date],input[type=time]{width:100%}
     <div class="logo-icon">P</div>
     <div>
       <div class="logo-text">PulsAIO</div>
-      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.7.4</span></div>
+      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.7.5</span></div>
     </div>
   </div>
   <nav class="nav">
@@ -786,9 +786,14 @@ function loadProjectsFromSupabase(callback) {
       try {
         var remoteProjects = JSON.parse(blobRow.notes);
         if(Array.isArray(remoteProjects)) {
+          var remoteIds = {};
+          remoteProjects.forEach(function(p){remoteIds[String(p.id)]=true;});
+          var localOnly = projects.filter(function(p){return !remoteIds[String(p.id)];});
           projects.length=0;
           remoteProjects.forEach(function(p){projects.push(p);});
+          localOnly.forEach(function(p){projects.push(p);});
           localStorage.setItem("pac:projects",JSON.stringify(projects));
+          localStorage.setItem("pulsaio_projects",JSON.stringify(projects));
           if(typeof renderProjects==="function") renderProjects();
         }
       } catch(e){}
@@ -1732,6 +1737,7 @@ fetch('/.netlify/functions/get-projects')
       const localOnly = projects.filter(p=>!serverIds.has(String(p.id)));
       projects = [...d.projects, ...localOnly];
       localStorage.setItem('pulsaio_projects', JSON.stringify(projects));
+      localStorage.setItem('pac:projects', JSON.stringify(projects));
       renderProjects();
     }
   }).catch(()=>{});
@@ -2117,12 +2123,14 @@ function toggleEmailExpand(el) {
 
 // Sync projects to Netlify Blobs so Gmail extension can read them
 async function syncProjectsToServer() {
+  window._projectSyncLock = true;
   var projectData = JSON.stringify(projects);
   try {
     await fetch("/.netlify/functions/get-projects",{method:"POST",headers:{"Content-Type":"application/json"},
       body:JSON.stringify({projects:[{id:"_projects_blob",name:"Projects Blob",biz:"_projects",status:"active",notes:projectData}]})
     });
   } catch(e) {}
+  setTimeout(function(){ window._projectSyncLock = false; }, 2000);
 }
 
 
