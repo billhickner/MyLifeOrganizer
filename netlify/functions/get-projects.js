@@ -26,8 +26,11 @@ exports.handler = async (event) => {
     try {
       const r = await fetch(`${SUPA_URL}/rest/v1/projects?order=updated.desc`, { headers: hdrs });
       let data = await r.json();
-      if (event.queryStringParameters && event.queryStringParameters.userOnly === 'true') {
+      // Filter out internal blob rows by default. Pass ?all=true to include them.
+      var includeAll = event.queryStringParameters && event.queryStringParameters.all === 'true';
+      if (!includeAll) {
         data = (Array.isArray(data) ? data : []).filter(function(p) { return !String(p.id).startsWith('_'); });
+      });
       }
       return { statusCode: 200, headers: CORS, body: JSON.stringify({ projects: data }) };
     } catch (e) {
