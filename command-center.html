@@ -313,7 +313,7 @@ input[type=date],input[type=time]{width:100%}
     <div class="logo-icon">P</div>
     <div>
       <div class="logo-text">PulsAIO</div>
-      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.7.3</span></div>
+      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.7.4</span></div>
     </div>
   </div>
   <nav class="nav">
@@ -1571,7 +1571,7 @@ function addReminder(text, project, dateStr) {
   const t = text || inp.value.trim();
   if (!t) return;
   const reminder = {
-    id: Date.now(),
+    id: String(Date.now()),
     text: t,
     project: project || proj.value || 'general',
     date: dateStr || dt.value || null,
@@ -1789,7 +1789,9 @@ function confirmCreateProject(){
     created: new Date().toISOString()
   };
   projects.unshift(project);
+  localStorage.setItem('pulsaio_projects', JSON.stringify(projects));
   save();
+  saveProjects();
   closeCreateProject();
   renderProjects();
   // Auto-open the new project
@@ -1898,7 +1900,7 @@ function renderProjectFiles(p){
 }
 
 function openProjectFile(index){
-  const p = projects.find(x => x.id === currentProjectId);
+  const p = projects.find(x => String(x.id) === String(currentProjectId));
   if (!p || !p.files[index] || !p.files[index].data) return;
   const f = p.files[index];
   const link = document.createElement('a');
@@ -1920,7 +1922,7 @@ async function linkMacFolder(){
   try {
     const handle = await window.showDirectoryPicker({ mode: 'readwrite' });
     projectFolderHandle = handle;
-    const p = projects.find(x => x.id === currentProjectId);
+    const p = projects.find(x => String(x.id) === String(currentProjectId));
     if (p) {
       p.folderPath = handle.name;
       saveProjects();
@@ -1932,7 +1934,7 @@ async function linkMacFolder(){
 }
 
 function unlinkFolder(){
-  const p = projects.find(x => x.id === currentProjectId);
+  const p = projects.find(x => String(x.id) === String(currentProjectId));
   if (p) { p.folderPath = null; saveProjects(); renderFolderLink(p); }
   projectFolderHandle = null;
 }
@@ -1941,7 +1943,7 @@ function addProjectUpdate(){
   const textarea = document.getElementById('modalProjectNotes');
   const text = textarea.value.trim();
   if (!text) return;
-  const p = projects.find(x => x.id === currentProjectId);
+  const p = projects.find(x => String(x.id) === String(currentProjectId));
   if (!p) return;
   if (!p.updates) p.updates = [];
   p.updates.unshift({ date: new Date().toISOString(), text });
@@ -1983,7 +1985,7 @@ function deleteCurrentProject() {
 }
 
 function handleProjectFiles(e){
-  const p = projects.find(x => x.id === currentProjectId);
+  const p = projects.find(x => String(x.id) === String(currentProjectId));
   if (!p) return;
   if (!p.files) p.files = [];
   const fileArr = Array.from(e.target.files);
@@ -2001,7 +2003,7 @@ function handleProjectFiles(e){
 }
 
 function removeProjectFile(index){
-  const p = projects.find(x => x.id === currentProjectId);
+  const p = projects.find(x => String(x.id) === String(currentProjectId));
   if (!p || !p.files) return;
   p.files.splice(index, 1);
   saveProjects();
