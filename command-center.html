@@ -313,7 +313,7 @@ input[type=date],input[type=time]{width:100%}
     <div class="logo-icon">P</div>
     <div>
       <div class="logo-text">PulsAIO</div>
-      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.7.8</span></div>
+      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.7.9</span></div>
     </div>
   </div>
   <nav class="nav">
@@ -783,16 +783,19 @@ function loadProjectsFromSupabase(callback) {
   fetch("/.netlify/functions/get-projects").then(function(r){return r.json();}).then(function(d){
     var projs = Array.isArray(d) ? d : (d.projects||[]);
     var blobRow = projs.find(function(p){return p.id==="_projects_blob";});
-    if(blobRow && blobRow.notes) {
+    if(blobRow && blobRow.notes && blobRow.notes.length > 2) {
       try {
         var remoteProjects = JSON.parse(blobRow.notes);
         if(Array.isArray(remoteProjects)) {
+          var now = Date.now();
           var remoteIds = {};
-          remoteProjects.forEach(function(p){remoteIds[String(p.id)]=true;});
-          var localOnly = projects.filter(function(p){return !remoteIds[String(p.id)];});
+          remoteProjects.forEach(function(rp){remoteIds[String(rp.id)]=true;});
+          var recentLocal = projects.filter(function(p){
+            return !String(p.id).startsWith("_") && !remoteIds[String(p.id)] && p.created && (now - new Date(p.created).getTime()) < 30000;
+          });
           projects.length=0;
           remoteProjects.forEach(function(p){projects.push(p);});
-          localOnly.forEach(function(p){projects.push(p);});
+          recentLocal.forEach(function(p){projects.push(p);});
           localStorage.setItem("pac:projects",JSON.stringify(projects));
           localStorage.setItem("pulsaio_projects",JSON.stringify(projects));
           if(typeof renderProjects==="function") renderProjects();
@@ -1734,20 +1737,18 @@ renderReminders();
 const PROJECT_COLORS = {pulsaio:'#2563eb',unity:'#16a34a',utbsc:'#d97706',personal:'#7c3aed',general:'#64748b'};
 let projects = JSON.parse(localStorage.getItem('pulsaio_projects') || '[]');
 
-// Load from Supabase on any device — always get latest
+// Load from Supabase on any device — blob is source of truth
 fetch('/.netlify/functions/get-projects')
   .then(r=>r.json())
   .then(d=>{
     var projs = Array.isArray(d) ? d : (d.projects||[]);
     var blobRow = projs.find(function(p){return p.id==='_projects_blob';});
-    if(blobRow && blobRow.notes) {
+    if(blobRow && blobRow.notes && blobRow.notes.length > 2) {
       try {
         var remoteProjects = JSON.parse(blobRow.notes);
         if(Array.isArray(remoteProjects)) {
-          var remoteIds = {};
-          remoteProjects.forEach(function(p){remoteIds[String(p.id)]=true;});
-          var localOnly = projects.filter(function(p){return !remoteIds[String(p.id)];});
-          projects = remoteProjects.concat(localOnly);
+          projects.length = 0;
+          remoteProjects.forEach(function(p){projects.push(p);});
           localStorage.setItem('pulsaio_projects', JSON.stringify(projects));
           localStorage.setItem('pac:projects', JSON.stringify(projects));
           renderProjects();
