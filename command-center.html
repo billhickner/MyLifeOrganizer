@@ -1,4 +1,4 @@
-                      <!DOCTYPE html>
+                       <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -313,7 +313,7 @@ input[type=date],input[type=time]{width:100%}
     <div class="logo-icon">P</div>
     <div>
       <div class="logo-text">PulsAIO</div>
-      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.7.0</span></div>
+      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.7.1</span></div>
     </div>
   </div>
   <nav class="nav">
@@ -1321,7 +1321,7 @@ const sendToMax = async (userText) => {
       (typeof getRemindersContext === 'function' ? getRemindersContext() : '') +
       (typeof getProjectsContext === 'function' ? getProjectsContext() : '') +
       (typeof getMemoryContext === 'function' ? getMemoryContext() : '') +
-      '\n\nCURRENT TIME: ' + new Date().toISOString() + ' (local: ' + new Date().toLocaleString() + '). Use this exact time when calculating reminder and calendar event dates.\n\nACTION SYSTEM: When the user asks you to add a task, save a memory, create a project, set a goal, or add a reminder, you MUST include an [ACTION] block in your response with valid JSON. Format:\n[ACTION]{"type":"add_task","text":"task description","priority":"high"}[/ACTION]\nSupported types: add_task (with text, category, priority), add_memory (with text, tag), add_goal (with text, category, timeframe), add_project (with name, goal, biz), add_reminder (with text).\nYou can include multiple actions as an array: [ACTION][{"type":"add_task","text":"..."},{"type":"add_memory","text":"..."}][/ACTION]\nAlways include a friendly confirmation message along with the action block.';
+      '\n\nCURRENT TIME: ' + new Date().toISOString() + ' (local: ' + new Date().toLocaleString() + '). Use this exact time when calculating reminder and calendar event dates.\n\nACTION SYSTEM: When the user asks you to add a task, save a memory, create a project, set a goal, or add a reminder, you MUST include an [ACTION] block in your response with valid JSON. Format:\n[ACTION]{"type":"add_task","text":"task description","priority":"high"}[/ACTION]\nSupported types: add_task (with text, category, priority), add_memory (with text, tag), add_goal (with text, category, timeframe), add_project (with name, goal, biz), add_reminder (with text, time - use ISO format or "2:00 PM" style, REQUIRED if user specifies a time).\nYou can include multiple actions as an array: [ACTION][{"type":"add_task","text":"..."},{"type":"add_memory","text":"..."}][/ACTION]\nAlways include a friendly confirmation message along with the action block.';
 
     const res = await fetch('/.netlify/functions/claude', {
       method: 'POST',
@@ -2939,7 +2939,26 @@ function executeMaxActions(reply) {
           save(); renderProjects();
           break;
         case 'add_reminder':
-          if(typeof reminders!=='undefined'){reminders.push({id:Date.now(),text:a.text,done:false});if(typeof saveReminders==='function')saveReminders();if(typeof renderReminders==='function')renderReminders();}
+          if(typeof reminders!=='undefined'){
+            var remTime = a.time ? new Date(a.time) : null;
+            if(remTime && isNaN(remTime.getTime())){
+              var today = new Date();
+              var timeParts = a.time.match(/(\d{1,2})(?::(\d{2}))?\s*(am|pm)?/i);
+              if(timeParts){
+                var h=parseInt(timeParts[1]),m=parseInt(timeParts[2]||0);
+                if(timeParts[3]&&timeParts[3].toLowerCase()==='pm'&&h<12)h+=12;
+                if(timeParts[3]&&timeParts[3].toLowerCase()==='am'&&h===12)h=0;
+                today.setHours(h,m,0,0);
+                remTime=today;
+              }
+            }
+            reminders.push({id:Date.now(),text:a.text,done:false,time:remTime?remTime.toISOString():null});
+            if(typeof saveReminders==='function')saveReminders();
+            if(typeof renderReminders==='function')renderReminders();
+            if(remTime && typeof scheduleNtfyReminder==='function'){
+              scheduleNtfyReminder(a.text, remTime.toISOString());
+            }
+          }
           break;
       }
     });
