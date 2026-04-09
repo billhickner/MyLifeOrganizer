@@ -314,7 +314,7 @@ input[type=date],input[type=time]{width:100%}
     <div class="logo-icon">P</div>
     <div>
       <div class="logo-text">PulsAIO</div>
-      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.8.6</span></div>
+      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.8.7</span></div>
     </div>
   </div>
   <nav class="nav">
@@ -780,8 +780,30 @@ function loadProjectsFromSupabase(callback) {
           var recentLocal = projects.filter(function(p){
             return !String(p.id).startsWith("_") && !remoteIds[String(p.id)] && p.created && (now - new Date(p.created).getTime()) < 30000;
           });
+          // Preserve local file data (base64) stripped before Supabase sync
+          var localFileMap = {};
+          projects.forEach(function(lp) {
+            if (lp.files && lp.files.length > 0) {
+              var filesWithData = lp.files.filter(function(f){return !!f.data;});
+              if (filesWithData.length > 0) localFileMap[String(lp.id)] = filesWithData;
+            }
+          });
           projects.length=0;
-          remoteProjects.forEach(function(p){projects.push(p);});
+          remoteProjects.forEach(function(p){
+            if (localFileMap[String(p.id)] && p.files) {
+              var localFiles = localFileMap[String(p.id)];
+              p.files = p.files.map(function(rf) {
+                if (!rf.data) {
+                  var lm = localFiles.find(function(lf){return lf.name === rf.name && lf.added === rf.added;});
+                  if (lm) return lm;
+                }
+                return rf;
+              });
+            } else if (localFileMap[String(p.id)] && (!p.files || p.files.length === 0)) {
+              p.files = localFileMap[String(p.id)];
+            }
+            projects.push(p);
+          });
           recentLocal.forEach(function(p){projects.push(p);});
           localStorage.setItem("pac:projects",JSON.stringify(projects));
           localStorage.setItem("pulsaio_projects",JSON.stringify(projects));
