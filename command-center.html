@@ -314,7 +314,7 @@ input[type=date],input[type=time]{width:100%}
     <div class="logo-icon">P</div>
     <div>
       <div class="logo-text">PulsAIO</div>
-      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.9.5</span></div>
+      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.9.6</span></div>
     </div>
   </div>
   <nav class="nav">
@@ -1960,92 +1960,49 @@ function openProjectFile(index){
 function renderFolderLink(p){
   var el = document.getElementById("folderLinkArea");
   if (p.folderPath) {
-    el.innerHTML = '<div class="project-folder-linked"><span onclick="openLinkedFolder()" style="cursor:pointer;color:#2563eb;text-decoration:underline" title="Click to open folder">📂 ' + p.folderPath + '</span> <button onclick="unlinkFolder()" style="background:none;border:none;color:#94a3b8;cursor:pointer;margin-left:auto;font-size:12px">Unlink</button></div>';
+    el.innerHTML = '<div class="project-folder-linked"><span onclick="openLinkedFolder()" style="cursor:pointer;color:#2563eb;text-decoration:underline" title="Click to open in Finder">\ud83d\udcc2 ' + (p.folderDisplay || p.folderPath) + '</span> <button onclick="unlinkFolder()" style="background:none;border:none;color:#94a3b8;cursor:pointer;margin-left:auto;font-size:12px">Unlink</button></div>';
   } else {
-    el.innerHTML = '<button class="project-link-folder" onclick="linkMacFolder()">📂 Link Mac Folder to this Project</button>';
+    el.innerHTML = '<button class="project-link-folder" onclick="linkMacFolder()">\ud83d\udcc2 Link Mac Folder to this Project</button>';
   }
 }
 
 async function linkMacFolder(){
   try {
-    var handle = await window.showDirectoryPicker({mode: "readwrite"});
+    var handle = await window.showDirectoryPicker({mode: "read"});
+    var guessPath = "/Users/williamhickner/" + handle.name;
+    var fullPath = prompt("Folder selected: " + handle.name + "\n\nConfirm or edit the full path so clicking it opens Finder:", guessPath);
+    if (!fullPath || !fullPath.trim()) return;
+    fullPath = fullPath.trim();
+    if (fullPath.endsWith("/")) fullPath = fullPath.slice(0, -1);
     var p = projects.find(function(x){return String(x.id) === String(currentProjectId);});
     if (p) {
-      p.folderPath = handle.name;
+      p.folderPath = fullPath;
+      p.folderDisplay = handle.name;
       saveProjects();
       renderFolderLink(p);
-      _saveFolderHandle(String(p.id), handle);
     }
   } catch(e) {
     if (e.name !== "AbortError") alert("Could not link folder: " + e.message);
   }
 }
 
-async function openLinkedFolder() {
+function openLinkedFolder() {
   var p = projects.find(function(x){return String(x.id) === String(currentProjectId);});
   if (!p || !p.folderPath) return;
-  var handle = await _loadFolderHandle(String(p.id));
-  if (handle) {
-    try {
-      var perm = await handle.requestPermission({mode: "readwrite"});
-      if (perm === "granted") {
-        await window.showDirectoryPicker({startIn: handle, mode: "readwrite"});
-        return;
-      }
-    } catch(e) {
-      if (e.name === "AbortError") return;
-    }
-  }
-  try {
-    var newHandle = await window.showDirectoryPicker({mode: "readwrite"});
-    p.folderPath = newHandle.name;
-    saveProjects();
-    renderFolderLink(p);
-    _saveFolderHandle(String(p.id), newHandle);
-  } catch(e) {
-    if (e.name !== "AbortError") alert("Could not open folder: " + e.message);
+  var url = "file://" + p.folderPath.split("/").map(encodeURIComponent).join("/");
+  var w = window.open(url);
+  if (!w) {
+    navigator.clipboard.writeText(p.folderPath).then(function(){
+      showToast("Path copied! Open Finder > Cmd+Shift+G > paste");
+    }).catch(function(){
+      prompt("Copy this path, then in Finder press Cmd+Shift+G and paste:", p.folderPath);
+    });
   }
 }
 
 function unlinkFolder(){
   var p = projects.find(function(x){return String(x.id) === String(currentProjectId);});
-  if (p) { p.folderPath = null; saveProjects(); renderFolderLink(p); }
-  _deleteFolderHandle(String(currentProjectId));
-}
-
-function _saveFolderHandle(projectId, handle) {
-  var req = indexedDB.open("pulsaio_folders", 1);
-  req.onupgradeneeded = function(e) { e.target.result.createObjectStore("handles"); };
-  req.onsuccess = function(e) {
-    var db = e.target.result;
-    var tx = db.transaction("handles", "readwrite");
-    tx.objectStore("handles").put(handle, projectId);
-  };
-}
-
-function _loadFolderHandle(projectId) {
-  return new Promise(function(resolve) {
-    var req = indexedDB.open("pulsaio_folders", 1);
-    req.onupgradeneeded = function(e) { e.target.result.createObjectStore("handles"); };
-    req.onsuccess = function(e) {
-      var db = e.target.result;
-      var tx = db.transaction("handles", "readonly");
-      var getReq = tx.objectStore("handles").get(projectId);
-      getReq.onsuccess = function() { resolve(getReq.result || null); };
-      getReq.onerror = function() { resolve(null); };
-    };
-    req.onerror = function() { resolve(null); };
-  });
-}
-
-function _deleteFolderHandle(projectId) {
-  var req = indexedDB.open("pulsaio_folders", 1);
-  req.onupgradeneeded = function(e) { e.target.result.createObjectStore("handles"); };
-  req.onsuccess = function(e) {
-    var db = e.target.result;
-    var tx = db.transaction("handles", "readwrite");
-    tx.objectStore("handles").delete(projectId);
-  };
+  if (p) { p.folderPath = null; p.folderDisplay = null; saveProjects(); renderFolderLink(p); }
 }
 
 function addProjectUpdate(){
