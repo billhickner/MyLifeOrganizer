@@ -314,7 +314,7 @@ input[type=date],input[type=time]{width:100%}
     <div class="logo-icon">P</div>
     <div>
       <div class="logo-text">PulsAIO</div>
-      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.8.5</span></div>
+      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.8.6</span></div>
     </div>
   </div>
   <nav class="nav">
@@ -2095,7 +2095,7 @@ async function renderProjectEmails(p) {
     }
     el.innerHTML = '<div class="project-emails-list">' + emails.map(function(e,i) {
       return '<div class="project-email-item" onclick="toggleEmailExpand(this)">' +
-        '<div class="project-email-subject">' + (e.subject || "(No subject)") + '</div>' +
+        '<div style="display:flex;justify-content:space-between;align-items:flex-start"><div class="project-email-subject" style="flex:1">' + (e.subject || "(No subject)") + '</div><button onclick="event.stopPropagation();unlinkEmail(' + e.id + ')" style="background:none;border:none;color:#94a3b8;cursor:pointer;font-size:14px;padding:2px 6px;flex-shrink:0" title="Remove email">\u2715</button></div>' +
         '<div class="project-email-meta">' +
           '<span>\ud83d\udc64 ' + (e.sender_name || e.senderName || e.sender || "Unknown") + '</span>' +
           (e.date ? '<span>\ud83d\udcc5 ' + e.date + '</span>' : '') +
@@ -2113,6 +2113,21 @@ async function renderProjectEmails(p) {
 
 function toggleEmailExpand(el) {
   el.classList.toggle('expanded');
+}
+
+async function unlinkEmail(emailId) {
+  if (!confirm('Remove this email from the project?')) return;
+  try {
+    await fetch('/.netlify/functions/get-emails', {
+      method: 'DELETE',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({id: emailId})
+    });
+    var p = projects.find(function(x){return String(x.id) === String(currentProjectId);});
+    if (p) renderProjectEmails(p);
+  } catch(e) {
+    alert('Could not remove email: ' + e.message);
+  }
 }
 
 // Sync projects to Netlify Blobs so Gmail extension can read them
