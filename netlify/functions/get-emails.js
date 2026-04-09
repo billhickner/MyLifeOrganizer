@@ -5,12 +5,27 @@ const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsI
 const CORS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'Content-Type',
-  'Access-Control-Allow-Methods': 'GET, OPTIONS',
+  'Access-Control-Allow-Methods': 'GET, DELETE, OPTIONS',
   'Content-Type': 'application/json'
 };
 
 exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: CORS, body: '' };
+
+  // DELETE: Remove an email by ID
+  if (event.httpMethod === 'DELETE') {
+    try {
+      const { id } = JSON.parse(event.body || '{}');
+      if (!id) return { statusCode: 400, headers: CORS, body: JSON.stringify({ error: 'id required' }) };
+      await fetch(SUPA_URL + '/rest/v1/emails?id=eq.' + id, {
+        method: 'DELETE',
+        headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY }
+      });
+      return { statusCode: 200, headers: CORS, body: JSON.stringify({ success: true, deleted: id }) };
+    } catch(e) {
+      return { statusCode: 500, headers: CORS, body: JSON.stringify({ error: e.message }) };
+    }
+  }
 
   try {
     const projectId = event.queryStringParameters?.projectId;
