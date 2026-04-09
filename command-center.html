@@ -314,7 +314,7 @@ input[type=date],input[type=time]{width:100%}
     <div class="logo-icon">P</div>
     <div>
       <div class="logo-text">PulsAIO</div>
-      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.8.9</span></div>
+      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.9.0</span></div>
     </div>
   </div>
   <nav class="nav">
@@ -1946,132 +1946,43 @@ function openProjectFile(index){
 }
 
 function renderFolderLink(p){
-  const el = document.getElementById('folderLinkArea');
+  var el = document.getElementById("folderLinkArea");
   if (p.folderPath) {
-    el.innerHTML = `<div class="project-folder-linked"><span onclick="openLinkedFolder()" style="cursor:pointer;color:#2563eb;text-decoration:underline" title="Click to open folder">📂 ${p.folderPath}</span> <button onclick="unlinkFolder()" style="background:none;border:none;color:#94a3b8;cursor:pointer;margin-left:auto;font-size:12px">Unlink</button></div>`;
+    var displayName = p.folderPath.split("/").pop() || p.folderPath;
+    el.innerHTML = '<div class="project-folder-linked"><span onclick="openLinkedFolder()" style="cursor:pointer;color:#2563eb;text-decoration:underline" title="Click to open in Finder">\ud83d\udcc2 ' + displayName + '</span> <button onclick="unlinkFolder()" style="background:none;border:none;color:#94a3b8;cursor:pointer;margin-left:auto;font-size:12px">Unlink</button></div>';
   } else {
-    el.innerHTML = `<button class="project-link-folder" onclick="linkMacFolder()">📂 Link Mac Folder to this Project</button>`;
+    el.innerHTML = '<button class="project-link-folder" onclick="linkMacFolder()">\ud83d\udcc2 Link Mac Folder to this Project</button>';
   }
 }
 
-async function linkMacFolder(){
-  try {
-    const handle = await window.showDirectoryPicker({ mode: 'readwrite' });
-    projectFolderHandle = handle;
-    const p = projects.find(x => String(x.id) === String(currentProjectId));
-    if (p) {
-      p.folderPath = handle.name;
-      saveProjects();
-      renderFolderLink(p);
-      saveFolderHandle(String(p.id), handle);
-    }
-  } catch(e) {
-    if (e.name !== 'AbortError') alert('Could not link folder: ' + e.message);
+function linkMacFolder(){
+  var folderPath = prompt("Enter the full Mac folder path:\n\nExample: /Users/williamhickner/Desktop/MyFolder\n\nTip: In Finder, right-click the folder > Get Info to see the path,\nor drag the folder into Terminal to get the path.");
+  if (!folderPath || !folderPath.trim()) return;
+  folderPath = folderPath.trim();
+  if (folderPath.startsWith("~")) folderPath = "/Users/williamhickner" + folderPath.substring(1);
+  if (folderPath.endsWith("/")) folderPath = folderPath.slice(0, -1);
+  var p = projects.find(function(x){return String(x.id) === String(currentProjectId);});
+  if (p) {
+    p.folderPath = folderPath;
+    saveProjects();
+    renderFolderLink(p);
   }
+}
+
+function openLinkedFolder() {
+  var p = projects.find(function(x){return String(x.id) === String(currentProjectId);});
+  if (!p || !p.folderPath) return;
+  var folderUrl = "file://" + encodeURI(p.folderPath).replace(/#/g, "%23");
+  window.open(folderUrl, "_blank");
 }
 
 function unlinkFolder(){
-  const p = projects.find(x => String(x.id) === String(currentProjectId));
+  var p = projects.find(function(x){return String(x.id) === String(currentProjectId);});
   if (p) { p.folderPath = null; saveProjects(); renderFolderLink(p); }
-  projectFolderHandle = null;
+}rojectFolderHandle = null;
 }
 
-async function openLinkedFolder() {
-  var projId = String(currentProjectId);
-  var handle = await loadFolderHandle(projId);
-  if (handle) {
-    try {
-      var perm = await handle.requestPermission({mode: "readwrite"});
-      if (perm === "granted") {
-        var files = [];
-        for await (var entry of handle.values()) {
-          files.push({name: entry.name, kind: entry.kind});
-        }
-        files.sort(function(a,b){return a.name.localeCompare(b.name);});
-        showFolderContents(handle, files);
-        return;
-      }
-    } catch(e) {}
-  }
-  try {
-    var newHandle = await window.showDirectoryPicker({mode: "readwrite"});
-    projectFolderHandle = newHandle;
-    saveFolderHandle(projId, newHandle);
-    var p = projects.find(function(x){return String(x.id) === projId;});
-    if (p) { p.folderPath = newHandle.name; saveProjects(); renderFolderLink(p); }
-    var files = [];
-    for await (var entry of newHandle.values()) {
-      files.push({name: entry.name, kind: entry.kind});
-    }
-    files.sort(function(a,b){return a.name.localeCompare(b.name);});
-    showFolderContents(newHandle, files);
-  } catch(e) {
-    if (e.name !== "AbortError") alert("Could not open folder: " + e.message);
-  }
-}
 
-function showFolderContents(handle, files) {
-  var existing = document.getElementById("folderContentsPopup");
-  if (existing) existing.remove();
-  var html = '<div id="folderContentsPopup" style="position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:2000;display:flex;align-items:center;justify-content:center" onclick="if(event.target===this)this.remove()">';
-  html += '<div style="background:white;border-radius:14px;padding:24px;width:480px;max-width:90vw;max-height:70vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.3)">';
-  html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><div style="font-size:16px;font-weight:700;color:#1e293b">\ud83d\udcc2 ' + handle.name + '</div><button onclick="this.closest(\x27#folderContentsPopup\x27).remove()" style="background:none;border:none;font-size:18px;cursor:pointer;color:#94a3b8">\u2715</button></div>';
-  if (files.length === 0) {
-    html += '<div style="color:#94a3b8;font-size:13px;padding:12px 0">Folder is empty</div>';
-  } else {
-    files.forEach(function(f) {
-      var icon = f.kind === "directory" ? "\ud83d\udcc1" : "\ud83d\udcc4";
-      var clickAttr = f.kind === "file" ? " onclick=\"downloadFolderFile(this.dataset.fn)\" data-fn=\"" + f.name.replace(/"/g,"&quot;") + "\"" : "";
-      html += '<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:6px;cursor:' + (f.kind === "file" ? "pointer" : "default") + ';font-size:13px;color:#334155;border-bottom:1px solid #f1f5f9"' + clickAttr + '>' + icon + " " + f.name + '</div>';
-    });
-  }
-  html += '</div></div>';
-  document.body.insertAdjacentHTML("beforeend", html);
-  window._currentFolderHandle = handle;
-}
-
-async function downloadFolderFile(fileName) {
-  try {
-    var handle = window._currentFolderHandle;
-    if (!handle) return;
-    var fileHandle = await handle.getFileHandle(fileName);
-    var file = await fileHandle.getFile();
-    var url = URL.createObjectURL(file);
-    var a = document.createElement("a");
-    a.href = url;
-    a.download = fileName;
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(url); }, 500);
-  } catch(e) {
-    alert("Could not open file: " + e.message);
-  }
-}
-
-function saveFolderHandle(projectId, handle) {
-  var req = indexedDB.open("pulsaio_folders", 1);
-  req.onupgradeneeded = function(e) { e.target.result.createObjectStore("handles"); };
-  req.onsuccess = function(e) {
-    var db = e.target.result;
-    var tx = db.transaction("handles", "readwrite");
-    tx.objectStore("handles").put(handle, projectId);
-  };
-}
-
-function loadFolderHandle(projectId) {
-  return new Promise(function(resolve) {
-    var req = indexedDB.open("pulsaio_folders", 1);
-    req.onupgradeneeded = function(e) { e.target.result.createObjectStore("handles"); };
-    req.onsuccess = function(e) {
-      var db = e.target.result;
-      var tx = db.transaction("handles", "readonly");
-      var getReq = tx.objectStore("handles").get(projectId);
-      getReq.onsuccess = function() { resolve(getReq.result || null); };
-      getReq.onerror = function() { resolve(null); };
-    };
-    req.onerror = function() { resolve(null); };
-  });
-}
 
 function addProjectUpdate(){
   const textarea = document.getElementById('modalProjectNotes');
