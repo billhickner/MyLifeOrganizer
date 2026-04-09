@@ -1782,6 +1782,14 @@ fetch('/.netlify/functions/memory')
 window.currentProjectId = null;
 let projectFolderHandle = null;
 
+function showToast(msg) {
+  var t = document.createElement("div");
+  t.textContent = msg;
+  t.style.cssText = "position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#1e293b;color:white;padding:12px 24px;border-radius:10px;font-size:14px;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,0.3);transition:opacity 0.3s";
+  document.body.appendChild(t);
+  setTimeout(function(){ t.style.opacity = "0"; setTimeout(function(){ t.remove(); }, 300); }, 3000);
+}
+
 function saveProjects() {
   localStorage.setItem("pac:projects", JSON.stringify(projects));
   localStorage.setItem("pulsaio_projects", JSON.stringify(projects));
