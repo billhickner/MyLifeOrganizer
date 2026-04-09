@@ -314,7 +314,7 @@ input[type=date],input[type=time]{width:100%}
     <div class="logo-icon">P</div>
     <div>
       <div class="logo-text">PulsAIO</div>
-      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.9.1</span></div>
+      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.9.2</span></div>
     </div>
   </div>
   <nav class="nav">
@@ -1948,9 +1948,9 @@ function openProjectFile(index){
 function renderFolderLink(p){
   var el = document.getElementById("folderLinkArea");
   if (p.folderPath) {
-    el.innerHTML = '<div class="project-folder-linked"><span onclick="openLinkedFolder()" style="cursor:pointer;color:#2563eb;text-decoration:underline" title="Click to open folder">\\ud83d\\udcc2 ' + p.folderPath + '</span> <button onclick="unlinkFolder()" style="background:none;border:none;color:#94a3b8;cursor:pointer;margin-left:auto;font-size:12px">Unlink</button></div>';
+    el.innerHTML = '<div class="project-folder-linked"><span onclick="openLinkedFolder()" style="cursor:pointer;color:#2563eb;text-decoration:underline" title="Click to open folder">📂 ' + p.folderPath + '</span> <button onclick="unlinkFolder()" style="background:none;border:none;color:#94a3b8;cursor:pointer;margin-left:auto;font-size:12px">Unlink</button></div>';
   } else {
-    el.innerHTML = '<button class="project-link-folder" onclick="linkMacFolder()">\\ud83d\\udcc2 Link Mac Folder to this Project</button>';
+    el.innerHTML = '<button class="project-link-folder" onclick="linkMacFolder()">📂 Link Mac Folder to this Project</button>';
   }
 }
 
@@ -1977,8 +1977,15 @@ async function openLinkedFolder() {
     try {
       var perm = await handle.requestPermission({mode: "readwrite"});
       if (perm === "granted") {
-        var reHandle = await window.showDirectoryPicker({id: "proj_" + p.id, startIn: handle, mode: "readwrite"});
-        _saveFolderHandle(String(p.id), reHandle);
+        var files = [];
+        for await (var entry of handle.values()) {
+          files.push({name: entry.name, kind: entry.kind});
+        }
+        files.sort(function(a,b){
+          if (a.kind !== b.kind) return a.kind === "directory" ? -1 : 1;
+          return a.name.localeCompare(b.name);
+        });
+        _showFolderPopup(handle, files);
         return;
       }
     } catch(e) {}
@@ -1991,6 +1998,63 @@ async function openLinkedFolder() {
     _saveFolderHandle(String(p.id), newHandle);
   } catch(e) {
     if (e.name !== "AbortError") alert("Could not open folder: " + e.message);
+  }
+}
+
+function _showFolderPopup(handle, files) {
+  var existing = document.getElementById("folderPopup");
+  if (existing) existing.remove();
+  var d = document.createElement("div");
+  d.id = "folderPopup";
+  d.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:2000;display:flex;align-items:center;justify-content:center";
+  d.onclick = function(e){if(e.target===d)d.remove();};
+  var inner = document.createElement("div");
+  inner.style.cssText = "background:white;border-radius:14px;padding:24px;width:500px;max-width:90vw;max-height:70vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.3)";
+  var header = document.createElement("div");
+  header.style.cssText = "display:flex;justify-content:space-between;align-items:center;margin-bottom:16px";
+  var title = document.createElement("div");
+  title.style.cssText = "font-size:16px;font-weight:700;color:#1e293b";
+  title.textContent = "\ud83d\udcc2 " + handle.name;
+  header.appendChild(title);
+  var closeBtn = document.createElement("button");
+  closeBtn.textContent = "\u2715";
+  closeBtn.style.cssText = "background:none;border:none;font-size:18px;cursor:pointer;color:#94a3b8";
+  closeBtn.onclick = function(){d.remove();};
+  header.appendChild(closeBtn);
+  inner.appendChild(header);
+  if (files.length === 0) {
+    var empty = document.createElement("div");
+    empty.style.cssText = "color:#94a3b8;font-size:13px;padding:12px 0";
+    empty.textContent = "Folder is empty";
+    inner.appendChild(empty);
+  } else {
+    files.forEach(function(f) {
+      var row = document.createElement("div");
+      row.style.cssText = "display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:6px;font-size:13px;color:#334155;border-bottom:1px solid #f1f5f9";
+      var icon = f.kind === "directory" ? "\ud83d\udcc1" : "\ud83d\udcc4";
+      row.textContent = icon + " " + f.name;
+      if (f.kind === "file") {
+        row.style.cursor = "pointer";
+        row.onmouseover = function(){row.style.background="#f1f5f9";};
+        row.onmouseout = function(){row.style.background="";};
+        row.onclick = function(){_openFolderFile(handle, f.name);};
+      }
+      inner.appendChild(row);
+    });
+  }
+  d.appendChild(inner);
+  document.body.appendChild(d);
+}
+
+async function _openFolderFile(dirHandle, fileName) {
+  try {
+    var fileHandle = await dirHandle.getFileHandle(fileName);
+    var file = await fileHandle.getFile();
+    var url = URL.createObjectURL(file);
+    window.open(url, "_blank");
+    setTimeout(function(){URL.revokeObjectURL(url);}, 60000);
+  } catch(e) {
+    alert("Could not open file: " + e.message);
   }
 }
 
