@@ -314,7 +314,7 @@ input[type=date],input[type=time]{width:100%}
     <div class="logo-icon">P</div>
     <div>
       <div class="logo-text">PulsAIO</div>
-      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.9.2</span></div>
+      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.9.3</span></div>
     </div>
   </div>
   <nav class="nav">
@@ -1312,7 +1312,7 @@ const callClaude = async (prompt, system='') => {
 const maxContext = () => {
   const openT = tasks.filter(t=>!t.done).map(t=>t.text).join(', ')||'none';
   const pilotS = pilots.map(p=>`${p.name}: ${p.status} ${p.progress}%`).join(', ');
-  return `You are Max, Bill Hickner's AI assistant built into his PulsAIO Command Center. Bill is an entrepreneur running PulsAIO (wholesale AIO platform, 4 pilot stores to launch by May 14 2026, target $25K/month revenue), Unity Controls, and UTBSC TAB. Key team: Ron Snider (CEO), Nate Essin (Shop Supervisor). Open tasks: ${openT}. Jobs: ${pilotS}. ${DAYS_LEFT} days to pilot deadline. Be concise, direct, and entrepreneurial. Keep voice responses under 3 sentences.\n\nWhen the user asks you to remind them of something at a specific time, you MUST include this EXACT tag at the end of your response (after your normal text): SCHEDULE_REMINDER:{"message":"brief reminder text","dueDate":"ISO8601_datetime"}. When user asks to add a calendar event, include CREATE_EVENT:{"title":"event name","date":"YYYY-MM-DD","time":"HH:MM","category":"general","location":"","notes":""} at the end of your response. Calculate the ISO date from the current time.  Example: if user says remind me in 5 minutes, output SCHEDULE_REMINDER:{"message":"the reminder","dueDate":"2026-04-02T21:39:11.509Z"}. Always include this tag when scheduling reminders - it is how the system actually fires the notification.`;
+  return `You are Max, Bill Hickner's AI assistant built into his PulsAIO Command Center. Bill is an entrepreneur running PulsAIO (wholesale AIO platform, 4 pilot stores to launch by May 14 2026, target $25K/month revenue), Unity Controls, and UTBSC TAB. Key team: Ron Snider (CEO), Nate Essin (Shop Supervisor). Open tasks: ${openT}. Jobs: ${pilotS}. ${DAYS_LEFT} days to pilot deadline. Be concise, direct, and entrepreneurial. Keep voice responses under 3 sentences.\n\nWhen the user asks you to remind them of something at a specific time, you MUST include this EXACT tag at the end of your response (after your normal text): SCHEDULE_REMINDER:{"message":"brief reminder text","dueDate":"ISO8601_datetime"}. When user asks to add calendar events, include one CREATE_EVENT tag per event. Format: CREATE_EVENT:{"title":"event name","date":"YYYY-MM-DD","time":"HH:MM","allDay":true,"category":"general","location":"","notes":""}. IMPORTANT: Use the EXACT dates the user specifies, do NOT default to today. For date ranges like April 10-14, use the START date 2026-04-10. You CAN output MULTIPLE CREATE_EVENT tags in one response to add many events at once.  Example: if user says remind me in 5 minutes, output SCHEDULE_REMINDER:{"message":"the reminder","dueDate":"2026-04-02T21:39:11.509Z"}. Always include this tag when scheduling reminders - it is how the system actually fires the notification.`;
 };
 
 const sendToMax = async (userText) => {
@@ -1369,32 +1369,36 @@ const sendToMax = async (userText) => {
     replyDiv.innerHTML = '<span style="background:#f1f5f9;color:#1e293b;padding:8px 14px;border-radius:16px;display:inline-block;max-width:80%;font-size:14px;line-height:1.6">' + displayReply.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</span>';
     // Check for SCHEDULE_REMINDER tag in reply
     const schedMatch = reply.match(/SCHEDULE_REMINDER:({[^}]+})/);
-    // Also detect CREATE_EVENT tag
-    const eventMatch = reply.match(/CREATE_EVENT:({[^}]+})/);
-    if(eventMatch) {
+    // Detect all CREATE_EVENT tags (supports multiple events)
+    var eventMatches = reply.match(/CREATE_EVENT:\{[^}]+\}/g) || [];
+    var eventsAdded = 0;
+    eventMatches.forEach(function(match, idx) {
       try {
-        const ev = JSON.parse(eventMatch[1]);
-        const newEvt = {
-          id: 'p'+Date.now(),
-          title: ev.title || 'New Event',
-          date: ev.date || new Date().toISOString().split('T')[0],
-          time: ev.time || '',
-          category: ev.category || 'general',
-          location: ev.location || '',
-          notes: ev.notes || '',
-          source: 'personal'
+        var jsonStr = match.replace("CREATE_EVENT:", "");
+        var ev = JSON.parse(jsonStr);
+        var newEvt = {
+          id: "p" + Date.now() + "_" + idx,
+          title: ev.title || "New Event",
+          date: ev.date || new Date().toISOString().split("T")[0],
+          time: ev.time || "",
+          allDay: ev.allDay !== false,
+          category: ev.category || "general",
+          location: ev.location || "",
+          notes: ev.notes || "",
+          source: "personal"
         };
         myEvents.push(newEvt);
-        localStorage.setItem('cal:myevents', JSON.stringify(myEvents));
-        // Push to Supabase
-        const clean = (({id,title,date,time,category,location,notes,source})=>({id,title,date,time:time||'',category:category||'general',location:location||'',notes:notes||'',source:source||'personal'}))(newEvt);
-        fetch('/.netlify/functions/get-events',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({events:[clean]})}).catch(()=>{});
-        // Also post to Google Calendar if authorized
-        if(typeof postToGoogleCalendar === 'function') postToGoogleCalendar(newEvt).catch(()=>{});
-        renderCalendar();
-        // Show confirmation toast
-        showToast('Event added: ' + newEvt.title + ' on ' + newEvt.date);
-      } catch(e) { console.log('CREATE_EVENT parse error:', e); }
+        var clean = {id:newEvt.id,title:newEvt.title,date:newEvt.date,time:newEvt.time||"",category:newEvt.category||"general",location:newEvt.location||"",notes:newEvt.notes||"",source:"personal"};
+        fetch("/.netlify/functions/get-events",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({events:[clean]})}).catch(function(){});
+        if(typeof postToGoogleCalendar === "function") postToGoogleCalendar(newEvt).catch(function(){});
+        eventsAdded++;
+      } catch(e) { console.log("CREATE_EVENT parse error:", e); }
+    });
+    if (eventsAdded > 0) {
+      localStorage.setItem("cal:myevents", JSON.stringify(myEvents));
+      renderCalendar();
+      showToast(eventsAdded + " event" + (eventsAdded > 1 ? "s" : "") + " added to calendar");
+    }
     // ADD_NOTE handler
     const noteMatch = reply.match(/ADD_NOTE:\{([^}]+)\}/);
     if (noteMatch) {
