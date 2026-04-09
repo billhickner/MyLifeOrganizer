@@ -314,7 +314,7 @@ input[type=date],input[type=time]{width:100%}
     <div class="logo-icon">P</div>
     <div>
       <div class="logo-text">PulsAIO</div>
-      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.9.7</span></div>
+      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.9.8</span></div>
     </div>
   </div>
   <nav class="nav">
@@ -1969,70 +1969,54 @@ function renderFolderLink(p){
 async function linkMacFolder(){
   try {
     var handle = await window.showDirectoryPicker();
+    var defaultPath = "/Users/williamhickner/Documents/" + handle.name;
+    var fullPath = prompt("Great! Now enter the full path to this folder so we can open it in Finder later.\n\nTip: Open Terminal, type: open \n(with a space after open), then drag the folder from Finder into Terminal. Copy the path shown.\n\nFolder name: " + handle.name, defaultPath);
+    if (!fullPath || !fullPath.trim()) fullPath = handle.name;
+    fullPath = fullPath.trim().replace(/\/+$/, "");
     var p = projects.find(function(x){return String(x.id) === String(currentProjectId);});
     if (p) {
-      p.folderPath = handle.name;
+      p.folderPath = fullPath;
       saveProjects();
       renderFolderLink(p);
-      _saveFolderHandle(String(p.id), handle);
     }
   } catch(e) {
     if (e.name !== "AbortError") alert("Could not link folder: " + e.message);
   }
 }
 
-async function openLinkedFolder() {
+function openLinkedFolder() {
   var p = projects.find(function(x){return String(x.id) === String(currentProjectId);});
   if (!p || !p.folderPath) return;
-  var handle = await _loadFolderHandle(String(p.id));
-  if (handle) {
+  var path = p.folderPath;
+  if (path.startsWith("/")) {
+    var iframe = document.createElement("iframe");
+    iframe.style.display = "none";
+    iframe.src = "file://" + path;
+    document.body.appendChild(iframe);
+    setTimeout(function(){ document.body.removeChild(iframe); }, 2000);
+    try { window.open("file://" + path); } catch(e) {}
     try {
-      await handle.requestPermission({mode: "read"});
-      await window.showDirectoryPicker({startIn: handle});
-      return;
-    } catch(e) {
-      if (e.name === "AbortError") return;
-    }
+      var a = document.createElement("a");
+      a.href = "file://" + path;
+      a.target = "_blank";
+      a.rel = "noopener";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    } catch(e) {}
   }
-  try {
-    var nh = await window.showDirectoryPicker();
-    p.folderPath = nh.name;
-    saveProjects();
-    renderFolderLink(p);
-    _saveFolderHandle(String(p.id), nh);
-  } catch(e) {
-    if (e.name !== "AbortError") alert("Could not open folder: " + e.message);
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(path).then(function(){
+      showToast("\ud83d\udcc2 Path copied! In Finder: Cmd+Shift+G \u2192 paste \u2192 Go");
+    });
   }
 }
 
 function unlinkFolder(){
   var p = projects.find(function(x){return String(x.id) === String(currentProjectId);});
   if (p) { p.folderPath = null; saveProjects(); renderFolderLink(p); }
-  _deleteFolderHandle(String(currentProjectId));
 }
 
-function _saveFolderHandle(pid, handle) {
-  var r = indexedDB.open("pulsaio_folders", 1);
-  r.onupgradeneeded = function(e) { e.target.result.createObjectStore("handles"); };
-  r.onsuccess = function(e) { e.target.result.transaction("handles","readwrite").objectStore("handles").put(handle, pid); };
-}
-function _loadFolderHandle(pid) {
-  return new Promise(function(res) {
-    var r = indexedDB.open("pulsaio_folders", 1);
-    r.onupgradeneeded = function(e) { e.target.result.createObjectStore("handles"); };
-    r.onsuccess = function(e) {
-      var g = e.target.result.transaction("handles","readonly").objectStore("handles").get(pid);
-      g.onsuccess = function() { res(g.result || null); };
-      g.onerror = function() { res(null); };
-    };
-    r.onerror = function() { res(null); };
-  });
-}
-function _deleteFolderHandle(pid) {
-  var r = indexedDB.open("pulsaio_folders", 1);
-  r.onupgradeneeded = function(e) { e.target.result.createObjectStore("handles"); };
-  r.onsuccess = function(e) { e.target.result.transaction("handles","readwrite").objectStore("handles").delete(pid); };
-}
 
 
 function addProjectUpdate(){
