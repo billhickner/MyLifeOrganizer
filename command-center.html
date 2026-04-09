@@ -314,7 +314,7 @@ input[type=date],input[type=time]{width:100%}
     <div class="logo-icon">P</div>
     <div>
       <div class="logo-text">PulsAIO</div>
-      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.8.4</span></div>
+      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.8.5</span></div>
     </div>
   </div>
   <nav class="nav">
@@ -569,7 +569,7 @@ input[type=date],input[type=time]{width:100%}
       <button class="btn-add-update" onclick="document.getElementById('pilotFileInput').click()" style="margin-top:8px">＋ Attach File</button>
 
         <div class="project-section-label" style="margin-top:20px">📧 Emails</div>
-        <div id="modalProjectEmails"><div class="project-emails-loading"><span>Loading…</span></div></div>
+        <div id="pilotModalEmails"><div class="project-emails-loading"><span>Loading…</span></div></div>
       </div>
       <div class="modal-actions">
         <button class="btn-delete-project" onclick="deleteCurrentProject()">Delete Project</button>
@@ -3022,11 +3022,11 @@ function executeMaxActions(reply) {
         <div class="project-files-area" id="modalProjectFiles"></div>
         <input type="file" id="projectFileInput" multiple style="display:none" onchange="handleProjectFiles(event)">
         <button class="btn-add-update" onclick="document.getElementById('projectFileInput').click()" style="margin-top:8px">＋ Attach File</button>
-      </div>
-      
+
         <div class="project-section-label" style="margin-top:20px">📧 Emails</div>
         <div id="modalProjectEmails"><div class="project-emails-loading"><span>Loading…</span></div></div>
-<div class="modal-actions">
+      </div>
+      <div class="modal-actions">
         <button class="btn-delete-project" onclick="deleteCurrentProject()">Delete Project</button>
         <button class="btn-save-project" onclick="saveProjectChanges()">Save Changes</button>
       </div>
