@@ -314,7 +314,7 @@ input[type=date],input[type=time]{width:100%}
     <div class="logo-icon">P</div>
     <div>
       <div class="logo-text">PulsAIO</div>
-      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.8.7</span></div>
+      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.8.8</span></div>
     </div>
   </div>
   <nav class="nav">
@@ -2018,6 +2018,12 @@ function deleteCurrentProject() {
   save();
   renderProjects();
   closeProjectModal();
+  // Also delete the individual row from Supabase to prevent zombie projects
+  fetch('/.netlify/functions/get-projects', {
+    method: 'DELETE',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ids: [delId]})
+  }).catch(function(){});
 }
 
 function handleProjectFiles(e){
