@@ -1979,7 +1979,6 @@ function openLinkedFolder() {
 function unlinkFolder(){
   var p = projects.find(function(x){return String(x.id) === String(currentProjectId);});
   if (p) { p.folderPath = null; saveProjects(); renderFolderLink(p); }
-}rojectFolderHandle = null;
 }
 
 
