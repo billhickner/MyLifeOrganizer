@@ -1416,7 +1416,6 @@ const sendToMax = async (userText) => {
         }
       } catch(e) { console.log('ADD_NOTE parse error:', e); }
     }
-    }
     let cleanReply = reply.replace(/SCHEDULE_REMINDER:{[^}]+}/g,'').replace(/CREATE_EVENT:{[^}]+}/g,'').replace(/ADD_NOTE:\{[^}]+\}/g,'').trim() || reply;
     if (schedMatch) {
       try {
