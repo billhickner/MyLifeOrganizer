@@ -1,9 +1,9 @@
 {
   "manifest_version": 3,
   "name": "Max - PulsAIO Assistant",
-  "version": "3.1",
+  "version": "3.2",
   "description": "Save emails to PulsAIO projects & open project folders in Finder",
-  "permissions": ["tabs"],
+  "permissions": ["tabs", "nativeMessaging"],
   "host_permissions": ["file:///*"],
   "background": {
     "service_worker": "background.js"
