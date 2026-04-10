@@ -1,9 +1,10 @@
 {
   "manifest_version": 3,
   "name": "Max - PulsAIO Assistant",
-  "version": "3.0",
+  "version": "3.1",
   "description": "Save emails to PulsAIO projects & open project folders in Finder",
-  "permissions": ["activeTab"],
+  "permissions": ["tabs"],
+  "host_permissions": ["file:///*"],
   "background": {
     "service_worker": "background.js"
   },
@@ -15,7 +16,7 @@
     },
     {
       "matches": ["https://billhickner-organizer.netlify.app/*"],
-      "js": ["folder-opener.js"],
+      "js": ["folder-opener.js", "sync.js"],
       "run_at": "document_idle"
     }
   ]
