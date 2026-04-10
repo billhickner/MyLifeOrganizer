@@ -314,7 +314,7 @@ input[type=date],input[type=time]{width:100%}
     <div class="logo-icon">P</div>
     <div>
       <div class="logo-text">PulsAIO</div>
-      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V3.0.5</span></div>
+      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V3.0.6</span></div>
     </div>
   </div>
   <nav class="nav">
@@ -2049,8 +2049,8 @@ function openLinkedFolder() {
     saveProjects();
     renderFolderLink(p);
   }
-  window.postMessage({type: "PULSAIO_OPEN_FOLDER", path: path}, "*");
-  showToast("\ud83d\udcc2 Opening folder in Finder...");
+  fetch("http://127.0.0.1:24368/open", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({path: path})}).then(function(r){ return r.json(); }).then(function(d){ if(d.success) showToast("\ud83d\udcc2 Opened in Finder"); else showToast("\u274c " + (d.error||"Could not open folder"), "error"); }).catch(function(){ showToast("\u274c Folder server not running. Open Terminal and run: python3 ~/Desktop/MaxGmailExtension/open_folder_server.py", "error"); });
+  
 }
 
 function unlinkFolder(){
