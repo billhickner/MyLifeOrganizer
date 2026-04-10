@@ -314,7 +314,7 @@ input[type=date],input[type=time]{width:100%}
     <div class="logo-icon">P</div>
     <div>
       <div class="logo-text">PulsAIO</div>
-      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V3.0.2</span></div>
+      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V3.0.3</span></div>
     </div>
   </div>
   <nav class="nav">
@@ -2011,7 +2011,14 @@ function openProjectFile(index){
 function renderFolderLink(p){
   var el = document.getElementById("folderLinkArea");
   if (p.folderPath) {
-    el.innerHTML = '<div class="project-folder-linked"><span onclick="openLinkedFolder()" style="cursor:pointer;color:#2563eb;text-decoration:underline" title="Click to open in Finder">\ud83d\udcc2 ' + p.folderPath + '</span> <button onclick="unlinkFolder()" style="background:none;border:none;color:#94a3b8;cursor:pointer;margin-left:auto;font-size:12px">Unlink</button></div>';
+    var path = p.folderPath;
+    var displayName = path.startsWith("/") ? path.split("/").pop() : path;
+    if (path.startsWith("/")) {
+      var fileUrl = "file://" + path;
+      el.innerHTML = '<div class="project-folder-linked"><a href="' + fileUrl + '" target="_blank" style="cursor:pointer;color:#2563eb;text-decoration:underline" title="' + path + '">\ud83d\udcc2 ' + displayName + '</a> <button onclick="unlinkFolder()" style="background:none;border:none;color:#94a3b8;cursor:pointer;margin-left:auto;font-size:12px">Unlink</button></div>';
+    } else {
+      el.innerHTML = '<div class="project-folder-linked"><span onclick="fixFolderPath()" style="cursor:pointer;color:#e67e22;text-decoration:underline" title="Click to set full path">\ud83d\udcc2 ' + displayName + ' (click to fix path)</span> <button onclick="unlinkFolder()" style="background:none;border:none;color:#94a3b8;cursor:pointer;margin-left:auto;font-size:12px">Unlink</button></div>';
+    }
   } else {
     el.innerHTML = '<button class="project-link-folder" onclick="linkMacFolder()">\ud83d\udcc2 Link Mac Folder to this Project</button>';
   }
@@ -2021,7 +2028,7 @@ async function linkMacFolder(){
   try {
     var handle = await window.showDirectoryPicker();
     var defaultPath = "/Users/williamhickner/Documents/" + handle.name;
-    var fullPath = prompt("Great! Now enter the full path to this folder so we can open it in Finder later.\n\nTip: Open Terminal, type: open \n(with a space after open), then drag the folder from Finder into Terminal. Copy the path shown.\n\nFolder name: " + handle.name, defaultPath);
+    var fullPath = prompt("Folder: " + handle.name + "\n\nEnter the full path so the link opens in Finder:\n\nTip: In Finder, right-click folder > Get Info > Where", defaultPath);
     if (!fullPath || !fullPath.trim()) fullPath = handle.name;
     fullPath = fullPath.trim().replace(/\/+$/, "");
     var p = projects.find(function(x){return String(x.id) === String(currentProjectId);});
@@ -2035,25 +2042,17 @@ async function linkMacFolder(){
   }
 }
 
-function openLinkedFolder() {
+function fixFolderPath() {
   var p = projects.find(function(x){return String(x.id) === String(currentProjectId);});
   if (!p || !p.folderPath) return;
-  var path = p.folderPath;
-  // If path does not start with /, it is just a folder name - ask for full path
-  if (!path.startsWith("/")) {
-    var fullPath = prompt("To open this folder in Finder, enter the full path:\n\nTip: In Terminal, type open then drag the folder in.\nOr in Finder, right-click the folder > Get Info > Where.\n\nFolder name: " + path, "/Users/williamhickner/Documents/" + path);
-    if (!fullPath || !fullPath.trim()) return;
-    path = fullPath.trim().replace(/\/+$/, "");
-    p.folderPath = path;
-    saveProjects();
-    renderFolderLink(p);
-  }
-  // Copy to clipboard for Cmd+Shift+G in Finder
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(path).then(function(){
-      showToast("\ud83d\udcc2 Path copied! In Finder: Cmd+Shift+G \u2192 paste \u2192 Go");
-    });
-  }
+  var fullPath = prompt("Enter the full Mac path for this folder:\n\nFolder name: " + p.folderPath + "\n\nTip: In Finder, right-click folder > Get Info > Where", "/Users/williamhickner/Documents/" + p.folderPath);
+  if (!fullPath || !fullPath.trim()) return;
+  fullPath = fullPath.trim().replace(/\/+$/, "");
+  if (!fullPath.startsWith("/")) fullPath = "/Users/williamhickner/Documents/" + fullPath;
+  p.folderPath = fullPath;
+  saveProjects();
+  renderFolderLink(p);
+  showToast("Folder path saved! Click the link to open in Finder.");
 }
 
 function unlinkFolder(){
