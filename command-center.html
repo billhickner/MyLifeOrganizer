@@ -314,7 +314,7 @@ input[type=date],input[type=time]{width:100%}
     <div class="logo-icon">P</div>
     <div>
       <div class="logo-text">PulsAIO</div>
-      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.9.8</span></div>
+      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V2.9.9</span></div>
     </div>
   </div>
   <nav class="nav">
@@ -1276,21 +1276,54 @@ const closeModal = () => document.getElementById('eventModal').style.display='no
 
 // ── AI PATH ────────────────────────────────────────────────────────────────
 const genPath = async () => {
-  const openT = tasks.filter(t=>!t.done).map(t=>`[${t.priority.toUpperCase()}] ${t.text}`).join('\n')||'None';
-  const pilotS = pilots.map(p=>`${p.name}: ${p.status} ${p.progress}%`).join(', ');
-  const prompt = `You are a strategic business advisor for Bill, entrepreneur running PulsAIO — wholesale AIO platform.\nTARGETS: 4 pilots live by May 14 (${DAYS_LEFT} days), $25K/month, then 10+ stores & wholesale distribution.\nPilots: David Glaser, Laurie Glaser, One Medical Houston, Kevin Moore.\nToday: ${TODAY.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'})}\nOpen tasks:\n${openT}\nPilot statuses: ${pilotS}\nGive a numbered list of 5-7 specific actions Bill should take TODAY toward $25K/month and the pilot deadline. End with one "North Star" sentence. REMINDER SYSTEM: You CAN and SHOULD set reminders when asked. When the user says "remind me to X" or "set a reminder for Y", respond with "Got it! I've set that reminder for you." — the system will automatically save it. You have full access to create, read, and confirm reminders. When the user asks you to set, add, or create a reminder, tell them to use the Reminders section on the Today page (below the journal) — they can type it directly or click "Tell Max" to speak it. You can also read back their reminders using getRemindersContext(). When asked "what are my reminders?" summarize the active reminders from your context.`;
-
-  ['pathBoxToday','pathBoxFull'].forEach(id=>{
-    const el=document.getElementById(id);
+  var todayStr = new Date().toISOString().split('T')[0];
+  var todayDisplay = new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+  var openT = tasks.filter(function(t){return !t.done;}).map(function(t){
+    return '\u2022 [' + (t.priority||'med').toUpperCase() + '] ' + t.text + (t.category ? ' (' + t.category + ')' : '');
+  }).join('\n') || 'No open tasks';
+  var todayEvents = myEvents.filter(function(e){return e.date === todayStr;}).sort(function(a,b){
+    return (a.time||'99:99').localeCompare(b.time||'99:99');
+  }).map(function(e){
+    return '\u2022 ' + (e.time ? e.time + ' \u2014 ' : '') + e.title + (e.location ? ' @ ' + e.location : '');
+  }).join('\n') || 'No calendar events today';
+  var weekFromNow = new Date(); weekFromNow.setDate(weekFromNow.getDate() + 7);
+  var upcomingEvents = myEvents.filter(function(e){
+    return e.date > todayStr && e.date <= weekFromNow.toISOString().split('T')[0];
+  }).sort(function(a,b){return a.date.localeCompare(b.date);}).slice(0,10).map(function(e){
+    return '\u2022 ' + e.date + ' ' + (e.time ? e.time + ' \u2014 ' : '') + e.title;
+  }).join('\n') || 'No upcoming events';
+  var activeGoals = goals.map(function(g){
+    return '\u2022 [' + (g.timeframe||'daily') + '] ' + g.title + (g.progress ? ' (' + g.progress + '%)' : '');
+  }).join('\n') || 'No goals set';
+  var pilotS = pilots.map(function(p){return '\u2022 ' + p.name + ': ' + p.status + ' ' + p.progress + '%';}).join('\n') || 'No active jobs';
+  var remindersText = typeof getRemindersContext === 'function' ? (getRemindersContext() || 'No active reminders') : 'No active reminders';
+  var memories = JSON.parse(localStorage.getItem('pulsaio_memories') || '[]');
+  var memText = memories.slice(0,10).map(function(m){return '\u2022 [' + (m.tag||'note') + '] ' + m.text;}).join('\n') || 'No memories saved';
+  var prompt = "You are Max, Bill Hickner's daily planner and business assistant.\n\n" +
+    'TODAY: ' + todayDisplay + '\n\n' +
+    '=== TODAY\'S CALENDAR ===\n' + todayEvents + '\n\n' +
+    '=== OPEN TASKS ===\n' + openT + '\n\n' +
+    '=== ACTIVE GOALS ===\n' + activeGoals + '\n\n' +
+    '=== JOBS/PILOTS ===\n' + pilotS + '\n\n' +
+    '=== REMINDERS ===\n' + remindersText + '\n\n' +
+    '=== UPCOMING (Next 7 Days) ===\n' + upcomingEvents + '\n\n' +
+    '=== MEMORY BANK ===\n' + memText + '\n\n' +
+    "Based on ALL the above, generate Bill's daily agenda for TODAY as a clear bullet-point list:\n" +
+    '1. Start with any calendar events/meetings in time order\n' +
+    '2. Then list the priority tasks to accomplish today\n' +
+    '3. Include any reminders or deadlines\n' +
+    '4. End with a brief Focus for today summary sentence\n\n' +
+    "Be specific, actionable, and concise. Use bullet points. Reference actual items from the data above, don't make things up.";
+  ['pathBoxToday','pathBoxFull'].forEach(function(id){
+    var el=document.getElementById(id);
     if(el){el.style.display='block';}
   });
   document.getElementById('pathTextToday').innerHTML='<div class="dots"><span></span><span></span><span></span></div>';
   document.getElementById('pathTextFull').innerHTML='<div class="dots"><span></span><span></span><span></span></div>';
-
-  const r = await callClaude(prompt);
+  var r = await callClaude(prompt);
   pathCache=r;
-  document.getElementById('pathTextToday').textContent=r;
-  document.getElementById('pathTextFull').textContent=r;
+  document.getElementById('pathTextToday').innerHTML = r.replace(/\n/g, '<br>');
+  document.getElementById('pathTextFull').innerHTML = r.replace(/\n/g, '<br>');
   document.getElementById('pathBoxFull').style.display='block';
   renderEntries();
 };
