@@ -314,7 +314,7 @@ input[type=date],input[type=time]{width:100%}
     <div class="logo-icon">P</div>
     <div>
       <div class="logo-text">PulsAIO</div>
-      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V3.0.4</span></div>
+      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V3.0.5</span></div>
     </div>
   </div>
   <nav class="nav">
@@ -2021,7 +2021,7 @@ function renderFolderLink(p){
 async function linkMacFolder(){
   try {
     var handle = await window.showDirectoryPicker();
-    var defaultPath = "/Users/williamhickner/Documents/" + handle.name;
+    var defaultPath = "/Users/williamhickner/Desktop/" + handle.name;
     var fullPath = prompt("Folder: " + handle.name + "\n\nEnter the full path so the link opens in Finder:\n\nTip: In Finder, right-click folder > Get Info > Where", defaultPath);
     if (!fullPath || !fullPath.trim()) fullPath = handle.name;
     fullPath = fullPath.trim().replace(/\/+$/, "");
@@ -2041,10 +2041,10 @@ function openLinkedFolder() {
   if (!p || !p.folderPath) return;
   var path = p.folderPath;
   if (!path.startsWith("/")) {
-    var fullPath = prompt("Enter the full Mac path for: " + path, "/Users/williamhickner/Documents/" + path);
+    var fullPath = prompt("Enter the full Mac path for: " + path, "/Users/williamhickner/Desktop/" + path);
     if (!fullPath || !fullPath.trim()) return;
     path = fullPath.trim().replace(/\/+$/, "");
-    if (!path.startsWith("/")) path = "/Users/williamhickner/Documents/" + path;
+    if (!path.startsWith("/")) path = "/Users/williamhickner/Desktop/" + path;
     p.folderPath = path;
     saveProjects();
     renderFolderLink(p);
