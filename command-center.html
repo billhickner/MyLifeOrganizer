@@ -314,7 +314,7 @@ input[type=date],input[type=time]{width:100%}
     <div class="logo-icon">P</div>
     <div>
       <div class="logo-text">PulsAIO</div>
-      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V3.0.0</span></div>
+      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V3.0.1</span></div>
     </div>
   </div>
   <nav class="nav">
@@ -1320,6 +1320,8 @@ const genPath = async () => {
   });
   document.getElementById('pathTextToday').innerHTML='<div class="dots"><span></span><span></span><span></span></div>';
   document.getElementById('pathTextFull').innerHTML='<div class="dots"><span></span><span></span><span></span></div>';
+  document.getElementById('pathBoxToday').scrollIntoView({behavior: 'smooth', block: 'start'});
+  showToast('Generating your daily agenda...');
   try {
     var r = await callClaude(prompt);
     if (!r || r.indexOf('Error') === 0 || r.indexOf('API Error') === 0 || r.indexOf('Connection error') === 0) {
@@ -1331,6 +1333,7 @@ const genPath = async () => {
     document.getElementById('pathTextToday').innerHTML = r.replace(/\n/g, '<br>');
     document.getElementById('pathTextFull').innerHTML = r.replace(/\n/g, '<br>');
     document.getElementById('pathBoxFull').style.display='block';
+    document.getElementById('pathBoxToday').scrollIntoView({behavior: 'smooth', block: 'start'});
     renderEntries();
   } catch(err) {
     document.getElementById('pathTextToday').innerHTML = '<span style="color:red">Error: ' + err.message + '</span>';
