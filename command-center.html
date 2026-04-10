@@ -314,7 +314,7 @@ input[type=date],input[type=time]{width:100%}
     <div class="logo-icon">P</div>
     <div>
       <div class="logo-text">PulsAIO</div>
-      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V3.0.1</span></div>
+      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V3.0.2</span></div>
     </div>
   </div>
   <nav class="nav">
@@ -2039,23 +2039,16 @@ function openLinkedFolder() {
   var p = projects.find(function(x){return String(x.id) === String(currentProjectId);});
   if (!p || !p.folderPath) return;
   var path = p.folderPath;
-  if (path.startsWith("/")) {
-    var iframe = document.createElement("iframe");
-    iframe.style.display = "none";
-    iframe.src = "file://" + path;
-    document.body.appendChild(iframe);
-    setTimeout(function(){ document.body.removeChild(iframe); }, 2000);
-    try { window.open("file://" + path); } catch(e) {}
-    try {
-      var a = document.createElement("a");
-      a.href = "file://" + path;
-      a.target = "_blank";
-      a.rel = "noopener";
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    } catch(e) {}
+  // If path does not start with /, it is just a folder name - ask for full path
+  if (!path.startsWith("/")) {
+    var fullPath = prompt("To open this folder in Finder, enter the full path:\n\nTip: In Terminal, type open then drag the folder in.\nOr in Finder, right-click the folder > Get Info > Where.\n\nFolder name: " + path, "/Users/williamhickner/Documents/" + path);
+    if (!fullPath || !fullPath.trim()) return;
+    path = fullPath.trim().replace(/\/+$/, "");
+    p.folderPath = path;
+    saveProjects();
+    renderFolderLink(p);
   }
+  // Copy to clipboard for Cmd+Shift+G in Finder
   if (navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(path).then(function(){
       showToast("\ud83d\udcc2 Path copied! In Finder: Cmd+Shift+G \u2192 paste \u2192 Go");
