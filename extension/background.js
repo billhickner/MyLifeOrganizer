@@ -1,26 +1,18 @@
-// Background script - opens folders in Finder via native messaging
+// Background script - opens folders
 chrome.runtime.onMessage.addListener(function(msg, sender, sendResponse) {
   if (msg.action === "openFolder" && msg.path) {
     console.log("BG: Opening folder:", msg.path);
-    try {
-      chrome.runtime.sendNativeMessage(
-        "com.pulsaio.folder_opener",
-        {path: msg.path},
-        function(response) {
-          console.log("BG: Native response:", JSON.stringify(response));
-          if (chrome.runtime.lastError) {
-            console.error("BG: Native error:", chrome.runtime.lastError.message);
-            // Fallback: try opening in Chrome tab
-            var encodedPath = msg.path.split("/").map(encodeURIComponent).join("/");
-            chrome.tabs.create({url: "file://" + encodedPath, active: true});
-          }
-          sendResponse(response || {success: true});
-        }
-      );
-    } catch(e) {
-      console.error("BG: Exception:", e.message);
-      sendResponse({success: false, error: e.message});
-    }
+    // Build a proper file URL
+    var url = "file://" + msg.path;
+    chrome.tabs.create({url: url, active: true}, function(tab) {
+      if (chrome.runtime.lastError) {
+        console.error("BG: tabs.create error:", chrome.runtime.lastError.message);
+        sendResponse({success: false, error: chrome.runtime.lastError.message});
+      } else {
+        console.log("BG: Opened tab", tab.id);
+        sendResponse({success: true, tabId: tab.id});
+      }
+    });
     return true;
   }
 });
