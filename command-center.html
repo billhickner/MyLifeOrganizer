@@ -314,7 +314,7 @@ input[type=date],input[type=time]{width:100%}
     <div class="logo-icon">P</div>
     <div>
       <div class="logo-text">PulsAIO</div>
-      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V3.0.6</span></div>
+      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V3.0.7</span></div>
     </div>
   </div>
   <nav class="nav">
@@ -2257,9 +2257,15 @@ async function syncProjectsToServer() {
     return cp;
   });
   var projectData = JSON.stringify(cleanProjects);
+  var rows = [{id:"_projects_blob",name:"Projects Blob",biz:"_projects",status:"active",notes:projectData}];
+  projects.forEach(function(p) {
+    if (!String(p.id).startsWith("_")) {
+      rows.push({id: String(p.id), name: p.name, biz: p.biz || "general", status: p.status || "planning", notes: null});
+    }
+  });
   try {
     await fetch("/.netlify/functions/get-projects",{method:"POST",headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({projects:[{id:"_projects_blob",name:"Projects Blob",biz:"_projects",status:"active",notes:projectData}]})
+      body:JSON.stringify({projects: rows})
     });
   } catch(e) {}
   setTimeout(function(){ window._projectSyncLock = false; }, 2000);
