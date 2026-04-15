@@ -164,7 +164,7 @@ input[type=date],input[type=time]{width:100%}
 .reminders-section{background:#fff;border:1px solid #e5e9f0;border-radius:12px;padding:20px;margin-top:20px}
 .reminders-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
 .reminders-title{font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#64748b;display:flex;align-items:center;gap:6px}
-.reminders-title::before{content:'Ã°ÂÂÂ'}
+.reminders-title::before{content:'ð'}
 .reminders-add{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
 .reminders-add input{flex:1;min-width:180px;border:1px solid #e2e8f0;border-radius:8px;padding:8px 12px;font-size:13px;color:#1e293b;outline:none;background:#f8fafc}
 .reminders-add input:focus{border-color:#3b82f6;background:#fff}
@@ -339,8 +339,8 @@ input[type=date],input[type=time]{width:100%}
     <button class="nav-btn" onclick="showTab('pilots')">Jobs</button>
     <button class="nav-btn" onclick="showTab('goals')">Goals</button>
     <button class="nav-btn" onclick="showTab('calendar')">Calendar</button>
-    <button class="nav-btn" onclick="showTab('max')">Ã°ÂÂ¤Â Max</button>
-    <button class="nav-btn" onclick="showTab('projects');renderProjects()">Ã°ÂÂÂ Projects</button>
+    <button class="nav-btn" onclick="showTab('max')">ð¤ Max</button>
+    <button class="nav-btn" onclick="showTab('projects');renderProjects()">ð Projects</button>
     <button class="nav-btn" onclick="showTab('path')">AI Path</button>
   </nav>
   <div class="header-date" id="headerDate"></div>
@@ -362,11 +362,11 @@ input[type=date],input[type=time]{width:100%}
   <div class="banner-sep"></div>
   <div style="display:flex;align-items:center;gap:8px">
     <span class="banner-label">Post-Launch</span>
-    <span style="color:var(--mid);font-size:12px">10+ stores ÃÂ· Wholesale deal ÃÂ· Profitable & scaling</span>
+    <span style="color:var(--mid);font-size:12px">10+ stores Â· Wholesale deal Â· Profitable & scaling</span>
   </div>
 </div>
 
-<!-- Ã¢ÂÂÃ¢ÂÂ TODAY TAB Ã¢ÂÂÃ¢ÂÂ -->
+<!-- ââ TODAY TAB ââ -->
 <div id="tab-today" class="page">
   <div class="main-grid">
     <div>
@@ -374,7 +374,7 @@ input[type=date],input[type=time]{width:100%}
       <div class="card">
         <div class="card-title"><div class="card-accent"></div>Today's Priority List</div>
         <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
-          <input class="inp" id="taskInput" placeholder="Add a taskÃ¢ÂÂ¦" style="flex:1;min-width:160px" onkeydown="if(event.key==='Enter')addTask()">
+          <input class="inp" id="taskInput" placeholder="Add a taskâ¦" style="flex:1;min-width:160px" onkeydown="if(event.key==='Enter')addTask()">
           <select class="sel" id="taskCat">
             <option>general</option><option>revenue</option><option>acquisition</option><option>product</option><option>team</option><option>pilot</option>
           </select>
@@ -390,8 +390,8 @@ input[type=date],input[type=time]{width:100%}
         <div class="card-accent"></div>
         <div class="memory-bank" id="memoryBank">
         <div class="memory-bank-header">
-          <div class="memory-bank-title">Ã°ÂÂ§Â  Max Memory Bank</div>
-          <button onclick="toggleMemoryMic()" id="memoryMicBtn" style="background:#eff6ff;border:1px solid #bfdbfe;color:#2563eb;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer">Ã°ÂÂÂÃ¯Â¸Â Tell Max</button>
+          <div class="memory-bank-title">ð§  Max Memory Bank</div>
+          <button onclick="toggleMemoryMic()" id="memoryMicBtn" style="background:#eff6ff;border:1px solid #bfdbfe;color:#2563eb;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer">ðï¸ Tell Max</button>
         </div>
         <div class="memory-add-row">
           <input type="text" id="memoryInput" placeholder="e.g. Bird Storm Marina gate code is 1234" onkeydown="if(event.key==='Enter')parseMemoryWithMax()">
@@ -410,7 +410,7 @@ input[type=date],input[type=time]{width:100%}
     </div>
     </div>
         <p style="font-size:13px;color:var(--soft);line-height:1.6;margin-bottom:14px">Generate today's prioritized action plan based on your tasks, jobs, and goals.</p>
-        <button class="btn-primary" style="width:100%" onclick="genPath()">Ã¢ÂÂ¦ Generate Today's Path</button>
+        <button class="btn-primary" style="width:100%" onclick="genPath()">â¦ Generate Today's Path</button>
         <div id="pathBoxToday" style="display:none" class="ai-box">
           <div class="ai-header"><div class="ai-dot"></div>Your Path for Today</div>
           <div class="ai-text" id="pathTextToday"></div>
@@ -420,7 +420,7 @@ input[type=date],input[type=time]{width:100%}
   </div>
 </div>
 
-<!-- Ã¢ÂÂÃ¢ÂÂ PILOTS TAB Ã¢ÂÂÃ¢ÂÂ -->
+<!-- ââ PILOTS TAB ââ -->
 <div id="tab-pilots" class="page hidden">
   <div class="card">
     <div class="card-title"><div class="card-accent"></div>PulsAIO Job Tracker</div>
@@ -430,12 +430,12 @@ input[type=date],input[type=time]{width:100%}
   </div>
 </div>
 
-<!-- Ã¢ÂÂÃ¢ÂÂ GOALS TAB Ã¢ÂÂÃ¢ÂÂ -->
+<!-- ââ GOALS TAB ââ -->
 <div id="tab-goals" class="page hidden">
   <div class="card">
     <div class="card-title"><div class="card-accent"></div>Add New Goal</div>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
-      <input class="inp" id="goalInput" placeholder="New goalÃ¢ÂÂ¦" style="flex:2;min-width:200px" onkeydown="if(event.key==='Enter')addGoal()">
+      <input class="inp" id="goalInput" placeholder="New goalâ¦" style="flex:2;min-width:200px" onkeydown="if(event.key==='Enter')addGoal()">
       <select class="sel" id="goalCat"><option>product</option><option>revenue</option><option>acquisition</option><option>team</option><option>general</option></select>
       <select class="sel" id="goalTf"><option>daily</option><option>weekly</option><option>monthly</option></select>
       <button class="btn-primary" onclick="addGoal()">Add Goal</button>
@@ -444,7 +444,7 @@ input[type=date],input[type=time]{width:100%}
   <div id="goalsList"></div>
 </div>
 
-<!-- Ã¢ÂÂÃ¢ÂÂ CALENDAR TAB Ã¢ÂÂÃ¢ÂÂ -->
+<!-- ââ CALENDAR TAB ââ -->
 <div id="tab-calendar" class="page hidden">
   <div class="card">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
@@ -452,19 +452,19 @@ input[type=date],input[type=time]{width:100%}
       <div style="display:flex;align-items:center;gap:10px">
         <div style="display:flex;align-items:centepx;font-size:11px;color:var(--muted)">
         <button class="btn-primary" onclick="openAddEvent()">+ Add Event</button>
-        <button class="btn-outline" onclick="openEventManager()" style="margin-left:6px">Ã¢ÂÂ Manage Events</button>
-        <button class="btn-outline" id="gcalConnectBtn" onclick="connectGoogleCalendar()" style="margin-left:6px;color:var(--green);border-color:var(--green)">Ã°ÂÂÂ Sync Google Cal</button>
+        <button class="btn-outline" onclick="openEventManager()" style="margin-left:6px">â Manage Events</button>
+        <button class="btn-outline" id="gcalConnectBtn" onclick="connectGoogleCalendar()" style="margin-left:6px;color:var(--green);border-color:var(--green)">ð Sync Google Cal</button>
         <div style="display:flex;gap:12px;margin-left:auto;align-items:center;font-size:11px"><span style="display:flex;align-items:center;gap:3px"><span style="display:flex;align-items:center;gap:3px"><span style="width:10px;height:10px;border-radius:50%;background:#27ae60;display:inline-block"></span>Google</span></div>
       </div>
     </div>
     <div class="cal-month-nav">
-      <button class="btn-outline" onclick="changeMonth(-1)" style="padding:6px 14px;font-size:18px;line-height:1">Ã¢ÂÂ¹</button>
+      <button class="btn-outline" onclick="changeMonth(-1)" style="padding:6px 14px;font-size:18px;line-height:1">â¹</button>
       <div class="cal-month-title" id="calMonthTitle"></div>
-      <button class="btn-outline" onclick="changeMonth(1)" style="padding:6px 14px;font-size:18px;line-height:1">Ã¢ÂÂº</button>
+      <button class="btn-outline" onclick="changeMonth(1)" style="padding:6px 14px;font-size:18px;line-height:1">âº</button>
     </div>
     <div class="cal-grid" id="calDayHeaders"></div>
-    <div id="calLegendRow" style="display:flex;align-items:center;gap:12px;margin:8px 0;flex-wrap:wrap"><span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:50%;background:var(--primary);display:inline-block"></span>Personal</span><span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:50%;background:#e67e22;display:inline-block"></span>UTBSC</span><span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:50%;background:#27ae60;display:inline-block"></span>Google</span><button onclick="var p=document.getElementById('calSettingsPanel');p.style.display=p.style.display==='none'?'block':'none'" style="background:var(--card);color:var(--text);border:1px solid var(--border);padding:4px 12px;border-radius:6px;cursor:pointer;font-size:12px;margin-left:auto">Ã¢ÂÂ Settings</button></div>
-<div id="calSettingsPanel" style="display:none;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin:8px 0"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><h3 style="margin:0;font-size:15px">Calendar Settings</h3><button onclick="document.getElementById('calSettingsPanel').style.display='none'" style="background:none;border:none;font-size:18px;cursor:pointer">Ã¢ÂÂ</button></div><label style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);cursor:pointer"><input type="checkbox" id="calToggle_personal" checked onchange="toggleCalendar('personal',this.checked)" style="width:18px;height:18px"><span style="width:12px;height:12px;border-radius:50%;background:var(--primary)"></span><div><b>Personal</b><br><small style="color:var(--muted)">Local events</small></div></label><label style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);cursor:pointer"><input type="checkbox" id="calToggle_utbsc" checked onchange="toggleCalendar('utbsc',this.checked)" style="width:18px;height:18px"><span style="width:12px;height:12px;border-radius:50%;background:#e67e22"></span><div><b>UTBSC Schedule</b><br><small style="color:var(--muted)">From Google Calendar</small></div></label><label style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);cursor:pointer"><input type="checkbox" id="calToggle_google" checked onchange="toggleCalendar('google',this.checked)" style="width:18px;height:18px"><span style="width:12px;height:12px;border-radius:50%;background:#27ae60"></span><div><b>Google Calendar</b><br><small style="color:var(--muted)">bhickner@gmail.com</small></div></label><div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)"><button onclick="openAddCalendarModal()" style="background:var(--primary);color:#fff;border:none;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px">+ Add PulsAIO Calendar</button></div></div>
+    <div id="calLegendRow" style="display:flex;align-items:center;gap:12px;margin:8px 0;flex-wrap:wrap"><span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:50%;background:var(--primary);display:inline-block"></span>Personal</span><span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:50%;background:#e67e22;display:inline-block"></span>UTBSC</span><span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:50%;background:#27ae60;display:inline-block"></span>Google</span><button onclick="var p=document.getElementById('calSettingsPanel');p.style.display=p.style.display==='none'?'block':'none'" style="background:var(--card);color:var(--text);border:1px solid var(--border);padding:4px 12px;border-radius:6px;cursor:pointer;font-size:12px;margin-left:auto">â Settings</button></div>
+<div id="calSettingsPanel" style="display:none;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin:8px 0"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><h3 style="margin:0;font-size:15px">Calendar Settings</h3><button onclick="document.getElementById('calSettingsPanel').style.display='none'" style="background:none;border:none;font-size:18px;cursor:pointer">â</button></div><label style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);cursor:pointer"><input type="checkbox" id="calToggle_personal" checked onchange="toggleCalendar('personal',this.checked)" style="width:18px;height:18px"><span style="width:12px;height:12px;border-radius:50%;background:var(--primary)"></span><div><b>Personal</b><br><small style="color:var(--muted)">Local events</small></div></label><label style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);cursor:pointer"><input type="checkbox" id="calToggle_utbsc" checked onchange="toggleCalendar('utbsc',this.checked)" style="width:18px;height:18px"><span style="width:12px;height:12px;border-radius:50%;background:#e67e22"></span><div><b>UTBSC Schedule</b><br><small style="color:var(--muted)">From Google Calendar</small></div></label><label style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);cursor:pointer"><input type="checkbox" id="calToggle_google" checked onchange="toggleCalendar('google',this.checked)" style="width:18px;height:18px"><span style="width:12px;height:12px;border-radius:50%;background:#27ae60"></span><div><b>Google Calendar</b><br><small style="color:var(--muted)">bhickner@gmail.com</small></div></label><div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)"><button onclick="openAddCalendarModal()" style="background:var(--primary);color:#fff;border:none;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px">+ Add PulsAIO Calendar</button></div></div>
 <div class="cal-grid" id="calGrid" style="margin-top:6px"></div>
   </div>
   <div id="selectedDayPanel" style="display:none" class="card">
@@ -477,54 +477,54 @@ input[type=date],input[type=time]{width:100%}
 </div>
 
 
-<!-- Ã¢ÂÂÃ¢ÂÂ MAX TAB Ã¢ÂÂÃ¢ÂÂ -->
+<!-- ââ MAX TAB ââ -->
 </div>
   <div id="tab-max" class="page hidden">
   <div class="max-panel">
     <div class="max-header">
       <div style="display:flex;align-items:center;gap:10px">
-        <div class="max-avatar">Ã°ÂÂ¤Â</div>
+        <div class="max-avatar">ð¤</div>
         <div>
           <div class="max-name">Max</div>
-          <div class="max-sub">PulsAIO Assistant ÃÂ· <span id="maxDeadline"></span>d to deadline</div>
+          <div class="max-sub">PulsAIO Assistant Â· <span id="maxDeadline"></span>d to deadline</div>
         </div>
       </div>
       <div style="display:flex;gap:6px">
-        <button id="muteBtn" onclick="stopSpeaking()" style="display:none;background:none;border:1px solid rgba(255,255,255,0.3);color:white;font-size:11px;padding:4px 9px;border-radius:4px;cursor:pointer">Mute</button><button onclick="stopSpeaking()" id="maxStopBtn" style="display:inline-flex;background:#ef4444;color:white;border:none;border-radius:4px;padding:5px 10px;font-size:11px;cursor:pointer;margin-left:4px">Ã¢ÂÂ¹ Stop</button>
+        <button id="muteBtn" onclick="stopSpeaking()" style="display:none;background:none;border:1px solid rgba(255,255,255,0.3);color:white;font-size:11px;padding:4px 9px;border-radius:4px;cursor:pointer">Mute</button><button onclick="stopSpeaking()" id="maxStopBtn" style="display:inline-flex;background:#ef4444;color:white;border:none;border-radius:4px;padding:5px 10px;font-size:11px;cursor:pointer;margin-left:4px">â¹ Stop</button>
         <button onclick="clearChat()" style="background:none;border:1px solid rgba(255,255,255,0.25);color:rgba(255,255,255,0.65);font-size:11px;padding:4px 9px;border-radius:4px;cursor:pointer">Clear</button>
       </div>
     </div>
     <div class="max-messages" id="maxMessages">
       <div id="maxWelcome" style="text-align:center;padding:24px 8px">
-        <div style="font-size:40px;margin-bottom:10px">Ã°ÂÂÂ</div>
+        <div style="font-size:40px;margin-bottom:10px">ð</div>
         <div style="font-size:15px;font-weight:700;color:var(--dark);margin-bottom:6px">Hey Bill, I'm Max.</div>
-        <div style="font-size:13px;color:var(--muted);line-height:1.7;max-width:380px;margin:0 auto">Tap Ã°ÂÂÂÃ¯Â¸Â to speak or type below. Ask me about tasks, pilots, goals, or anything PulsAIO.</div>
+        <div style="font-size:13px;color:var(--muted);line-height:1.7;max-width:380px;margin:0 auto">Tap ðï¸ to speak or type below. Ask me about tasks, pilots, goals, or anything PulsAIO.</div>
         <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:16px" id="maxSuggestions"></div>
       </div>
     </div>
     <div class="max-input-row">
-      <textarea class="max-ta" id="maxInput" rows="2" placeholder="Ask Max anythingÃ¢ÂÂ¦ or tap Ã°ÂÂÂÃ¯Â¸Â" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendToMax()}"></textarea>
+      <textarea class="max-ta" id="maxInput" rows="2" placeholder="Ask Max anythingâ¦ or tap ðï¸" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendToMax()}"></textarea>
       <div style="display:flex;flex-direction:column;gap:6px">
-        <button class="mic-btn idle" id="micBtn" onclick="toggleMic()">Ã°ÂÂÂÃ¯Â¸Â</button>
-        <button class="send-btn" id="sendBtn" onclick="sendToMax()" style="background:var(--accent)">Ã¢ÂÂ¤</button>
+        <button class="mic-btn idle" id="micBtn" onclick="toggleMic()">ðï¸</button>
+        <button class="send-btn" id="sendBtn" onclick="sendToMax()" style="background:var(--accent)">â¤</button>
       </div>
     </div>
     <div id="listeningBar" style="display:none" class="max-listen-bar">
       <div class="listen-dot"></div>
-      <span style="font-size:12px;color:#E84C4C;font-weight:600">ListeningÃ¢ÂÂ¦ speak now</span>
+      <span style="font-size:12px;color:#E84C4C;font-weight:600">Listeningâ¦ speak now</span>
     </div>
   </div>
 </div>
 
-<!-- Ã¢ÂÂÃ¢ÂÂ AI PATH TAB Ã¢ÂÂÃ¢ÂÂ -->
+<!-- ââ AI PATH TAB ââ -->
 <div id="tab-path" class="page hidden">
   <div class="card">
     <div class="card-title"><div class="card-accent"></div>AI-Powered Path to Success</div>
-    <p style="font-size:13px;color:var(--soft);line-height:1.7;margin-bottom:16px">Claude analyzes your open tasks, pilot store progress, and goals to generate a focused daily plan Ã¢ÂÂ keeping you <strong>on the path to $25K/month</strong> by May 14.</p>
-    <button class="btn-primary" onclick="genPath()">Ã¢ÂÂ¦ Generate Today's Action Path</button>
+    <p style="font-size:13px;color:var(--soft);line-height:1.7;margin-bottom:16px">Claude analyzes your open tasks, pilot store progress, and goals to generate a focused daily plan â keeping you <strong>on the path to $25K/month</strong> by May 14.</p>
+    <button class="btn-primary" onclick="genPath()">â¦ Generate Today's Action Path</button>
   </div>
   <div id="pathBoxFull" style="display:none" class="card" style="background:var(--lb)">
-    <div class="ai-header"><div class="ai-dot"></div>Your Path Ã¢ÂÂ <span id="pathDate"></span></div>
+    <div class="ai-header"><div class="ai-dot"></div>Your Path â <span id="pathDate"></span></div>
     <div class="ai-text" id="pathTextFull"></div>
   </div>
   <div id="entriesPanel" class="card" style="display:none">
@@ -559,7 +559,7 @@ input[type=date],input[type=time]{width:100%}
           </select>
         </div>
       </div>
-      <button class="project-modal-close" onclick="closePilotModal()">Ã¢ÂÂ</button>
+      <button class="project-modal-close" onclick="closePilotModal()">â</button>
     </div>
     <div class="project-modal-body">
       <div class="project-section-label">Deployment Progress</div>
@@ -577,16 +577,16 @@ input[type=date],input[type=time]{width:100%}
       <div class="project-section-label">Notes & Updates</div>
       <textarea class="project-notes-area" id="pilotModalNotes" placeholder="Notes about this pilot..."></textarea>
       <div id="pilotModalUpdates" class="project-updates" style="margin-top:10px"></div>
-      <button class="btn-add-update" onclick="addPilotUpdate()">Ã¯Â¼Â Add Update</button>
+      <button class="btn-add-update" onclick="addPilotUpdate()">ï¼ Add Update</button>
       <div class="project-section-label" style="margin-top:20px">Mac Folder</div>
       <div id="pilotFolderArea"></div>
       <div class="project-section-label" style="margin-top:20px">Files & Documents</div>
       <div id="pilotModalFiles" class="project-files-area"></div>
       <input type="file" id="pilotFileInput" multiple style="display:none" onchange="handlePilotFiles(event)">
-      <button class="btn-add-update" onclick="document.getElementById('pilotFileInput').click()" style="margin-top:8px">Ã¯Â¼Â Attach File</button>
+      <button class="btn-add-update" onclick="document.getElementById('pilotFileInput').click()" style="margin-top:8px">ï¼ Attach File</button>
 
-        <div class="project-section-label" style="margin-top:20px">Ã°ÂÂÂ§ Emails</div>
-        <div id="pilotModalEmails"><div class="project-emails-loading"><span>LoadingÃ¢ÂÂ¦</span></div></div>
+        <div class="project-section-label" style="margin-top:20px">ð§ Emails</div>
+        <div id="pilotModalEmails"><div class="project-emails-loading"><span>Loadingâ¦</span></div></div>
       </div>
       <div class="modal-actions">
         <button class="btn-delete-project" onclick="deleteCurrentProject()">Delete Project</button>
@@ -599,8 +599,8 @@ input[type=date],input[type=time]{width:100%}
 <div id="eventManagerModal" class="modal-overlay" style="display:none" onclick="if(event.target===this)closeEventManager()">
   <div class="modal" style="width:600px;max-height:80vh;display:flex;flex-direction:column">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-      <h3 style="margin:0">Ã¢ÂÂ Manage Calendar Events</h3>
-      <button onclick="closeEventManager()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted)">Ã¢ÂÂ</button>
+      <h3 style="margin:0">â Manage Calendar Events</h3>
+      <button onclick="closeEventManager()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted)">â</button>
     </div>
     <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
       <button class="btn-outline" style="font-size:11px;padding:5px 12px" onclick="filterEventManager('all')">All</button>
@@ -620,7 +620,7 @@ input[type=date],input[type=time]{width:100%}
     <h3 id="modalTitle">Add Event</h3>
     <div class="form-row">
       <label class="form-label">Event Title *</label>
-      <input class="inp" id="evtTitle" placeholder="Event titleÃ¢ÂÂ¦">
+      <input class="inp" id="evtTitle" placeholder="Event titleâ¦">
     </div>
     <div class="form-2col">
       <div>
@@ -644,11 +644,11 @@ input[type=date],input[type=time]{width:100%}
     </div>
     <div class="form-row">
       <label class="form-label">Location</label>
-      <input class="inp" id="evtLocation" placeholder="Location (optional)Ã¢ÂÂ¦">
+      <input class="inp" id="evtLocation" placeholder="Location (optional)â¦">
     </div>
     <div class="form-row">
       <label class="form-label">Notes</label>
-      <textarea class="ta" id="evtNotes" rows="2" style="min-height:60px" placeholder="Notes (optional)Ã¢ÂÂ¦"></textarea>
+      <textarea class="ta" id="evtNotes" rows="2" style="min-height:60px" placeholder="Notes (optional)â¦"></textarea>
     </div>
     <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
       <button class="btn-outline" onclick="closeModal()">Cancel</button>
@@ -658,7 +658,7 @@ input[type=date],input[type=time]{width:100%}
 </div>
 
 <script>
-// Ã¢ÂÂÃ¢ÂÂ CONFIG Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ââ CONFIG âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 const GCAL_KEY    = 'AIzaSyAjwhrGc-7C0O2HY2fy5p-9LvvH1BOCyeI';
 const GCAL_CAL    = 'aakus6fs5ogpjk6e1c8emec078kkuhlf@import.calendar.google.com';
 const ELEVEN_KEY  = ''; // routed through Netlify function
@@ -669,7 +669,7 @@ const TODAY       = new Date();
 const TODAY_STR   = TODAY.toISOString().split('T')[0];
 const DAYS_LEFT   = Math.ceil((DEADLINE - TODAY) / 86400000);
 
-// Ã¢ÂÂÃ¢ÂÂ STATE Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ââ STATE ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 let tasks = JSON.parse(localStorage.getItem('pac:entries') || '[]');
 let pilots = JSON.parse(localStorage.getItem('pac:pilots') || '[]');
 let goals = JSON.parse(localStorage.getItem('pac:goals') || '[]');
@@ -710,7 +710,7 @@ let currentAudio = null;
 let currentTab = 'today';
 let pathCache = null;
 
-// Ã¢ÂÂÃ¢ÂÂ SAVE Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ââ SAVE âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 const save = () => {
   localStorage.setItem('pac:entries', JSON.stringify(tasks));
   localStorage.setItem('pac:pilots', JSON.stringify(pilots));
@@ -832,7 +832,7 @@ function loadProjectsFromSupabase(callback) {
   }).catch(function(){if(callback)callback();});
 };
 
-// Ã¢ÂÂÃ¢ÂÂ INIT Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ââ INIT âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 let currentMonth = new Date().getMonth();
 let currentYear = new Date().getFullYear();
 
@@ -892,7 +892,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setTimeout(function(){mergeGcalIntoMyEvents();renderCalendar();},5000);
 });
 
-// Ã¢ÂÂÃ¢ÂÂ RENDER ALL Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ââ RENDER ALL âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 function renderAll() {
   renderStats();
   renderTasks();
@@ -903,7 +903,7 @@ function renderAll() {
   renderEntries();
 };
 
-// Ã¢ÂÂÃ¢ÂÂ STATS Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ââ STATS ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 function renderStats() {
   const done = tasks.filter(t=>t.done).length;
   const live = pilots.filter(p=>p.status==='live').length;
@@ -916,25 +916,25 @@ function renderStats() {
   el=document.getElementById('statHigh');if(el)el.textContent=hi;
 };
 
-// Ã¢ÂÂÃ¢ÂÂ COLOR HELPERS Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ââ COLOR HELPERS ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 const catColor  = {general:'#9CA3AF',revenue:'#00C48C',acquisition:'#00A3E0',product:'#0057B8',team:'#F5A623',pilot:'#8B5CF6'};
 const prioColor = {high:'#E84C4C',med:'#F5A623',low:'#9CA3AF'};
 const statColor = {planning:'#9CA3AF',active:'#F5A623',live:'#00C48C',blocked:'#E84C4C'};
 const barColor  = p => p>=75?'#00C48C':p>=40?'#F5A623':p>0?'#00A3E0':'#e5e7eb';
 const pillStyle = (text,color) => `<span style="display:inline-flex;align-items:center;font-size:10px;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;padding:2px 7px;border-radius:20px;background:${color}22;color:${color};border:1px solid ${color}33;white-space:nowrap">${text}</span>`;
 
-// Ã¢ÂÂÃ¢ÂÂ TASKS Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ââ TASKS ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 function renderTasks() {
   const sorted = [...tasks].sort((a,b)=>({high:0,med:1,low:2}[a.priority]-{high:0,med:1,low:2}[b.priority]));
   document.getElementById('taskList').innerHTML = sorted.length===0
     ? '<div style="text-align:center;padding:16px 0;color:var(--muted);font-size:13px;font-style:italic">No tasks yet.</div>'
     : sorted.map(t=>`
       <div class="task-row">
-        <div class="task-check ${t.done?'done':''}" onclick="toggleTask(${t.id})">${t.done?'Ã¢ÂÂ':''}</div>
+        <div class="task-check ${t.done?'done':''}" onclick="toggleTask(${t.id})">${t.done?'â':''}</div>
         <span class="task-label ${t.done?'done':''}">${t.text}</span>
         ${pillStyle(t.category,catColor[t.category]||'#9CA3AF')}
         ${pillStyle(t.priority,prioColor[t.priority])}
-        <button onclick="deleteTask(${t.id})" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:14px;padding:0 4px">ÃÂ</button>
+        <button onclick="deleteTask(${t.id})" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:14px;padding:0 4px">Ã</button>
       </div>`).join('');
 };
 
@@ -956,7 +956,7 @@ const deleteTask = id => {
   save(); renderTasks(); renderStats();
 };
 
-// Ã¢ÂÂÃ¢ÂÂ JOURNAL Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ââ JOURNAL ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 const saveEntry = () => {
   if(!document.getElementById('journalInput'))return;
   const v = document.getElementById('journalInput').value.trim();
@@ -989,7 +989,7 @@ function renderEntries() {
     </div>`).join('');
 };
 
-// Ã¢ÂÂÃ¢ÂÂ PILOTS Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ââ PILOTS âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 function renderPilotSnapshot() {
   var _ps=document.getElementById('pilotSnapshot');if(!_ps)return;_ps.innerHTML = pilots.map(p=>`
     <div style="margin-bottom:14px">
@@ -1017,7 +1017,7 @@ const updatePilot = (id,field,val) => {
   save(); renderPilotSnapshot(); renderStats();
 };
 
-// Ã¢ÂÂÃ¢ÂÂ GOALS Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ââ GOALS ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 function renderGoals() {
   const tfs = ['daily','weekly','monthly'];
   const tfColor = {daily:'#0057B8',weekly:'#F5A623',monthly:'#00C48C'};
@@ -1029,13 +1029,13 @@ function renderGoals() {
       g.map(g=>`<div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:13px 15px;margin-bottom:10px">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
           ${pillStyle(g.category,catColor[g.category]||'#9CA3AF')}
-          <span style="flex:1;font-size:13px;font-weight:500">${g.title} <button onclick="editGoalTitle(${g.id})" style="background:none;border:none;cursor:pointer;font-size:11px;padding:1px;opacity:0.5" title="Edit title">Ã¢ÂÂÃ¯Â¸Â</button></span>
+          <span style="flex:1;font-size:13px;font-weight:500">${g.title} <button onclick="editGoalTitle(${g.id})" style="background:none;border:none;cursor:pointer;font-size:11px;padding:1px;opacity:0.5" title="Edit title">âï¸</button></span>
           <span style="font-family:IBM Plex Mono,monospace;font-size:12px;color:var(--soft)">${g.progress}%</span>
-          <button onclick="deleteGoal(${g.id})" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:14px">ÃÂ</button>
+          <button onclick="deleteGoal(${g.id})" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:14px">Ã</button>
         </div>
         <div class="pbar" style="margin-bottom:6px"><div class="pbar-fill" style="width:${g.progress}%;background:${barColor(g.progress)}"></div></div>
         <input type="range" min="0" max="100" value="${g.progress}" oninput="updateGoal(${g.id},+this.value)">
-        <div style="margin-top:6px;font-size:12px;color:var(--soft);cursor:pointer" onclick="editGoalNotes(${g.id})" title="Click to edit notes">${g.notes?'Ã°ÂÂÂ '+g.notes:'<span style=\'opacity:0.4\'>+ Add notes</span>'}</div>
+        <div style="margin-top:6px;font-size:12px;color:var(--soft);cursor:pointer" onclick="editGoalNotes(${g.id})" title="Click to edit notes">${g.notes?'ð '+g.notes:'<span style=\'opacity:0.4\'>+ Add notes</span>'}</div>
       </div>`).join('')}
     </div>`;
   }).join('');
@@ -1116,7 +1116,7 @@ const deleteGoal = id => {
   save(); renderGoals();
 };
 
-// Ã¢ÂÂÃ¢ÂÂ CALENDAR Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ââ CALENDAR âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 const allEvents = () => [...utbscEvents, ...myEvents];
 
 const eventsForDate = (ds) => myEvents.filter(e => e.date === ds);
@@ -1180,9 +1180,9 @@ function renderEventsList() {
   if(!all.length){c.innerHTML='<p style="color:#9CA3AF;font-size:13px;padding:8px 0">No upcoming events.</p>';return;}
   c.innerHTML=all.map(e=>{
     const dot=e.source==='utbsc'?'#00A3E0':'#00C48C';
-    const d=e.source==='personal'?'<button onclick="deleteEvent(\''+e.id+'\')" style="background:none;border:none;cursor:pointer;color:#9CA3AF;font-size:16px;padding:2px 6px" onmouseover="this.style.color=\'#E84C4C\'" onmouseout="this.style.color=\'#9CA3AF\'">Ã¢ÂÂ</button>':'';
+    const d=e.source==='personal'?'<button onclick="deleteEvent(\''+e.id+'\')" style="background:none;border:none;cursor:pointer;color:#9CA3AF;font-size:16px;padding:2px 6px" onmouseover="this.style.color=\'#E84C4C\'" onmouseout="this.style.color=\'#9CA3AF\'">â</button>':'';
     const dt=new Date(e.date+'T00:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
-    return '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;margin-bottom:6px;background:#fff;border-radius:10px;border:1px solid #dde3f0"><div style="display:flex;align-items:center;gap:10px;min-width:0"><div style="width:8px;height:8px;border-radius:50%;background:'+dot+'"></div><div><div style="font-size:13px;font-weight:600;color:#0D1B2A">'+e.title+'</div><div style="font-size:11px;color:#9CA3AF;margin-top:2px">'+dt+(e.time?' ÃÂ· '+e.time:'')+'</div></div></div>'+d+'</div>';
+    return '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;margin-bottom:6px;background:#fff;border-radius:10px;border:1px solid #dde3f0"><div style="display:flex;align-items:center;gap:10px;min-width:0"><div style="width:8px;height:8px;border-radius:50%;background:'+dot+'"></div><div><div style="font-size:13px;font-weight:600;color:#0D1B2A">'+e.title+'</div><div style="font-size:11px;color:#9CA3AF;margin-top:2px">'+dt+(e.time?' Â· '+e.time:'')+'</div></div></div>'+d+'</div>';
   }).join('');
 };;
 
@@ -1196,7 +1196,7 @@ function renderSelectedDay() {
   panel.style.display='block';
 
   if(evts.length===0){
-    list.innerHTML='<div style="text-align:center;padding:16px 0;color:var(--muted);font-size:13px;font-style:italic">No events Ã¢ÂÂ click "+ Add to this day" to create one.</div>';
+    list.innerHTML='<div style="text-align:center;padding:16px 0;color:var(--muted);font-size:13px;font-style:italic">No events â click "+ Add to this day" to create one.</div>';
     return;
   }
 
@@ -1204,9 +1204,9 @@ function renderSelectedDay() {
     <div class="evt-card ${e.source==='utbsc'?'':'personal'}">
       <div style="flex:1">
         <div style="font-size:14px;font-weight:600;color:var(--dark)">${e.title}</div>
-        ${e.time&&!e.allDay?`<div style="font-size:12px;color:var(--primary);font-weight:500;margin-top:2px">Ã°ÂÂÂ ${e.time}</div>`:''}
+        ${e.time&&!e.allDay?`<div style="font-size:12px;color:var(--primary);font-weight:500;margin-top:2px">ð ${e.time}</div>`:''}
         ${e.allDay?'<div style="font-size:11px;color:var(--muted);margin-top:2px">All day</div>':''}
-        ${e.location?`<div style="font-size:12px;color:var(--soft);margin-top:2px">Ã°ÂÂÂ ${e.location}</div>`:''}
+        ${e.location?`<div style="font-size:12px;color:var(--soft);margin-top:2px">ð ${e.location}</div>`:''}
       </div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
         ${pillStyle(e.source==='utbsc'?'UTBSC':'Personal',e.source==='utbsc'?'#00A3E0':'#00C48C')}
@@ -1291,7 +1291,7 @@ const deleteEvent = id => {
 
 const closeModal = () => document.getElementById('eventModal').style.display='none';
 
-// Ã¢ÂÂÃ¢ÂÂ AI PATH Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ââ AI PATH ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 const genPath = async () => {
   var todayStr = new Date().toISOString().split('T')[0];
   var todayDisplay = new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
@@ -1358,7 +1358,7 @@ const genPath = async () => {
   }
 };
 
-// Ã¢ÂÂÃ¢ÂÂ CLAUDE API Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ââ CLAUDE API âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 const callClaude = async (prompt, system='') => {
   try {
     const res = await fetch('/.netlify/functions/claude',{
@@ -1376,7 +1376,7 @@ const callClaude = async (prompt, system='') => {
   } catch(e) { return 'Connection error: ' + e.message; }
 };
 
-// Ã¢ÂÂÃ¢ÂÂ MAX ASSISTANT Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ââ MAX ASSISTANT ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 const maxContext = () => {
   const openT = tasks.filter(t=>!t.done).map(t=>t.text).join(', ')||'none';
   const pilotS = pilots.map(p=>`${p.name}: ${p.status} ${p.progress}%`).join(', ');
@@ -1413,7 +1413,7 @@ const sendToMax = async (userText) => {
       (typeof getRemindersContext === 'function' ? getRemindersContext() : '') +
       (typeof getProjectsContext === 'function' ? getProjectsContext() : '') +
       (typeof getMemoryContext === 'function' ? getMemoryContext() : '') +
-      '\n\nCURRENT TIME: ' + new Date().toISOString() + ' (local: ' + new Date().toLocaleString() + '). Use this exact time when calculating reminder and calendar event dates.\n\nACTION SYSTEM: When the user asks you to add a task, save a memory, create a project, set a goal, or add a reminder, you MUST include an [ACTION] block in your response with valid JSON. Format:\n[ACTION]{"type":"add_task","text":"task description","priority":"high"}[/ACTION]\nSupported types: add_task (with text, category, priority), add_memory (with text, tag), add_goal (with text, category, timeframe), add_project (with name, goal, biz), add_reminder (with text, time - use ISO format or "2:00 PM" style, REQUIRED if user specifies a time).\nYou can include multiple actions as an array: [ACTION][{"type":"add_task","text":"..."},{"type":"add_memory","text":"..."}][/ACTION]\nAlways include a friendly confirmation message along with the action block.\n\nIMPORTANT — PROACTIVE MEMORY: When Bill shares personal data like weight, blood pressure, blood sugar, keto readings, measurements, or ANY trackable information, ALWAYS save it as a memory using add_memory with tag health or personal. Do NOT just acknowledge it — you MUST include the [ACTION] block to save it. Include the date in the memory text. Example: if Bill says weight 185 you MUST respond with [ACTION]{type:add_memory,text:Weight 185 lbs on 4/15/2026,tag:health}[/ACTION]. This applies to ANY personal data Bill shares — always save it.\n\nWhen Bill asks what was my weight or similar recall questions, look in the Memory Bank above and report the stored values with their dates.';
+      '\n\nCURRENT TIME: ' + new Date().toISOString() + ' (local: ' + new Date().toLocaleString() + '). Use this exact time when calculating reminder and calendar event dates.\n\nACTION SYSTEM: When the user asks you to add a task, save a memory, create a project, set a goal, or add a reminder, you MUST include an [ACTION] block in your response with valid JSON. Format:\n[ACTION]{"type":"add_task","text":"task description","priority":"high"}[/ACTION]\nSupported types: add_task (with text, category, priority), add_memory (with text, tag), add_goal (with text, category, timeframe), add_project (with name, goal, biz), add_reminder (with text, time - use ISO format or "2:00 PM" style, REQUIRED if user specifies a time).\nYou can include multiple actions as an array: [ACTION][{"type":"add_task","text":"..."},{"type":"add_memory","text":"..."}][/ACTION]\nAlways include a friendly confirmation message along with the action block.\n\nIMPORTANT \u2014 PROACTIVE MEMORY: When Bill shares personal data like weight, blood pressure, blood sugar, keto readings, measurements, or ANY trackable information, ALWAYS save it as a memory using add_memory with tag health or personal. Do NOT just acknowledge it \u2014 you MUST include the [ACTION] block to save it. Include the date in the memory text.\n\nWhen Bill asks what was my weight or similar recall questions, look in the Memory Bank above and report the stored values with their dates.';
 
     const res = await fetch('/.netlify/functions/claude', {
       method: 'POST',
@@ -1535,11 +1535,11 @@ const clearChat = () => {
   const w=document.createElement('div');
   w.id='maxWelcome';
   w.style.cssText='text-align:center;padding:24px 8px';
-  w.innerHTML='<div style="font-size:40px;margin-bottom:10px">Ã°ÂÂÂ</div><div style="font-size:15px;font-weight:700;color:var(--dark);margin-bottom:6px">Hey Bill, I\'m Max.</div><div style="font-size:13px;color:var(--muted);line-height:1.7">Ask me anything about PulsAIO.</div>';
+  w.innerHTML='<div style="font-size:40px;margin-bottom:10px">ð</div><div style="font-size:15px;font-weight:700;color:var(--dark);margin-bottom:6px">Hey Bill, I\'m Max.</div><div style="font-size:13px;color:var(--muted);line-height:1.7">Ask me anything about PulsAIO.</div>';
   document.getElementById('maxMessages').appendChild(w);
 };
 
-// Ã¢ÂÂÃ¢ÂÂ ELEVENLABS DANIEL VOICE Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ââ ELEVENLABS DANIEL VOICE ââââââââââââââââââââââââââââââââââââââââââââââââ
 const speakDaniel = async (text) => {
   if(currentAudio){currentAudio.pause();currentAudio=null;}
   isSpeaking=true;
@@ -1576,7 +1576,7 @@ const stopSpeaking = () => {
   document.getElementById('muteBtn').style.display='none';
 };
 
-// Ã¢ÂÂÃ¢ÂÂ VOICE RECOGNITION Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ââ VOICE RECOGNITION ââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 const toggleMic = () => {
   if(isListening){stopListening();}else{startListening();}
 };
@@ -1586,16 +1586,16 @@ const startListening = () => {
   if(!SR){alert('Voice requires Chrome browser.');return;}
   recognition = new SR();
   recognition.continuous=false;recognition.interimResults=true;recognition.lang='en-US';
-  recognition.onstart=()=>{isListening=true;document.getElementById('micBtn').className='mic-btn listening';document.getElementById('micBtn').textContent='Ã¢ÂÂ¹';document.getElementById('listeningBar').style.display='flex';};
+  recognition.onstart=()=>{isListening=true;document.getElementById('micBtn').className='mic-btn listening';document.getElementById('micBtn').textContent='â¹';document.getElementById('listeningBar').style.display='flex';};
   recognition.onresult=e=>{document.getElementById('maxInput').value=Array.from(e.results).map(r=>r[0].transcript).join('');};
-  recognition.onend=()=>{isListening=false;document.getElementById('micBtn').className='mic-btn idle';document.getElementById('micBtn').textContent='Ã°ÂÂÂÃ¯Â¸Â';document.getElementById('listeningBar').style.display='none';const v=document.getElementById('maxInput').value.trim();if(v)sendToMax();};
-  recognition.onerror=()=>{isListening=false;document.getElementById('micBtn').className='mic-btn idle';document.getElementById('micBtn').textContent='Ã°ÂÂÂÃ¯Â¸Â';document.getElementById('listeningBar').style.display='none';};
+  recognition.onend=()=>{isListening=false;document.getElementById('micBtn').className='mic-btn idle';document.getElementById('micBtn').textContent='ðï¸';document.getElementById('listeningBar').style.display='none';const v=document.getElementById('maxInput').value.trim();if(v)sendToMax();};
+  recognition.onerror=()=>{isListening=false;document.getElementById('micBtn').className='mic-btn idle';document.getElementById('micBtn').textContent='ðï¸';document.getElementById('listeningBar').style.display='none';};
   recognition.start();
 };
 
 const stopListening = () => {recognition&&recognition.stop();};
 
-// Ã¢ÂÂÃ¢ÂÂ TAB ROUTING Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ââ TAB ROUTING ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 const showTab = (tab) => {
   currentTab=tab;
   if(tab==='calendar') setTimeout(syncCalendarEvents, 100);
@@ -1715,7 +1715,7 @@ function renderReminders() {
   const done = reminders.filter(r => r.done);
   const all = [...active, ...done];
   if (all.length === 0) {
-    list.innerHTML = '<div class="reminders-empty">No reminders yet Ã¢ÂÂ add one or tell Max!</div>';
+    list.innerHTML = '<div class="reminders-empty">No reminders yet â add one or tell Max!</div>';
     return;
   }
   list.innerHTML = all.map(r => {
@@ -1727,10 +1727,10 @@ function renderReminders() {
         <div class="reminder-text">${r.text}</div>
         <div class="reminder-meta">
           <span class="reminder-tag ${r.project}">${r.project}</span>
-          ${dateLabel ? `<span class="reminder-date ${overdue ? 'overdue' : ''}">Ã°ÂÂÂ ${dateLabel}${overdue ? ' ÃÂ· OVERDUE' : ''}</span>` : ''}
+          ${dateLabel ? `<span class="reminder-date ${overdue ? 'overdue' : ''}">ð ${dateLabel}${overdue ? ' Â· OVERDUE' : ''}</span>` : ''}
         </div>
       </div>
-      <button class="reminder-del" onclick="deleteReminder(${r.id})" title="Delete">Ã¢ÂÂ</button>
+      <button class="reminder-del" onclick="deleteReminder(${r.id})" title="Delete">â</button>
     </div>`;
   }).join('');
 }
@@ -1745,7 +1745,7 @@ function toggleReminderMic() {
   reminderRecog.onstart = () => {
     reminderListening = true;
     const btn = document.getElementById('reminderVoiceBtn');
-    if (btn) { btn.textContent = 'Ã¢ÂÂ¹ ListeningÃ¢ÂÂ¦'; btn.classList.add('active'); }
+    if (btn) { btn.textContent = 'â¹ Listeningâ¦'; btn.classList.add('active'); }
   };
   reminderRecog.onresult = e => {
     const transcript = e.results[0][0].transcript;
@@ -1754,12 +1754,12 @@ function toggleReminderMic() {
   reminderRecog.onend = () => {
     reminderListening = false;
     const btn = document.getElementById('reminderVoiceBtn');
-    if (btn) { btn.textContent = 'Ã°ÂÂÂÃ¯Â¸Â Tell Max'; btn.classList.remove('active'); }
+    if (btn) { btn.textContent = 'ðï¸ Tell Max'; btn.classList.remove('active'); }
   };
   reminderRecog.onerror = () => {
     reminderListening = false;
     const btn = document.getElementById('reminderVoiceBtn');
-    if (btn) { btn.textContent = 'Ã°ÂÂÂÃ¯Â¸Â Tell Max'; btn.classList.remove('active'); }
+    if (btn) { btn.textContent = 'ðï¸ Tell Max'; btn.classList.remove('active'); }
   };
   reminderRecog.start();
 }
@@ -1831,7 +1831,7 @@ function getCategoryName(bizId){ var ct=categories.find(function(cat){return cat
 const PROJECT_COLORS = new Proxy({}, {get: function(t,p){ return getCategoryColor(p); }});
 let projects = JSON.parse(localStorage.getItem('pulsaio_projects') || '[]');
 
-// Load from Supabase on any device Ã¢ÂÂ blob is source of truth
+// Load from Supabase on any device â blob is source of truth
 fetch('/.netlify/functions/get-projects?all=true')
   .then(r=>r.json())
   .then(d=>{
@@ -1924,7 +1924,7 @@ function renderProjects(){
   if (!grid) return;
   var displayProjects = projects.filter(function(p){return p.id!=='_pilots_data'&&p.id!=='_reminders_data'&&p.id!=='_tasks_data'&&p.id!=='_goals_data'&&p.id!=='_jobnote_data'&&p.id!=='_projects_blob';});
   if (displayProjects.length === 0) {
-    grid.innerHTML = '<div class="project-empty" style="grid-column:1/-1"><div class="project-empty-icon">ð</div><div class="project-empty-text">No projects yet</div><div class="project-empty-sub">Click New Project or tell Max to create one</div></div>';
+    grid.innerHTML = '<div class="project-empty" style="grid-column:1/-1"><div class="project-empty-icon">📁</div><div class="project-empty-text">No projects yet</div><div class="project-empty-sub">Click New Project or tell Max to create one</div></div>';
     return;
   }
   var grouped = {};
@@ -1940,11 +1940,11 @@ function renderProjects(){
     if (catProjects.length === 0) return;
     var isC = collapsedCategories[cat.id] || false;
     html += '<div class="category-section"><div class="category-header" onclick="toggleCategory(\'' + cat.id + '\')">';
-    html += '<span class="category-arrow' + (isC ? ' collapsed' : '') + '">â¼</span>';
+    html += '<span class="category-arrow' + (isC ? ' collapsed' : '') + '">▼</span>';
     html += '<span class="category-color-dot" style="background:' + cat.color + '"></span>';
     html += '<span class="category-name">' + cat.name + '</span>';
     html += '<span class="category-count">' + catProjects.length + ' project' + (catProjects.length !== 1 ? 's' : '') + '</span>';
-    html += '<span class="category-actions"><button class="category-action-btn" onclick="event.stopPropagation();renameCategory(\'' + cat.id + '\')" title="Rename">âï¸</button></span>';
+    html += '<span class="category-actions"><button class="category-action-btn" onclick="event.stopPropagation();renameCategory(\'' + cat.id + '\')" title="Rename">✏️</button></span>';
     html += '</div><div class="category-body' + (isC ? ' collapsed' : '') + '" style="max-height:' + (isC ? '0' : '9999') + 'px"><div class="projects-grid">';
     catProjects.forEach(function(p){
       var uc = (p.updates||[]).length;
@@ -1952,23 +1952,23 @@ function renderProjects(){
       var lu = uc > 0 ? new Date(p.updates[0].date).toLocaleDateString() : 'No updates';
       html += '<div class="project-card" onclick="openProject(\'' + p.id + '\')">';
       html += '<div class="project-card-accent" style="background:' + cat.color + '"></div>';
-      html += '<div class="project-card-header"><div><div class="project-name">' + p.name + ' <button onclick="event.stopPropagation();editProjectName(\'' + p.id + '\')" style="background:none;border:none;cursor:pointer;font-size:12px;padding:2px;opacity:0.5" title="Edit name">âï¸</button></div></div>';
+      html += '<div class="project-card-header"><div><div class="project-name">' + p.name + ' <button onclick="event.stopPropagation();editProjectName(\'' + p.id + '\')" style="background:none;border:none;cursor:pointer;font-size:12px;padding:2px;opacity:0.5" title="Edit name">✏️</button></div></div>';
       html += '<span class="project-status-badge ' + p.status + '">' + p.status + '</span></div>';
       html += '<div class="project-goal">' + (p.goal || 'No goal defined yet') + '</div>';
-      html += '<div class="project-meta"><span>ð ' + uc + ' update' + (uc !== 1 ? 's' : '') + '</span><span>ð ' + fc + ' file' + (fc !== 1 ? 's' : '') + '</span><span>ð ' + lu + '</span></div></div>';
+      html += '<div class="project-meta"><span>📝 ' + uc + ' update' + (uc !== 1 ? 's' : '') + '</span><span>📎 ' + fc + ' file' + (fc !== 1 ? 's' : '') + '</span><span>🕐 ' + lu + '</span></div></div>';
     });
     html += '</div></div></div>';
   });
   var uncategorized = displayProjects.filter(function(p){ return !categories.some(function(c2){ return c2.id === (p.biz||'general'); }); });
   if (uncategorized.length > 0) {
-    html += '<div class="category-section"><div class="category-header" onclick="toggleCategory(\'_uncategorized\')"><span class="category-arrow">â¼</span><span class="category-color-dot" style="background:#94a3b8"></span><span class="category-name">Uncategorized</span><span class="category-count">' + uncategorized.length + '</span></div>';
+    html += '<div class="category-section"><div class="category-header" onclick="toggleCategory(\'_uncategorized\')"><span class="category-arrow">▼</span><span class="category-color-dot" style="background:#94a3b8"></span><span class="category-name">Uncategorized</span><span class="category-count">' + uncategorized.length + '</span></div>';
     html += '<div class="category-body"><div class="projects-grid">';
     uncategorized.forEach(function(p){
       html += '<div class="project-card" onclick="openProject(\'' + p.id + '\')"><div class="project-card-accent" style="background:#94a3b8"></div><div class="project-card-header"><div><div class="project-name">' + p.name + '</div></div><span class="project-status-badge ' + p.status + '">' + p.status + '</span></div><div class="project-goal">' + (p.goal || '') + '</div></div>';
     });
     html += '</div></div></div>';
   }
-  html += '<button class="btn-add-category" onclick="addCategory()">ï¼ Add Category</button>';
+  html += '<button class="btn-add-category" onclick="addCategory()">＋ Add Category</button>';
   grid.innerHTML = html;
 }
 
@@ -2079,12 +2079,12 @@ function renderProjectFiles(p){
   const files = p.files || [];
   if (files.length === 0) { el.innerHTML = '<div style="font-size:12px;color:#94a3b8;padding:4px 0">No files attached yet</div>'; return; }
   el.innerHTML = files.map((f,i) => {
-    const icon = f.type && f.type.startsWith('image/') ? 'Ã°ÂÂÂ¼Ã¯Â¸Â' : f.type === 'application/pdf' ? 'Ã°ÂÂÂ' : 'Ã°ÂÂÂ';
+    const icon = f.type && f.type.startsWith('image/') ? 'ð¼ï¸' : f.type === 'application/pdf' ? 'ð' : 'ð';
     const canOpen = !!f.data;
     return `<div class="project-file-item">
       <span class="project-file-icon">${icon}</span>
       <span class="project-file-name" style="cursor:${canOpen?'pointer':'default'};color:${canOpen?'#2563eb':'#334155'}" onclick="${canOpen?'openProjectFile('+i+')':''}" title="${canOpen?'Click to open':f.name}">${f.name}</span>
-      <button class="project-file-del" onclick="removeProjectFile(${i})" title="Remove">Ã¢ÂÂ</button>
+      <button class="project-file-del" onclick="removeProjectFile(${i})" title="Remove">â</button>
     </div>`;
   }).join('');
 }
@@ -2248,8 +2248,8 @@ function startMaxProjectMic(){
   projectMicRecog.onresult = e => parseProjectCommand(e.results[0][0].transcript);
   projectMicRecog.start();
   const btn = document.querySelector('.btn-max-project');
-  if (btn) btn.textContent = 'Ã¢ÂÂ¹ ListeningÃ¢ÂÂ¦';
-  projectMicRecog.onend = () => { const b = document.querySelector('.btn-max-project'); if(b) b.textContent = 'Ã°ÂÂÂÃ¯Â¸Â Tell Max'; };
+  if (btn) btn.textContent = 'â¹ Listeningâ¦';
+  projectMicRecog.onend = () => { const b = document.querySelector('.btn-max-project'); if(b) b.textContent = 'ðï¸ Tell Max'; };
 }
 
 async function parseProjectCommand(transcript){
@@ -2282,7 +2282,7 @@ function getProjectsContext(){
   if (projects.length === 0) return '';
   const active = projects.filter(p => p.status !== 'complete');
   if (active.length === 0) return '';
-  return '\n\nProjects: ' + active.map(p => `[${p.biz}] ${p.name} (${p.status}): ${p.goal||'no goal'}${p.updates&&p.updates[0]?' Ã¢ÂÂ Latest: '+p.updates[0].text:''}`).join('; ');
+  return '\n\nProjects: ' + active.map(p => `[${p.biz}] ${p.name} (${p.status}): ${p.goal||'no goal'}${p.updates&&p.updates[0]?' â Latest: '+p.updates[0].text:''}`).join('; ');
 }
 
 // Patch showTab to render projects when switching
@@ -2390,15 +2390,15 @@ function syncProjectsToExtension() {
   } catch(e) {}
 
   // Method 3: Write to a known key the extension content script can read on gmail.com
-  // The extension needs to be on the same page Ã¢ÂÂ show instructions if needed
+  // The extension needs to be on the same page â show instructions if needed
   if (btn) {
-    btn.textContent = 'Ã¢ÂÂ Synced!';
+    btn.textContent = 'â Synced!';
     btn.style.background = '#dcfce7';
-    setTimeout(() => { btn.textContent = 'Ã°ÂÂÂ Sync to Gmail'; btn.style.background = '#f0fdf4'; }, 2000);
+    setTimeout(() => { btn.textContent = 'ð Sync to Gmail'; btn.style.background = '#f0fdf4'; }, 2000);
   }
   
   // Show sync instructions
-  alert('Projects synced! Now go to Gmail and click "Save to Max" Ã¢ÂÂ your projects will appear in the dropdown.\n\nIf projects still don\'t appear, open Gmail and run this in the console (Cmd+Option+J):\n\nchrome.storage.local.set({pulsaio_projects: JSON.stringify(' + JSON.stringify(ps) + '})');
+  alert('Projects synced! Now go to Gmail and click "Save to Max" â your projects will appear in the dropdown.\n\nIf projects still don\'t appear, open Gmail and run this in the console (Cmd+Option+J):\n\nchrome.storage.local.set({pulsaio_projects: JSON.stringify(' + JSON.stringify(ps) + '})');
 }
 
 
@@ -2436,14 +2436,14 @@ function renderMemories() {
   const list = document.getElementById('memoryList');
   if (!list) return;
   if (memories.length === 0) {
-    list.innerHTML = '<div class="memory-empty">Nothing saved yet Ã¢ÂÂ speak or type something for Max to remember!</div>';
+    list.innerHTML = '<div class="memory-empty">Nothing saved yet â speak or type something for Max to remember!</div>';
     return;
   }
   list.innerHTML = memories.map(m => `<div class="memory-item">
     <span class="memory-tag ${m.tag}">${m.tag}</span>
     <span class="memory-text">${m.text}</span>
     <span class="memory-time">${new Date(m.created).toLocaleDateString()}</span>
-    <button onclick="editMemory(${m.id})" style="background:none;border:none;cursor:pointer;font-size:12px;color:var(--primary)">Ã¢ÂÂÃ¯Â¸Â</button> <button class="memory-del" onclick="deleteMemory(${m.id})">Ã¢ÂÂ</button>
+    <button onclick="editMemory(${m.id})" style="background:none;border:none;cursor:pointer;font-size:12px;color:var(--primary)">âï¸</button> <button class="memory-del" onclick="deleteMemory(${m.id})">â</button>
   </div>`).join('');
 }
 
@@ -2457,7 +2457,7 @@ function toggleMemoryMic() {
   memoryMicRecog.onstart = () => {
     memoryMicListening = true;
     const btn = document.getElementById('memoryMicBtn');
-    if (btn) { btn.textContent = 'Ã¢ÂÂ¹ Listening...'; btn.style.background='#fee2e2'; btn.style.color='#dc2626'; }
+    if (btn) { btn.textContent = 'â¹ Listening...'; btn.style.background='#fee2e2'; btn.style.color='#dc2626'; }
   };
   memoryMicRecog.onresult = e => {
     const t = e.results[0][0].transcript;
@@ -2468,7 +2468,7 @@ function toggleMemoryMic() {
   memoryMicRecog.onend = () => {
     memoryMicListening = false;
     const btn = document.getElementById('memoryMicBtn');
-    if (btn) { btn.textContent = 'Ã°ÂÂÂÃ¯Â¸Â Tell Max'; btn.style.background='#eff6ff'; btn.style.color='#2563eb'; }
+    if (btn) { btn.textContent = 'ðï¸ Tell Max'; btn.style.background='#eff6ff'; btn.style.color='#2563eb'; }
   };
   memoryMicRecog.start();
 }
@@ -2477,7 +2477,7 @@ async function parseMemoryWithMax(voiceText) {
   const text = voiceText || document.getElementById('memoryInput')?.value?.trim();
   if (!text) return;
   const btn = document.getElementById('memoryMicBtn');
-  if (btn && !memoryMicListening) btn.textContent = 'Ã¢ÂÂ³ Saving...';
+  if (btn && !memoryMicListening) btn.textContent = 'â³ Saving...';
   try {
     const res = await fetch('/.netlify/functions/claude', {
       method:'POST', headers:{'Content-Type':'application/json'},
@@ -2495,7 +2495,7 @@ async function parseMemoryWithMax(voiceText) {
       addMemory(parsed.text, parsed.tag||'fact');
     }
   } catch { addMemory(text, 'fact'); }
-  if (btn && !memoryMicListening) btn.textContent = 'Ã°ÂÂÂÃ¯Â¸Â Tell Max';
+  if (btn && !memoryMicListening) btn.textContent = 'ðï¸ Tell Max';
 }
 
 function getMemoryContext() {
@@ -2543,7 +2543,7 @@ function acknowledgeReminder(id) {
 
 // ===== GOOGLE CALENDAR WRITE =====
 const GCAL_OAUTH_CLIENT = '558830694197-00hvjl61s76tfv52l028omedp8gnb6uk.apps.googleusercontent.com';
-// Ã¢ÂÂÃ¢ÂÂ GOOGLE CALENDAR TWO-WAY SYNC Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ââ GOOGLE CALENDAR TWO-WAY SYNC ââââââââââââââââââââââââââââââââââââââââââ
 const GCAL_WRITE_SCOPE = "https://www.googleapis.com/auth/calendar.events";
 const GCAL_CLIENT_ID = "558830694197-00hvjl61s76tfv52l028omedp8gnb6uk.apps.googleusercontent.com";
 let gcalToken = localStorage.getItem("gcal_access_token") || null;
@@ -2699,7 +2699,7 @@ function syncCalendarEvents() {
 // Auto-sync every 30 seconds so all devices stay current without any user action
 setInterval(syncCalendarEvents, 30000);
 
-// Ã¢ÂÂÃ¢ÂÂ CROSS-DEVICE SYNC (polls Supabase every 15s) Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ââ CROSS-DEVICE SYNC (polls Supabase every 15s) ââââââââââââââââââââââââââââââââââââââââââ
 setInterval(function(){
   fetch('/.netlify/functions/get-events')
     .then(function(r){return r.json();})
@@ -2754,7 +2754,7 @@ setInterval(function(){
     loadRemindersFromSupabase();
   });
 
-// Ã¢ÂÂÃ¢ÂÂ EVENT MANAGER Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ââ EVENT MANAGER ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 let eventManagerFilter = 'all';
 
 const openEventManager = () => {
@@ -2816,7 +2816,7 @@ const deleteSelectedEvents = () => {
 
 
 
-// Ã¢ÂÂÃ¢ÂÂ PILOT DETAIL MODAL Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ââ PILOT DETAIL MODAL ââââââââââââââââââââââââââââââââââââââââââââââââââââ
 let currentPilotId = null;
 
 function openPilot(id) {
@@ -2828,7 +2828,7 @@ function openPilot(id) {
   if (!p.files) p.files = [];
   if (!p.folder) p.folder = '';
   if (!p.contact) p.contact = '';
-  document.getElementById('pilotModalName').innerHTML = '<span id="pilotNameText">' + p.name + '</span> <button onclick="editPilotName()" style="background:none;border:none;cursor:pointer;font-size:14px;opacity:0.6" title="Edit name">Ã¢ÂÂÃ¯Â¸Â</button>';
+  document.getElementById('pilotModalName').innerHTML = '<span id="pilotNameText">' + p.name + '</span> <button onclick="editPilotName()" style="background:none;border:none;cursor:pointer;font-size:14px;opacity:0.6" title="Edit name">âï¸</button>';
   document.getElementById('pilotModalStatus').value = p.status;
   document.getElementById('pilotProgressSlider').value = p.progress;
   document.getElementById('pilotProgressVal').textContent = p.progress + '%';
@@ -3215,11 +3215,11 @@ function executeMaxActions(reply) {
   <!-- PROJECTS TAB -->
   <div id="tab-projects" class="page hidden">
     <div class="projects-header">
-      <div class="projects-title">Ã°ÂÂÂ Projects</div>
+      <div class="projects-title">ð Projects</div>
       <div class="projects-actions">
-        <button class="btn-max-project" onclick="startMaxProjectMic()">Ã°ÂÂÂÃ¯Â¸Â Tell Max</button>
-        <button class="btn-max-project" onclick="syncProjectsToExtension()" id="syncExtBtn" title="Sync projects to Gmail extension" style="background:#f0fdf4;border-color:#86efac;color:#16a34a">Ã°ÂÂÂ Sync to Gmail</button>
-        <button class="btn-create-project" onclick="openCreateProject()">Ã¯Â¼Â New Project</button>
+        <button class="btn-max-project" onclick="startMaxProjectMic()">ðï¸ Tell Max</button>
+        <button class="btn-max-project" onclick="syncProjectsToExtension()" id="syncExtBtn" title="Sync projects to Gmail extension" style="background:#f0fdf4;border-color:#86efac;color:#16a34a">ð Sync to Gmail</button>
+        <button class="btn-create-project" onclick="openCreateProject()">ï¼ New Project</button>
       </div>
     </div>
     <div class="projects-grid" id="projectsGrid"></div>
@@ -3242,15 +3242,15 @@ function executeMaxActions(reply) {
             </select>
           </div>
         </div>
-        <button class="project-modal-close" onclick="closeProjectModal()">Ã¢ÂÂ</button>
+        <button class="project-modal-close" onclick="closeProjectModal()">â</button>
       </div>
       <div class="project-modal-body">
         <div class="project-section-label">Project Goal</div>
         <input type="text" id="projectGoalInput" placeholder="Enter project goal..." style="width:100%;padding:10px 12px;border:1px solid #dde3f0;border-radius:8px;font-size:14px;font-family:inherit;color:#0d1b2a;background:#fff;box-sizing:border-box;">
 
         <div class="project-section-label">Notes & Updates</div>
-        <textarea class="project-notes-area" id="modalProjectNotes" placeholder="Add notes, thoughts, or updates about this projectÃ¢ÂÂ¦" rows="3"></textarea>
-        <button class="btn-add-update" onclick="addProjectUpdate()">Ã¯Â¼Â Add Update</button>
+        <textarea class="project-notes-area" id="modalProjectNotes" placeholder="Add notes, thoughts, or updates about this projectâ¦" rows="3"></textarea>
+        <button class="btn-add-update" onclick="addProjectUpdate()">ï¼ Add Update</button>
         <div class="project-updates" id="modalProjectUpdates"></div>
 
         <div class="project-section-label">Mac Folder</div>
@@ -3259,10 +3259,10 @@ function executeMaxActions(reply) {
         <div class="project-section-label">Files & Documents</div>
         <div class="project-files-area" id="modalProjectFiles"></div>
         <input type="file" id="projectFileInput" multiple style="display:none" onchange="handleProjectFiles(event)">
-        <button class="btn-add-update" onclick="document.getElementById('projectFileInput').click()" style="margin-top:8px">Ã¯Â¼Â Attach File</button>
+        <button class="btn-add-update" onclick="document.getElementById('projectFileInput').click()" style="margin-top:8px">ï¼ Attach File</button>
 
-        <div class="project-section-label" style="margin-top:20px">Ã°ÂÂÂ§ Emails</div>
-        <div id="modalProjectEmails"><div class="project-emails-loading"><span>LoadingÃ¢ÂÂ¦</span></div></div>
+        <div class="project-section-label" style="margin-top:20px">ð§ Emails</div>
+        <div id="modalProjectEmails"><div class="project-emails-loading"><span>Loadingâ¦</span></div></div>
       </div>
       <div class="modal-actions">
         <button class="btn-delete-project" onclick="deleteCurrentProject()">Delete Project</button>
@@ -3274,7 +3274,7 @@ function executeMaxActions(reply) {
   <!-- CREATE PROJECT MODAL -->
   <div class="create-modal" id="createProjectModal" onclick="if(event.target===this)closeCreateProject()">
     <div class="create-modal-inner">
-      <div class="create-modal-title">Ã¯Â¼Â Create New Project</div>
+      <div class="create-modal-title">ï¼ Create New Project</div>
       <div class="create-field">
         <label class="create-label">Project Name</label>
         <input class="create-input" id="newProjectName" placeholder="e.g. Modbus M1 72 Integration" type="text">
