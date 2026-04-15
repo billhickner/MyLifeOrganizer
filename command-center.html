@@ -314,7 +314,7 @@ input[type=date],input[type=time]{width:100%}
     <div class="logo-icon">P</div>
     <div>
       <div class="logo-text">PulsAIO</div>
-      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V3.0.7</span></div>
+      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V3.0.8</span></div>
     </div>
   </div>
   <nav class="nav">
@@ -1297,7 +1297,7 @@ const genPath = async () => {
   }).join('\n') || 'No goals set';
   var pilotS = pilots.map(function(p){return '\u2022 ' + p.name + ': ' + p.status + ' ' + p.progress + '%';}).join('\n') || 'No active jobs';
   var remindersText = typeof getRemindersContext === 'function' ? (getRemindersContext() || 'No active reminders') : 'No active reminders';
-  var memories = JSON.parse(localStorage.getItem('pulsaio_memories') || '[]');
+  var memories = JSON.parse(localStorage.getItem('max_memories') || '[]');
   var memText = memories.slice(0,10).map(function(m){return '\u2022 [' + (m.tag||'note') + '] ' + m.text;}).join('\n') || 'No memories saved';
   var prompt = "You are Max, Bill Hickner's daily planner and business assistant.\n\n" +
     'TODAY: ' + todayDisplay + '\n\n' +
@@ -1396,7 +1396,7 @@ const sendToMax = async (userText) => {
       (typeof getRemindersContext === 'function' ? getRemindersContext() : '') +
       (typeof getProjectsContext === 'function' ? getProjectsContext() : '') +
       (typeof getMemoryContext === 'function' ? getMemoryContext() : '') +
-      '\n\nCURRENT TIME: ' + new Date().toISOString() + ' (local: ' + new Date().toLocaleString() + '). Use this exact time when calculating reminder and calendar event dates.\n\nACTION SYSTEM: When the user asks you to add a task, save a memory, create a project, set a goal, or add a reminder, you MUST include an [ACTION] block in your response with valid JSON. Format:\n[ACTION]{"type":"add_task","text":"task description","priority":"high"}[/ACTION]\nSupported types: add_task (with text, category, priority), add_memory (with text, tag), add_goal (with text, category, timeframe), add_project (with name, goal, biz), add_reminder (with text, time - use ISO format or "2:00 PM" style, REQUIRED if user specifies a time).\nYou can include multiple actions as an array: [ACTION][{"type":"add_task","text":"..."},{"type":"add_memory","text":"..."}][/ACTION]\nAlways include a friendly confirmation message along with the action block.';
+      '\n\nCURRENT TIME: ' + new Date().toISOString() + ' (local: ' + new Date().toLocaleString() + '). Use this exact time when calculating reminder and calendar event dates.\n\nACTION SYSTEM: When the user asks you to add a task, save a memory, create a project, set a goal, or add a reminder, you MUST include an [ACTION] block in your response with valid JSON. Format:\n[ACTION]{"type":"add_task","text":"task description","priority":"high"}[/ACTION]\nSupported types: add_task (with text, category, priority), add_memory (with text, tag), add_goal (with text, category, timeframe), add_project (with name, goal, biz), add_reminder (with text, time - use ISO format or "2:00 PM" style, REQUIRED if user specifies a time).\nYou can include multiple actions as an array: [ACTION][{"type":"add_task","text":"..."},{"type":"add_memory","text":"..."}][/ACTION]\nAlways include a friendly confirmation message along with the action block.\n\nIMPORTANT: When Bill shares personal data like weight, blood pressure, blood sugar, keto readings, or ANY trackable info, ALWAYS save it using add_memory with tag health. You MUST include the [ACTION] block. Include the date.\n\nWhen Bill asks recall questions, check the Memory Bank and report stored values with dates.';
 
     const res = await fetch('/.netlify/functions/claude', {
       method: 'POST',
