@@ -6,7 +6,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta http-equiv="Pragma" content="no-cache">
-<!-- v1775184192722 -->
+<!-- v1776367829207 -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PulsAIO Command Center</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -314,7 +314,7 @@ input[type=date],input[type=time]{width:100%}
     <div class="logo-icon">P</div>
     <div>
       <div class="logo-text">PulsAIO</div>
-      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V3.1.0</span></div>
+      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V3.1.1</span></div>
     </div>
   </div>
   <nav class="nav">
@@ -3032,45 +3032,48 @@ function loadDeletedFromSupabase(callback){
   }).catch(function(){if(callback)callback();});
 }
 
+function normalizeMemId(id) {
+  var s = String(id);
+  if (s.indexOf('mem_') === 0) s = s.substring(4);
+  var n = Number(s);
+  return isNaN(n) ? s : n;
+}
 function loadMemoriesFromSupabase(callback) {
   if(window._memSyncLock){if(callback)callback();return;}
   fetch("/.netlify/functions/get-events").then(function(r){return r.json();}).then(function(d){
     if(!d.events){if(callback)callback();return;}
-    // V3.1.0: Honor local tombstones — do not resurrect memories the user deleted
-    var tombstones = JSON.parse(localStorage.getItem('max_memory_tombstones') || '[]');
-    var tombstoneSet = {};
-    tombstones.forEach(function(tid) { tombstoneSet[tid] = true; });
-    var memEvents = d.events.filter(function(e) {
-      if (e.source !== "_memory") return false;
-      var meta = {}; try { meta = JSON.parse(e.notes); } catch(x) {}
-      var originalId = meta.originalId || parseInt(e.id.replace("mem_", ""));
-      return !tombstoneSet[originalId];
+    // V3.1.1: Normalize IDs - strip mem_ prefix for matching and tombstone filtering
+    var ts = JSON.parse(localStorage.getItem('max_memory_tombstones') || '[]');
+    var remote = (d.events || []).filter(function(e){
+      return e.source === '_memory' && ts.indexOf(normalizeMemId(e.id)) === -1;
     });
-    if(memEvents.length > 0) {
-      var remoteMems = memEvents.map(function(e){
-        var meta = {}; try{meta=JSON.parse(e.notes);}catch(x){}
-        return {id:meta.originalId||parseInt(e.id.replace("mem_","")), text:e.title,
-                tag:meta.tag||"note", created:meta.created||e.date};
-      });
-      var localMems = JSON.parse(localStorage.getItem("max_memories")||"[]");
-      var remoteIds = {};
-      remoteMems.forEach(function(m){ remoteIds[m.id] = true; });
-      var newerLocal = localMems.filter(function(m){ return !remoteIds[m.id]; });
-      var merged = newerLocal.concat(remoteMems);
-      merged.sort(function(a,b){
-        var da = a.created || '', db = b.created || '';
-        return db.localeCompare(da);
-      });
-      localStorage.setItem("max_memories",JSON.stringify(merged));
-      memories.length=0;
-      merged.forEach(function(m){memories.push(m);});
-      if(typeof renderMemories==="function") renderMemories();
-      if(newerLocal.length > 0 && typeof saveMemories === 'function') {
-        saveMemories();
+    var local = JSON.parse(localStorage.getItem('max_memories') || '[]');
+    // Merge: use remote as base, add local-only (normalize IDs for comparison)
+    var remoteNormIds = {};
+    remote.forEach(function(m){ remoteNormIds[normalizeMemId(m.id)] = true; });
+    local.forEach(function(m){
+      var nid = normalizeMemId(m.id);
+      if(!remoteNormIds[nid] && ts.indexOf(nid) === -1){
+        remote.push(m);
       }
-    }
+    });
+    // Sort by date desc
+    remote.sort(function(a,b){
+      var da = a.date || (a.created ? a.created.split('T')[0] : '');
+      var db = b.date || (b.created ? b.created.split('T')[0] : '');
+      return new Date(db)-new Date(da);
+    });
+    // Save merged - normalize IDs and handle both remote and local field formats
+    memories = remote.map(function(e){
+      return { id:normalizeMemId(e.id), text:e.title||e.text||'', tag:(e.description||e.tag||'note').toLowerCase(), date:e.date||(e.created?e.created.split('T')[0]:''), created:e.created||e.date||'' };
+    });
+    localStorage.setItem('max_memories', JSON.stringify(memories));
+    renderMemories();
     if(callback)callback();
-  }).catch(function(){if(callback)callback();});
+  }).catch(function(e){
+    console.log('MEM_LOAD_FAIL:',e.message);
+    if(callback)callback();
+  });
 }
 function editMemory(id) {
   var memories = JSON.parse(localStorage.getItem("max_memories")||"[]");
