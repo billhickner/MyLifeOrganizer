@@ -1,5 +1,5 @@
 // tts.js — ElevenLabs Daniel voice
-const ELEVEN_KEY = 'sk_03c22c22c92402f3bdb4a27ac8e91a9fc542e99ce569e10f';
+const ELEVEN_KEY = process.env.ELEVENLABS_API_KEY;
 const DANIEL_ID  = 'onwK4e9ZLuTAKqWW03F9';
 
 const CORS = {
