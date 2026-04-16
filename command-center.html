@@ -314,7 +314,7 @@ input[type=date],input[type=time]{width:100%}
     <div class="logo-icon">P</div>
     <div>
       <div class="logo-text">PulsAIO</div>
-      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V3.0.8</span></div>
+      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V3.0.9</span></div>
     </div>
   </div>
   <nav class="nav">
@@ -3037,10 +3037,22 @@ function loadMemoriesFromSupabase(callback) {
         return {id:meta.originalId||parseInt(e.id.replace("mem_","")), text:e.title,
                 tag:meta.tag||"note", created:meta.created||e.date};
       });
-      localStorage.setItem("max_memories",JSON.stringify(remoteMems));
+      var localMems = JSON.parse(localStorage.getItem("max_memories")||"[]");
+      var remoteIds = {};
+      remoteMems.forEach(function(m){ remoteIds[m.id] = true; });
+      var newerLocal = localMems.filter(function(m){ return !remoteIds[m.id]; });
+      var merged = newerLocal.concat(remoteMems);
+      merged.sort(function(a,b){
+        var da = a.created || '', db = b.created || '';
+        return db.localeCompare(da);
+      });
+      localStorage.setItem("max_memories",JSON.stringify(merged));
       memories.length=0;
-      remoteMems.forEach(function(m){memories.push(m);});
+      merged.forEach(function(m){memories.push(m);});
       if(typeof renderMemories==="function") renderMemories();
+      if(newerLocal.length > 0 && typeof saveMemories === 'function') {
+        saveMemories();
+      }
     }
     if(callback)callback();
   }).catch(function(){if(callback)callback();});
@@ -3058,8 +3070,7 @@ function editMemory(id) {
 }
 
 function executeMaxActions(reply) {
-  // Look for JSON action block in Max's response
-  var actionMatch = reply.match(/\[ACTION\](.*?)\[\/ACTION\]/s);
+  var actionMatch = reply.match(/\[ACTION\]([\s\S]*?)\[\/ACTION\]/);
   if (!actionMatch) return;
   try {
     var actions = JSON.parse(actionMatch[1]);
@@ -3092,8 +3103,13 @@ function executeMaxActions(reply) {
                 if(timeParts[3]&&timeParts[3].toLowerCase()==='pm'&&h<12)h+=12;
                 if(timeParts[3]&&timeParts[3].toLowerCase()==='am'&&h===12)h=0;
                 today.setHours(h,m,0,0);
+                if(today.getTime() < Date.now()) today.setDate(today.getDate()+1);
                 remTime=today;
-              }
+              } else { remTime = null; }
+            }
+            if(remTime && remTime.getTime() < Date.now() - 60000) {
+              remTime = new Date(Date.now() + 60*60*1000);
+              if(typeof showToast === 'function') showToast('\u26a0\ufe0f Time was in the past \u2014 set for 1 hour from now', 'warning');
             }
             reminders.push({id:Date.now(),text:a.text,done:false,time:remTime?remTime.toISOString():null});
             if(typeof saveReminders==='function')saveReminders();
@@ -3105,7 +3121,10 @@ function executeMaxActions(reply) {
           break;
       }
     });
-  } catch(e) { console.log('Max action parse error:', e); }
+  } catch(e) {
+    console.log('Max action parse error:', e);
+    if(typeof showToast === 'function') showToast('\u274c Could not save: ' + e.message, 'error');
+  }
 }
 
 </script>
