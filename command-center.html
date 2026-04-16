@@ -6,7 +6,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta http-equiv="Pragma" content="no-cache">
-<!-- v1776367829207 -->
+<!-- v1776368734096 -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PulsAIO Command Center</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -3065,7 +3065,7 @@ function loadMemoriesFromSupabase(callback) {
     });
     // Save merged - normalize IDs and handle both remote and local field formats
     memories = remote.map(function(e){
-      return { id:normalizeMemId(e.id), text:e.title||e.text||'', tag:(e.description||e.tag||'note').toLowerCase(), date:e.date||(e.created?e.created.split('T')[0]:''), created:e.created||e.date||'' };
+      return { id:normalizeMemId(e.id), text:e.title||e.text||'', tag:(function(){try{var nt=JSON.parse(e.notes||'{}');if(nt.tag)return nt.tag;}catch(x){}return e.description||e.tag||'note';}()).toLowerCase(), date:e.date||(e.created?e.created.split('T')[0]:''), created:(function(){try{var nt=JSON.parse(e.notes||'{}');if(nt.created)return nt.created;}catch(x){}return e.created||e.date||'';}()) };
     });
     localStorage.setItem('max_memories', JSON.stringify(memories));
     renderMemories();
