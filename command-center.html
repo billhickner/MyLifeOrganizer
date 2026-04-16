@@ -314,7 +314,7 @@ input[type=date],input[type=time]{width:100%}
     <div class="logo-icon">P</div>
     <div>
       <div class="logo-text">PulsAIO</div>
-      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V3.0.9</span></div>
+      <div class="logo-sub">Command Center <span style="font-size:10px;opacity:0.5;font-weight:400">V3.1.0</span></div>
     </div>
   </div>
   <nav class="nav">
@@ -2325,6 +2325,12 @@ function addMemory(text, tag) {
 
 function deleteMemory(id) {
   memories = memories.filter(m => m.id !== id);
+  // V3.1.0: Tombstone — remember deletion so loadMemoriesFromSupabase cannot resurrect
+  var tombstones = JSON.parse(localStorage.getItem('max_memory_tombstones') || '[]');
+  if (tombstones.indexOf(id) === -1) {
+    tombstones.push(id);
+    localStorage.setItem('max_memory_tombstones', JSON.stringify(tombstones));
+  }
   saveMemories();
   renderMemories();
   fetch("/.netlify/functions/get-events",{method:"DELETE",headers:{"Content-Type":"application/json"},body:JSON.stringify({ids:["mem_"+id]})}).catch(function(){});
@@ -3030,7 +3036,16 @@ function loadMemoriesFromSupabase(callback) {
   if(window._memSyncLock){if(callback)callback();return;}
   fetch("/.netlify/functions/get-events").then(function(r){return r.json();}).then(function(d){
     if(!d.events){if(callback)callback();return;}
-    var memEvents = d.events.filter(function(e){return e.source==="_memory";});
+    // V3.1.0: Honor local tombstones — do not resurrect memories the user deleted
+    var tombstones = JSON.parse(localStorage.getItem('max_memory_tombstones') || '[]');
+    var tombstoneSet = {};
+    tombstones.forEach(function(tid) { tombstoneSet[tid] = true; });
+    var memEvents = d.events.filter(function(e) {
+      if (e.source !== "_memory") return false;
+      var meta = {}; try { meta = JSON.parse(e.notes); } catch(x) {}
+      var originalId = meta.originalId || parseInt(e.id.replace("mem_", ""));
+      return !tombstoneSet[originalId];
+    });
     if(memEvents.length > 0) {
       var remoteMems = memEvents.map(function(e){
         var meta = {}; try{meta=JSON.parse(e.notes);}catch(x){}
