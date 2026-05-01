@@ -1442,25 +1442,6 @@ const sendToMax = async (userText) => {
         var clean = {id:newEvt.id,title:newEvt.title,date:newEvt.date,time:newEvt.time||"",category:newEvt.category||"general",location:newEvt.location||"",notes:newEvt.notes||"",source:"personal"};
         fetch("/.netlify/functions/get-events",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({events:[clean]})}).catch(function(){});
         if(typeof postToGoogleCalendar === "function") postToGoogleCalendar(newEvt).catch(function(){});
-        // Auto-schedule notifications: 15min before + at event time
-        if (ev.date && ev.time && !ev.allDay) {
-          var fireTime = new Date(ev.date + 'T' + ev.time + ':00');
-          if (!isNaN(fireTime.getTime()) && fireTime.getTime() > Date.now()) {
-            var fireMinus15 = new Date(fireTime.getTime() - 15*60*1000);
-            if (fireMinus15.getTime() > Date.now()) {
-              fetch('/.netlify/functions/notify', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({title: 'Upcoming: '+ev.title, message: ev.title+' in 15 minutes', dueDate: fireMinus15.toISOString(), priority: 4, topic: 'pulsaio-max-bill'})
-              }).catch(function(e){console.log('event 15min reminder error',e);});
-            }
-            fetch('/.netlify/functions/notify', {
-              method: 'POST',
-              headers: {'Content-Type': 'application/json'},
-              body: JSON.stringify({title: 'Now: '+ev.title, message: ev.title+(ev.location?' at '+ev.location:''), dueDate: fireTime.toISOString(), priority: 5, topic: 'pulsaio-max-bill'})
-            }).catch(function(e){console.log('event reminder error',e);});
-          }
-        }
         eventsAdded++;
       } catch(e) { console.log("CREATE_EVENT parse error:", e); }
     });
@@ -1492,11 +1473,22 @@ const sendToMax = async (userText) => {
         const sched = JSON.parse(schedMatch[1]);
         cleanReply = reply.replace(/SCHEDULE_REMINDER:{[^}]+}/, '').trim();
         // Fire the notification
-        fetch('/.netlify/functions/notify', {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({title: 'Max Reminder', message: sched.message, dueDate: sched.dueDate, priority: 5, topic: 'pulsaio-max-bill'})
-        }).catch(function(e){console.log('notify error',e);});
+        // Create as Google Calendar event so iOS Calendar fires native reminder
+        try {
+          var dt = new Date(sched.dueDate);
+          if (!isNaN(dt.getTime())) {
+            var pad = function(n){return String(n).padStart(2,'0');};
+            var ymd = dt.getFullYear()+'-'+pad(dt.getMonth()+1)+'-'+pad(dt.getDate());
+            var hm = pad(dt.getHours())+':'+pad(dt.getMinutes());
+            var reminderEvt = {id: 'r'+Date.now(), title: '\u23F0 '+sched.message, date: ymd, time: hm, category: 'reminder', location: '', notes: 'Reminder created by Max'};
+            if (typeof myEvents !== 'undefined') {
+              myEvents.push(reminderEvt);
+              localStorage.setItem('cal:myevents', JSON.stringify(myEvents));
+              if (typeof renderCalendar === 'function') renderCalendar();
+            }
+            if (typeof postToGoogleCalendar === 'function') postToGoogleCalendar(reminderEvt).catch(function(e){console.log('reminder->gcal error',e);});
+          }
+        } catch(err) { console.log('reminder create error', err); }
       } catch(e) { cleanReply = reply; }
     }
     // Update replyDiv with clean reply (no SCHEDULE_REMINDER tag)
@@ -2598,7 +2590,11 @@ async function postToGoogleCalendar(evt) {
       location: evt.location || "",
       description: evt.notes || "",
       start: startDateTime ? {dateTime: startDateTime} : {date: evt.date},
-      end: endDateTime ? {dateTime: endDateTime} : {date: evt.date}
+      end: endDateTime ? {dateTime: endDateTime} : {date: evt.date},
+      reminders: startDateTime ? {
+        useDefault: false,
+        overrides: [{method: 'popup', minutes: 0}, {method: 'popup', minutes: 15}]
+      } : {useDefault: true}
     };
     var r = await fetch("https://www.googleapis.com/calendar/v3/calendars/primary/events", {
       method: "POST",
