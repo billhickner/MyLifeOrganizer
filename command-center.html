@@ -1442,6 +1442,25 @@ const sendToMax = async (userText) => {
         var clean = {id:newEvt.id,title:newEvt.title,date:newEvt.date,time:newEvt.time||"",category:newEvt.category||"general",location:newEvt.location||"",notes:newEvt.notes||"",source:"personal"};
         fetch("/.netlify/functions/get-events",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({events:[clean]})}).catch(function(){});
         if(typeof postToGoogleCalendar === "function") postToGoogleCalendar(newEvt).catch(function(){});
+        // Auto-schedule notifications: 15min before + at event time
+        if (ev.date && ev.time && !ev.allDay) {
+          var fireTime = new Date(ev.date + 'T' + ev.time + ':00');
+          if (!isNaN(fireTime.getTime()) && fireTime.getTime() > Date.now()) {
+            var fireMinus15 = new Date(fireTime.getTime() - 15*60*1000);
+            if (fireMinus15.getTime() > Date.now()) {
+              fetch('/.netlify/functions/notify', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({title: 'Upcoming: '+ev.title, message: ev.title+' in 15 minutes', dueDate: fireMinus15.toISOString(), priority: 4, topic: 'pulsaio-max-bill'})
+              }).catch(function(e){console.log('event 15min reminder error',e);});
+            }
+            fetch('/.netlify/functions/notify', {
+              method: 'POST',
+              headers: {'Content-Type': 'application/json'},
+              body: JSON.stringify({title: 'Now: '+ev.title, message: ev.title+(ev.location?' at '+ev.location:''), dueDate: fireTime.toISOString(), priority: 5, topic: 'pulsaio-max-bill'})
+            }).catch(function(e){console.log('event reminder error',e);});
+          }
+        }
         eventsAdded++;
       } catch(e) { console.log("CREATE_EVENT parse error:", e); }
     });
