@@ -1900,6 +1900,15 @@ function renderProjects(){
   const grid = document.getElementById('projectsGrid');
   if (!grid) return;
   var displayProjects = projects.filter(function(p){return p.id!=='_pilots_data'&&p.id!=='_reminders_data'&&p.id!=='_tasks_data'&&p.id!=='_goals_data'&&p.id!=='_jobnote_data'&&p.id!=='_projects_blob';});
+  // Apply search query filter
+  var _searchInp = document.getElementById('projectSearch');
+  var _q = ((_searchInp && _searchInp.value) || '').trim().toLowerCase();
+  if (_q) {
+    displayProjects = displayProjects.filter(function(p){
+      var hay = ((p.name||'')+' '+(p.goal||'')+' '+(p.biz||'')+' '+(p.notes||'')+' '+(p.status||'')).toLowerCase();
+      return hay.indexOf(_q) !== -1;
+    });
+  }
   if (displayProjects.length === 0) {
     grid.innerHTML = `<div class="project-empty" style="grid-column:1/-1">
       <div class="project-empty-icon">📁</div>
@@ -3188,6 +3197,9 @@ function executeMaxActions(reply) {
         <button class="btn-max-project" onclick="syncProjectsToExtension()" id="syncExtBtn" title="Sync projects to Gmail extension" style="background:#f0fdf4;border-color:#86efac;color:#16a34a">🔄 Sync to Gmail</button>
         <button class="btn-create-project" onclick="openCreateProject()">＋ New Project</button>
       </div>
+    </div>
+    <div class="projects-search" style="margin: 12px 0 16px 0;">
+      <input type="text" id="projectSearch" placeholder="🔍 Search projects by name, goal, business, status..." oninput="renderProjects()" style="width:100%; padding:10px 14px; border:1px solid var(--muted, #ccc); border-radius:8px; font-size:14px; box-sizing:border-box; background:var(--card-bg, #fff); color:var(--text, #000);">
     </div>
     <div class="projects-grid" id="projectsGrid"></div>
   </div>
