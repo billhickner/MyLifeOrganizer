@@ -1363,7 +1363,7 @@ const callClaude = async (prompt, system='') => {
 const maxContext = () => {
   const openT = tasks.filter(t=>!t.done).map(t=>t.text).join(', ')||'none';
   const pilotS = pilots.map(p=>`${p.name}: ${p.status} ${p.progress}%`).join(', ');
-  return `You are Max, Bill Hickner's AI assistant built into his PulsAIO Command Center. Bill is an entrepreneur running PulsAIO (wholesale AIO platform, 4 pilot stores to launch by May 14 2026, target $25K/month revenue), Unity Controls, and UTBSC TAB. Key team: Ron Snider (CEO), Nate Essin (Shop Supervisor). Open tasks: ${openT}. Jobs: ${pilotS}. ${DAYS_LEFT} days to pilot deadline. Be concise, direct, and entrepreneurial. Keep voice responses under 3 sentences.\n\nWhen the user asks you to remind them of something at a specific time, you MUST include this EXACT tag at the end of your response (after your normal text): SCHEDULE_REMINDER:{"message":"brief reminder text","dueDate":"ISO8601_datetime"}. When user asks to add calendar events, include one CREATE_EVENT tag per event. Format: CREATE_EVENT:{"title":"event name","date":"YYYY-MM-DD","time":"HH:MM","allDay":true,"category":"general","location":"","notes":""}. IMPORTANT: Use the EXACT dates the user specifies, do NOT default to today. For date ranges like April 10-14, use the START date 2026-04-10. You CAN output MULTIPLE CREATE_EVENT tags in one response to add many events at once.  Example: if user says remind me in 5 minutes, output SCHEDULE_REMINDER:{"message":"the reminder","dueDate":"2026-04-02T21:39:11.509Z"}. Always include this tag when scheduling reminders - it is how the system actually fires the notification.`;
+  return `You are Max, Bill Hickner's AI assistant built into his PulsAIO Command Center. Bill is an entrepreneur running PulsAIO (wholesale AIO platform, 4 pilot stores to launch by May 14 2026, target $25K/month revenue), Unity Controls, and UTBSC TAB. Key team: Ron Snider (CEO), Nate Essin (Shop Supervisor). Open tasks: ${openT}. Jobs: ${pilotS}. ${DAYS_LEFT} days to pilot deadline. Be concise, direct, and entrepreneurial. Keep voice responses under 3 sentences.\n\nWhen the user asks you to remind them of something at a specific time, you MUST include this EXACT tag at the end of your response (after your normal text): SCHEDULE_REMINDER:{"message":"brief reminder text","dueDate":"ISO8601_datetime"}. When user asks to add calendar events, include one CREATE_EVENT tag per event. Format: CREATE_EVENT:{"title":"event name","date":"YYYY-MM-DD","time":"HH:MM","allDay":true,"category":"general","location":"","notes":""}. IMPORTANT: Use the EXACT dates the user specifies, do NOT default to today. For date ranges like April 10-14, use the START date 2026-04-10. You CAN output MULTIPLE CREATE_EVENT tags in one response to add many events at once.  Example: if user says remind me in 5 minutes, output SCHEDULE_REMINDER:{"message":"the reminder","dueDate":"2026-04-02T21:39:11-04:00"}. CRITICAL TIMEZONE: Bill is in Eastern Time (Cape Coral, FL). The dueDate MUST include timezone offset: use -04:00 from mid-March to early-November (EDT) and -05:00 the rest of the year (EST). DO NOT use UTC Z suffix. When Bill says "remind me at 3pm" that means 3pm in HIS local time, so output "...T15:00:00-04:00" for that day during EDT. Always include this tag when scheduling reminders - it is how the system actually fires the notification.`;
 };
 
 const sendToMax = async (userText) => {
@@ -1473,14 +1473,11 @@ const sendToMax = async (userText) => {
         const sched = JSON.parse(schedMatch[1]);
         cleanReply = reply.replace(/SCHEDULE_REMINDER:{[^}]+}/, '').trim();
         // Fire the notification
-        const _delay = Math.max(0, new Date(sched.dueDate).getTime() - Date.now());
-        setTimeout(function() {
-          fetch('/.netlify/functions/notify', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({title: 'Max Reminder', message: sched.message, priority: 5, topic: 'pulsaio-max-bill'})
-          }).catch(function(e){console.log('notify error',e);});
-        }).catch(()=>{});
+        fetch('/.netlify/functions/notify', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({title: 'Max Reminder', message: sched.message, dueDate: sched.dueDate, priority: 5, topic: 'pulsaio-max-bill'})
+        }).catch(function(e){console.log('notify error',e);});
       } catch(e) { cleanReply = reply; }
     }
     // Update replyDiv with clean reply (no SCHEDULE_REMINDER tag)
@@ -1658,6 +1655,12 @@ function addReminder(text, project, dateStr) {
   };
   reminders.unshift(reminder);
   saveReminders();
+  // Schedule ntfy push if a date/time was set
+  if (reminder.date) {
+    const projName = (projects.find(p=>String(p.id)===reminder.project)||{}).name || '';
+    const repeatCount = parseInt(document.getElementById('reminderRepeat')?.value || '5');
+    scheduleNtfyReminder(reminder.text, reminder.date, projName, repeatCount);
+  }
   inp.value = '';
   dt.value = '';
   renderReminders();
@@ -1682,12 +1685,6 @@ function deleteReminder(id) {
   reminders = reminders.filter(x => x.id !== id);
   saveReminders();
   renderReminders();
-  // Schedule ntfy push if due date is set
-  if (dueDate) {
-    const projName = newReminder.project ? (projects.find(p=>String(p.id)===newReminder.project)||{}).name : '';
-    const repeatCount = parseInt(document.getElementById('reminderRepeat')?.value || '5');
-    scheduleNtfyReminder(text, dueDate, projName, repeatCount);
-  }
 }
 
 function renderReminders() {
@@ -3145,7 +3142,7 @@ function executeMaxActions(reply) {
                 remTime=today;
               } else { remTime = null; }
             }
-            if(remTime && remTime.getTime() < Date.now() - 60000) {
+            if(remTime && remTime.getTime() < Date.now()) {
               remTime = new Date(Date.now() + 60*60*1000);
               if(typeof showToast === 'function') showToast('\u26a0\ufe0f Time was in the past \u2014 set for 1 hour from now', 'warning');
             }
